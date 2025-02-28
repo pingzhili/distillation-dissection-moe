@@ -1703,7 +1703,7 @@ class DeepseekV3ForCausalLM(DeepseekV3PreTrainedModel):
                 "attention_mask": attention_mask,
             }
         )
-        for key, item in model_inputs:
+        for key, item in model_inputs.items():
             if isinstance(item, torch.Tensor):
                 print(key, item.shape)
             else:
