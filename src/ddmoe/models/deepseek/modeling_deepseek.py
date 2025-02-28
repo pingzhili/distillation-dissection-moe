@@ -1456,7 +1456,7 @@ class DeepseekV3Model(DeepseekV3PreTrainedModel):
                 attention_mask,
                 (batch_size, seq_length),
                 inputs_embeds,
-                past_key_values_length,
+                past_key_values_length+seq_length,
             )
             print("after", attention_mask.shape, attention_mask)
 
