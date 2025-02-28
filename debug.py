@@ -8,6 +8,7 @@ model = DeepseekV3ForCausalLM.from_pretrained(
     device_map="auto",
     trust_remote_code=True
 )
+model.generation_config.pad_token_id = model.generation_config.eos_token_id[0]
 tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
 
 messages = [
