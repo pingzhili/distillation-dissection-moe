@@ -825,10 +825,10 @@ class DeepseekV3Attention(nn.Module):
             )
         assert attention_mask is not None
         if attention_mask is not None:
-            if attention_mask.size() != (bsz, 1, q_len, kv_seq_len):
-                raise ValueError(
-                    f"Attention mask should be of size {(bsz, 1, q_len, kv_seq_len)}, but is {attention_mask.size()}"
-                )
+            # if attention_mask.size() != (bsz, 1, q_len, kv_seq_len):
+            #     raise ValueError(
+            #         f"Attention mask should be of size {(bsz, 1, q_len, kv_seq_len)}, but is {attention_mask.size()}"
+            #     )
             attn_weights = attn_weights + attention_mask
 
         # upcast attention to fp32
