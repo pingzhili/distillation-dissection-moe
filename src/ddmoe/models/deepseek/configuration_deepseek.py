@@ -1,3 +1,5 @@
+# Copy from https://huggingface.co/deepseek-ai/DeepSeek-V3/blob/main/configuration_deepseek.py
+
 from transformers.configuration_utils import PretrainedConfig
 from transformers.utils import logging
 

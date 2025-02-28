@@ -1,4 +1,5 @@
 # coding=utf-8
+# Copy from https://huggingface.co/deepseek-ai/DeepSeek-V3/blob/main/modeling_deepseek.py
 # Copyright 2023 DeepSeek-AI and The HuggingFace Inc. team. All rights reserved.
 #
 # This code is based on EleutherAI's GPT-NeoX library and the GPT-NeoX
@@ -1652,7 +1653,7 @@ class DeepseekV3ForCausalLM(DeepseekV3PreTrainedModel):
             if isinstance(past_key_values, Cache):
                 cache_length = past_key_values.get_seq_length()
                 past_length = past_key_values.seen_tokens
-                max_cache_length = past_key_values.get_max_length()
+                max_cache_length = past_key_values.get_seq_length()
             else:
                 cache_length = past_length = past_key_values[0][0].shape[2]
                 max_cache_length = None
