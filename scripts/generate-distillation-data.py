@@ -120,6 +120,7 @@ def api_generate_distillation_data(
             result_file_id = batch_job.output_file_id
             file_response = client.files.content(result_file_id)
             result_content = file_response.read()
+            print(type(result_content))
             with open(os.path.join(save_dir, f"distillation_data.jsonl"), 'ab') as file:
                 file.write(result_content)
         else:
