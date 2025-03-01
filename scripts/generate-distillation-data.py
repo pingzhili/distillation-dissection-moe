@@ -49,12 +49,3 @@ def generate_distillation_data(
             response = model.generate(input_ids, max_length=max_length, num_return_sequences=1)
             response = tokenizer.batch_decode(response, skip_special_tokens=True)
             f.write(response[0] + "\n")
-
-
-model = DeepseekV3ForCausalLM.from_pretrained(
-    model_name,
-    torch_dtype="auto",
-    device_map="auto",
-    trust_remote_code=True,
-)
-tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)

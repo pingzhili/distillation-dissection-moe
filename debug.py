@@ -18,3 +18,4 @@ messages = [
 input_ids = tokenizer.apply_chat_template(messages, add_generation_prompt=True, return_tensors="pt").to(model.device)
 generated_ids = model.generate(inputs=input_ids, max_new_tokens=500)
 response = tokenizer.batch_decode(generated_ids)[0]
+print(response)
