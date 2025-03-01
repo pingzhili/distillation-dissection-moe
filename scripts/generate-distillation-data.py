@@ -5,7 +5,6 @@ from torch.utils.data import DataLoader
 from transformers import set_seed, AutoTokenizer
 from ddmoe.data import batch_preprocess_fn, CustomDataCollatorWithPadding
 from ddmoe.models import DeepseekV3ForCausalLM
-import deepspeed
 import openai
 from functools import partial
 from tqdm import tqdm
@@ -32,13 +31,8 @@ def run_generate_distillation_data(
         save_dir: str = "data/",
         num_workers: int = 4,
 ):
-    local_rank = int(os.getenv('LOCAL_RANK', '0'))
-    world_size = int(os.getenv('WORLD_SIZE', '1'))
     model = DeepseekV3ForCausalLM.from_pretrained(
         model_name, torch_dtype="auto", trust_remote_code=True, device_map=f"cuda:{local_rank}"
-    )
-    model = deepspeed.init_inference(
-        model, tensor_parallel=2,
     )
     tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
     tokenizer.pad_token_id = tokenizer.eos_token_id
@@ -97,8 +91,6 @@ def api_generate_distillation_data(
             for j, messages in enumerate(batch):
                 request = {
                     "custom_id": f"request-{i * batch_size + j}",
-                    "method": "POST",
-                    "url": "/v1/chat/completions",
                     "body": {
                         "messages": messages,
                         "max_tokens": 1024
