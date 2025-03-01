@@ -33,7 +33,7 @@ def generate_distillation_data(
     accelerator = Accelerator()
     rank = accelerator.local_process_index
 
-    with accelerator.main_process_first(desc="Loading model"):
+    with accelerator.main_process_first():
         model = DeepseekV3ForCausalLM.from_pretrained(model_name, torch_dtype="auto", trust_remote_code=True)
         tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
         tokenizer.pad_token_id = tokenizer.eos_token_id
