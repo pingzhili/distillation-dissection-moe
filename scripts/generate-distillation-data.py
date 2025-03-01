@@ -23,7 +23,7 @@ def append_generation(response, prompt, output_file):
         f.write(json.dumps(entry, ensure_ascii=False) + "\n")
 
 
-def generate_distillation_data(
+def run_generate_distillation_data(
         model_name: str = "moonshotai/Moonlight-16B-A3B-Instruct",
         dataset_name: str = "ServiceNow-AI/R1-Distill-SFT",
         max_length: int = 1024,
@@ -67,6 +67,17 @@ def generate_distillation_data(
         response = tokenizer.batch_decode(generated_ids, skip_special_tokens=True)[0]
         append_generation(response, content[0], os.path.join(save_dir, f"distillation_data_rank_{rank}.jsonl"))
 
+def api_generate_distillation_data(
+        dataset_name: str = "ServiceNow-AI/R1-Distill-SFT",
+        base_url: str="http://10.2.133.35:30000/v1",
+        save_dir: str = "data/",
+        num_workers: int = 4,
+):
+    dataset = load_dataset(
+        "ServiceNow-AI/R1-Distill-SFT", "v1", trust_remote_code=True
+    )
+    dataset = dataset["train"]
+
 
 if __name__ == "__main__":
-    Fire(generate_distillation_data)
+    Fire(run_generate_distillation_data)

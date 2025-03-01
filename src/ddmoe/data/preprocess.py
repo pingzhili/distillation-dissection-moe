@@ -7,7 +7,7 @@ __all__ = ["batch_preprocess_fn"]
 
 
 def batch_preprocess_fn(
-        examples: Dict[str, List[Any]], task: str, tokenizer: PreTrainedTokenizerBase
+        examples: Dict[str, List[Any]], task: str, tokenizer: PreTrainedTokenizerBase=None
 ) -> Dict[str, List[Any]]:
     task_to_fn = {
         "chat-eval": partial(chat_eval_batch_preprocess_fn, tokenizer=tokenizer),
@@ -16,14 +16,14 @@ def batch_preprocess_fn(
 
 
 def chat_eval_batch_preprocess_fn(
-        examples: Dict[str, List[Any]], tokenizer: PreTrainedTokenizerBase
+        examples: Dict[str, List[Any]], tokenizer: PreTrainedTokenizerBase=None
 ) -> Dict[str, List[Any]]:
     """
     Parameters
     ----------
     examples: Dict[str, List[Any]]
         examples to preprocess
-    tokenizer: PreTrainedTokenizerBase
+    tokenizer: PreTrainedTokenizerBase, optional
         tokenizer to use
 
     Returns
@@ -45,5 +45,8 @@ def chat_eval_batch_preprocess_fn(
         [{"role": "system", "content": "You are a helpful assistant provided by Moonshot-AI."},
          {"role": "user", "content": messages}] for messages in messages_list
     ]
-    input_ids_list = tokenizer.apply_chat_template(chat_list, add_generation_prompt=True)
-    return {"input_ids": input_ids_list, "content": messages_list}
+    if tokenizer is None:
+        return {"content": chat_list}
+    else:
+        input_ids_list = tokenizer.apply_chat_template(chat_list, add_generation_prompt=True)
+        return {"input_ids": input_ids_list, "content": messages_list}
