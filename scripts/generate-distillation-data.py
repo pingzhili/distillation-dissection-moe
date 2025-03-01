@@ -30,7 +30,7 @@ def generate_distillation_data(
         save_dir: str = "data/",
         num_workers: int = 4,
 ):
-    accelerator = Accelerator()
+    accelerator = Accelerator(cpu=True)
     rank = accelerator.local_process_index
 
     with accelerator.main_process_first():
@@ -57,7 +57,7 @@ def generate_distillation_data(
     model, dataloader = accelerator.prepare(model, dataloader)
 
     # write the response into a file on-the-fly
-    for batch in tqdm(dataloader, desc="Generating distillation data"):
+    for batch in tqdm(dataloader, desc="Generating distillation data", disable=not accelerator.is_main_process):
         input_ids = batch["input_ids"].cuda()
         content = batch["content"]
         with torch.inference_mode():
