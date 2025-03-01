@@ -92,6 +92,7 @@ def api_generate_distillation_data(
                 request = {
                     "custom_id": f"request-{i * batch_size + j}",
                     "body": {
+                        "model": "moonshotai/Moonlight-16B-A3B-Instruct",
                         "url": "/v1/chat/completions",
                         "messages": messages,
                         "max_tokens": 1024
