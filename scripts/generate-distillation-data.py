@@ -82,6 +82,7 @@ def api_generate_distillation_data(
     preprocess_fn = partial(batch_preprocess_fn, task="chat-eval")
     dataset = dataset.map(preprocess_fn, batched=True, num_proc=num_workers, remove_columns=dataset.column_names)
     for i, messages in enumerate(tqdm(dataset, desc="Generating distillation data via API")):
+        print(messages)
         response = client.chat.completions.create(
             model="default",
             messages=messages,
