@@ -1,2 +1,4 @@
 export PYTHONPATH=$PYTHONPATH:src
-python debug.py
+export CUDA_VISIBLE_DEVICES=0,1
+#python debug.py
+python scripts/generate-distillation-data.py

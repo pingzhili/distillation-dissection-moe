@@ -62,3 +62,7 @@ def generate_distillation_data(
         generated_ids = generated_ids[:, len(input_ids[0]):]
         response = tokenizer.batch_decode(generated_ids, skip_special_tokens=True)[0]
         append_generation(response, content[0], os.path.join(save_dir, "distillation_data.jsonl"))
+
+
+if __name__ == "__main__":
+    Fire(generate_distillation_data)
