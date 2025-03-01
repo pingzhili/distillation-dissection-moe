@@ -2,9 +2,9 @@ from fire import Fire
 from datasets import load_dataset
 from torch.utils.data import DataLoader
 from transformers import (
-    set_seed, AutoTokenizer, DataCollatorWithPadding,
+    set_seed, AutoTokenizer,
 )
-from ddmoe.data import batch_preprocess_fn
+from ddmoe.data import batch_preprocess_fn, CustomDataCollatorWithPadding
 from ddmoe.models import DeepseekV3ForCausalLM
 from functools import partial
 from tqdm import tqdm
@@ -49,13 +49,16 @@ def generate_distillation_data(
         raise ValueError(f"Dataset {dataset_name} not found.")
     preprocess_fn = partial(batch_preprocess_fn, task="chat-eval", tokenizer=tokenizer)
     dataset = dataset.map(preprocess_fn, batched=True, num_proc=num_workers)
-    data_collator = DataCollatorWithPadding(tokenizer=tokenizer, pad_to_multiple_of=8)
+    data_collator = CustomDataCollatorWithPadding(
+        tokenizer=tokenizer, pad_to_multiple_of=8, extra_keys_to_ignore=["content"]
+    )
     dataloader = DataLoader(dataset=dataset, collate_fn=data_collator, batch_size=1, num_workers=num_workers)
 
     # write the response into a file on-the-fly
-    with open(os.path.join(save_dir, "distillation_data.txt"), "w") as f:
-        for batch in tqdm(dataloader, desc="Generating distillation data"):
-            input_ids = batch["input_ids"]
-            response = model.generate(input_ids, max_length=max_length, num_return_sequences=1)
-            response = tokenizer.batch_decode(response, skip_special_tokens=True)
-            f.write(response[0] + "\n")
+    for batch in tqdm(dataloader, desc="Generating distillation data"):
+        input_ids = batch["input_ids"].cuda()
+        content = batch["content"][0]
+        generated_ids = model.generate(inputs=input_ids, max_new_tokens=max_length - len(input_ids[0]))
+        generated_ids = generated_ids[:, len(input_ids[0]):]
+        response = tokenizer.batch_decode(generated_ids, skip_special_tokens=True)[0]
+        append_generation(response, content[0], os.path.join(save_dir, "distillation_data.jsonl"))

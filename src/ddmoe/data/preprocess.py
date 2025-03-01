@@ -41,11 +41,11 @@ def chat_eval_batch_preprocess_fn(
     dict_keys(['input_ids'])
     """
     messages_list = [messeges[0]["content"] for messeges in examples["messages"]]
-    messages_list = [
+    chat_list = [
         [{"role": "system", "content": "You are a helpful assistant provided by Moonshot-AI."},
          {"role": "user", "content": messages}] for messages in messages_list
     ]
     input_ids_list = tokenizer.apply_chat_template(
-        messages_list, add_generation_prompt=True, return_tensors="pt"
+        chat_list, add_generation_prompt=True, return_tensors="pt"
     )
-    return {"input_ids": input_ids_list}
+    return {"input_ids": input_ids_list, "content": messages_list}
