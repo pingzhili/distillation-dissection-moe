@@ -1457,7 +1457,7 @@ class DeepseekV3Model(DeepseekV3PreTrainedModel):
                 inputs_embeds,
                 past_key_values_length,
             )
-            print("after", attention_mask.shape)
+            print("after", attention_mask.shape, attention_mask)
 
         # embed positions
         hidden_states = inputs_embeds
