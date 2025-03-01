@@ -47,6 +47,7 @@ def generate_distillation_data(
         )
     else:
         raise ValueError(f"Dataset {dataset_name} not found.")
+    dataset = dataset["train"]
     preprocess_fn = partial(batch_preprocess_fn, task="chat-eval", tokenizer=tokenizer)
     dataset = dataset.map(preprocess_fn, batched=True, num_proc=num_workers)
     data_collator = CustomDataCollatorWithPadding(
