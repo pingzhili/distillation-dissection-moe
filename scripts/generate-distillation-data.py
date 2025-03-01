@@ -5,7 +5,7 @@ from torch.utils.data import DataLoader
 from transformers import set_seed, AutoTokenizer
 from ddmoe.data import batch_preprocess_fn, CustomDataCollatorWithPadding
 from ddmoe.models import DeepseekV3ForCausalLM
-from accelerate import Accelerator
+import deepspeed
 from functools import partial
 from tqdm import tqdm
 import os
@@ -30,34 +30,35 @@ def generate_distillation_data(
         save_dir: str = "data/",
         num_workers: int = 4,
 ):
-    accelerator = Accelerator(cpu=True)
-    rank = accelerator.local_process_index
-
-    with accelerator.main_process_first():
-        model = DeepseekV3ForCausalLM.from_pretrained(model_name, torch_dtype="auto", trust_remote_code=True)
-        tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
-        tokenizer.pad_token_id = tokenizer.eos_token_id
-        model.eval()
-        model.config.pad_token_id = tokenizer.pad_token_id
-        model.generation_config.pad_token_id = model.generation_config.eos_token_id[0]
-        if dataset_name == "ServiceNow-AI/R1-Distill-SFT":
-            dataset = load_dataset(
-                "ServiceNow-AI/R1-Distill-SFT", "v1", trust_remote_code=True
-            )
-        else:
-            raise ValueError(f"Dataset {dataset_name} not found.")
-        dataset = dataset["train"]
-        preprocess_fn = partial(batch_preprocess_fn, task="chat-eval", tokenizer=tokenizer)
-        dataset = dataset.map(preprocess_fn, batched=True, num_proc=num_workers, remove_columns=dataset.column_names)
-        data_collator = CustomDataCollatorWithPadding(
-            tokenizer=tokenizer, pad_to_multiple_of=8, extra_keys_to_ignore=["content"]
+    local_rank = int(os.getenv('LOCAL_RANK', '0'))
+    world_size = int(os.getenv('WORLD_SIZE', '1'))
+    model = DeepseekV3ForCausalLM.from_pretrained(
+        model_name, torch_dtype="auto", trust_remote_code=True, device_map=f"cuda:{local_rank}"
+    )
+    model = deepspeed.init_inference(
+        model, tensor_parallel=2,
+    )
+    tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
+    tokenizer.pad_token_id = tokenizer.eos_token_id
+    model.eval()
+    model.config.pad_token_id = tokenizer.pad_token_id
+    model.generation_config.pad_token_id = model.generation_config.eos_token_id[0]
+    if dataset_name == "ServiceNow-AI/R1-Distill-SFT":
+        dataset = load_dataset(
+            "ServiceNow-AI/R1-Distill-SFT", "v1", trust_remote_code=True
         )
-        dataloader = DataLoader(dataset=dataset, collate_fn=data_collator, batch_size=1, num_workers=num_workers)
-
-    model, dataloader = accelerator.prepare(model, dataloader)
+    else:
+        raise ValueError(f"Dataset {dataset_name} not found.")
+    dataset = dataset["train"]
+    preprocess_fn = partial(batch_preprocess_fn, task="chat-eval", tokenizer=tokenizer)
+    dataset = dataset.map(preprocess_fn, batched=True, num_proc=num_workers, remove_columns=dataset.column_names)
+    data_collator = CustomDataCollatorWithPadding(
+        tokenizer=tokenizer, pad_to_multiple_of=8, extra_keys_to_ignore=["content"]
+    )
+    dataloader = DataLoader(dataset=dataset, collate_fn=data_collator, batch_size=1, num_workers=num_workers)
 
     # write the response into a file on-the-fly
-    for batch in tqdm(dataloader, desc="Generating distillation data", disable=not accelerator.is_main_process):
+    for batch in tqdm(dataloader, desc="Generating distillation data"):
         input_ids = batch["input_ids"].cuda()
         content = batch["content"]
         with torch.inference_mode():
