@@ -92,14 +92,17 @@ def api_generate_distillation_data(
                 request = {
                     "custom_id": f"request-{i * batch_size + j}",
                     "body": {
+                        "url": "/v1/chat/completions",
                         "messages": messages,
                         "max_tokens": 1024
                     }
                 }
                 f.write(json.dumps(request, ensure_ascii=False) + "\n")
+        with open("_tmp_batch_input.jsonl", "rb") as file:
+            uploaded_file = client.files.create(file=file, purpose="batch")
         # call the API
         batch_job = client.batches.create(
-            input_file_id="_tmp_batch_input.jsonl",
+            input_file_id=uploaded_file.id,
             endpoint="/v1/chat/completions",
             completion_window="24h",
         )
