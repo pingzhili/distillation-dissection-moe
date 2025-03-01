@@ -48,6 +48,8 @@ def generate_distillation_data(
     else:
         raise ValueError(f"Dataset {dataset_name} not found.")
     dataset = dataset["train"]
+    # debugging keep only 1000
+    dataset = dataset.select(range(1000))
     preprocess_fn = partial(batch_preprocess_fn, task="chat-eval", tokenizer=tokenizer)
     dataset = dataset.map(preprocess_fn, batched=True, num_proc=num_workers, remove_columns=dataset.column_names)
     data_collator = CustomDataCollatorWithPadding(
