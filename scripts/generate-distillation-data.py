@@ -77,7 +77,7 @@ def api_generate_distillation_data(
     dataset = dataset["train"]
     preprocess_fn = partial(batch_preprocess_fn, task="chat-eval")
     dataset = dataset.map(preprocess_fn, batched=True, num_proc=num_workers, remove_columns=dataset.column_names)
-    batch_size = 4
+    batch_size = 128
     progress_bar = tqdm(
         total=len(dataset) // batch_size, desc=f"Generating distillation data via API (batch size is {batch_size})"
     )
@@ -120,9 +120,16 @@ def api_generate_distillation_data(
             result_file_id = batch_job.output_file_id
             file_response = client.files.content(result_file_id)
             result_content = file_response.read()
-            print(type(result_content))
             with open(os.path.join(save_dir, f"distillation_data.jsonl"), 'ab') as file:
                 file.write(result_content)
+            # also write messages in this batch along with custom_id into a separate file
+            with open(os.path.join(save_dir, f"distillation_data_input.jsonl"), 'a') as f:
+                for j, messages in enumerate(batch):
+                    entry = {
+                        "custom_id": f"request-{i * batch_size + j}",
+                        "messages": messages
+                    }
+                    f.write(json.dumps(entry, ensure_ascii=False) + "\n")
         else:
             print(f"Batch job failed with status: {batch_job.status}")
             return None
