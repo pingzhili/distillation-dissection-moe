@@ -46,7 +46,7 @@ def run_generate_distillation_data(
     model.generation_config.pad_token_id = model.generation_config.eos_token_id[0]
     if dataset_name == "ServiceNow-AI/R1-Distill-SFT":
         dataset = load_dataset(
-            "ServiceNow-AI/R1-Distill-SFT", "v1", trust_remote_code=True
+            dataset_name, "v1", trust_remote_code=True
         )
     else:
         raise ValueError(f"Dataset {dataset_name} not found.")
@@ -76,7 +76,7 @@ def api_generate_distillation_data(
 ):
     client = openai.Client(base_url=base_url, api_key="EMPTY")
     dataset = load_dataset(
-        "ServiceNow-AI/R1-Distill-SFT", "v1", trust_remote_code=True
+        dataset_name, "v1", trust_remote_code=True
     )
     dataset = dataset["train"]
     preprocess_fn = partial(batch_preprocess_fn, task="chat-eval")
