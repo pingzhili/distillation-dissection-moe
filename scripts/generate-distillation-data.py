@@ -53,7 +53,7 @@ def generate_distillation_data(
     data_collator = CustomDataCollatorWithPadding(
         tokenizer=tokenizer, pad_to_multiple_of=8, extra_keys_to_ignore=["content"]
     )
-    dataloader = DataLoader(dataset=dataset, collate_fn=data_collator, batch_size=1, num_workers=num_workers)
+    dataloader = DataLoader(dataset=dataset, batch_size=1, num_workers=num_workers)
 
     # write the response into a file on-the-fly
     for batch in tqdm(dataloader, desc="Generating distillation data"):
