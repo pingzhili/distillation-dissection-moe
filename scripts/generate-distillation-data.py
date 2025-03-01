@@ -9,8 +9,18 @@ from ddmoe.models import DeepseekV3ForCausalLM
 from functools import partial
 from tqdm import tqdm
 import os
+import json
 
 set_seed(233)
+
+
+def append_generation(response, prompt, output_file):
+    entry = {
+        "response": response,
+        "prompt": prompt,
+    }
+    with open(output_file, 'a', encoding='utf-8') as f:
+        f.write(json.dumps(entry, ensure_ascii=False) + "\n")
 
 
 def generate_distillation_data(
@@ -44,7 +54,7 @@ def generate_distillation_data(
 
     # write the response into a file on-the-fly
     with open(os.path.join(save_dir, "distillation_data.txt"), "w") as f:
-        for batch in tqdm(dataloader):
+        for batch in tqdm(dataloader, desc="Generating distillation data"):
             input_ids = batch["input_ids"]
             response = model.generate(input_ids, max_length=max_length, num_return_sequences=1)
             response = tokenizer.batch_decode(response, skip_special_tokens=True)
