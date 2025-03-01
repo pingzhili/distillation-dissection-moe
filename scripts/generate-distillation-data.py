@@ -11,6 +11,7 @@ from functools import partial
 from tqdm import tqdm
 import os
 import json
+import time
 
 set_seed(233)
 
@@ -66,11 +67,12 @@ def run_generate_distillation_data(
             generated_ids = model.generate(inputs=input_ids, max_new_tokens=max_length - len(input_ids[0]))
         generated_ids = generated_ids[:, len(input_ids[0]):]
         response = tokenizer.batch_decode(generated_ids, skip_special_tokens=True)[0]
-        append_generation(response, content[0], os.path.join(save_dir, f"distillation_data_rank_{rank}.jsonl"))
+        append_generation(response, content[0], os.path.join(save_dir, f"distillation_data.jsonl"))
+
 
 def api_generate_distillation_data(
         dataset_name: str = "ServiceNow-AI/R1-Distill-SFT",
-        base_url: str="http://127.0.0.1:30000/v1",
+        base_url: str = "http://127.0.0.1:30000/v1",
         save_dir: str = "data/",
         num_workers: int = 4,
 ):
@@ -81,13 +83,53 @@ def api_generate_distillation_data(
     dataset = dataset["train"]
     preprocess_fn = partial(batch_preprocess_fn, task="chat-eval")
     dataset = dataset.map(preprocess_fn, batched=True, num_proc=num_workers, remove_columns=dataset.column_names)
-    for i, messages in enumerate(tqdm(dataset, desc="Generating distillation data via API")):
-        response = client.chat.completions.create(
-            model="default",
-            messages=messages["content"],
+    batch_size = 1024
+    progress_bar = tqdm(
+        total=len(dataset) // batch_size, desc=f"Generating distillation data via API (batch size is {batch_size})"
+    )
+    for i in range(0, len(dataset), batch_size):
+        # write batch file on-the-fly into "_tmp_batch_input.jsonl"
+        # format is like:
+        # {"custom_id": "request-1", "method": "POST", "url": "/v1/chat/completions", "body": {"model": "gpt-3.5-turbo-0125", "messages": [{"role": "system", "content": "You are a helpful assistant."},{"role": "user", "content": "Hello world!"}],"max_tokens": 1000}}
+        # {"custom_id": "request-2", "method": "POST", "url": "/v1/chat/completions", "body": {"model": "gpt-3.5-turbo-0125", "messages": [{"role": "system", "content": "You are an unhelpful assistant."},{"role": "user", "content": "Hello world!"}],"max_tokens": 1000}}
+        batch = dataset[i:i + batch_size]["content"]  # of a list of messages
+        with open("_tmp_batch_input.jsonl", 'w', encoding='utf-8') as f:
+            for j, messages in enumerate(batch):
+                request = {
+                    "custom_id": f"request-{i * batch_size + j}",
+                    "method": "POST",
+                    "url": "/v1/chat/completions",
+                    "body": {
+                        "model": "gpt-3.5-turbo-0125",
+                        "messages": messages,
+                        "max_tokens": 1000
+                    }
+                }
+                f.write(json.dumps(request, ensure_ascii=False) + "\n")
+        # call the API
+        batch_job = client.batches.create(
+            input_file_id="_tmp_batch_input.jsonl",
+            endpoint="/v1/chat/completions",
+            completion_window="24h",
         )
-        print(f">> {i} :", response)
-        print()
+        # Monitor the batch job status
+        while batch_job.status not in ["completed", "failed", "cancelled"]:
+            time.sleep(3)  # Wait for 3 seconds before checking the status again
+            batch_job = client.batches.retrieve(batch_job.id)
+        if batch_job.status == "failed":
+            print(f"Batch job failed with status: {batch_job.status}")
+            print(f"Batch job errors: {batch_job.errors}")
+            raise RuntimeError(f"Batch job failed at batch {i}")
+
+        if batch_job.status == "completed":
+            result_file_id = batch_job.output_file_id
+            file_response = client.files.content(result_file_id)
+            result_content = file_response.read()
+            with open(os.path.join(save_dir, f"distillation_data.jsonl"), 'ab') as file:
+                file.write(result_content)
+        else:
+            print(f"Batch job failed with status: {batch_job.status}")
+            return None
 
 
 if __name__ == "__main__":
