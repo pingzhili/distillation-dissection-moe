@@ -70,11 +70,11 @@ def run_generate_distillation_data(
 
 def api_generate_distillation_data(
         dataset_name: str = "ServiceNow-AI/R1-Distill-SFT",
-        base_url: str="http://10.2.133.35:30000/v1",
+        base_url: str="http://127.0.0.1:30000/v1",
         save_dir: str = "data/",
         num_workers: int = 4,
 ):
-    client = openai.Client(base_url="http://10.2.133.35:30000/v1", api_key="EMPTY")
+    client = openai.Client(base_url=base_url, api_key="EMPTY")
     dataset = load_dataset(
         "ServiceNow-AI/R1-Distill-SFT", "v1", trust_remote_code=True
     )
