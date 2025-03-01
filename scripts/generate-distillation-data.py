@@ -100,9 +100,8 @@ def api_generate_distillation_data(
                     "method": "POST",
                     "url": "/v1/chat/completions",
                     "body": {
-                        "model": "gpt-3.5-turbo-0125",
                         "messages": messages,
-                        "max_tokens": 1000
+                        "max_tokens": 1024
                     }
                 }
                 f.write(json.dumps(request, ensure_ascii=False) + "\n")
