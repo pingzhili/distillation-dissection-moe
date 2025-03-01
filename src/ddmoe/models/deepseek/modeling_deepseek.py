@@ -1450,7 +1450,7 @@ class DeepseekV3Model(DeepseekV3PreTrainedModel):
             )
         else:
             # 4d mask is passed through the layers
-            print("before", attention_mask.shape, batch_size, seq_length, inputs_embeds.shape, past_key_values_length)
+            print("before", attention_mask.shape, batch_size, seq_length, inputs_embeds.shape, past_key_values_length, attention_mask)
             attention_mask = _prepare_4d_causal_attention_mask(
                 attention_mask,
                 (batch_size, seq_length),
