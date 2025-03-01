@@ -123,7 +123,7 @@ def api_generate_distillation_data(
             with open(os.path.join(save_dir, f"distillation_data.jsonl"), 'ab') as file:
                 file.write(result_content)
             # also write messages in this batch along with custom_id into a separate file
-            with open(os.path.join(save_dir, f"distillation_data_input.jsonl"), 'a') as f:
+            with open(os.path.join(save_dir, f"distillation_data_input.jsonl"), 'a', encoding='utf-8') as f:
                 for j, messages in enumerate(batch):
                     entry = {
                         "custom_id": f"request-{i * batch_size + j}",
