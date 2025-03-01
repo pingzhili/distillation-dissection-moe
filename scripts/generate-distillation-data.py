@@ -87,6 +87,7 @@ def api_generate_distillation_data(
             messages=messages,
         )
         print(f">> {i} :", response)
+        print
 
 
 if __name__ == "__main__":
