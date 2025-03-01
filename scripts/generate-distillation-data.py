@@ -6,6 +6,7 @@ from transformers import set_seed, AutoTokenizer
 from ddmoe.data import batch_preprocess_fn, CustomDataCollatorWithPadding
 from ddmoe.models import DeepseekV3ForCausalLM
 import deepspeed
+import openai
 from functools import partial
 from tqdm import tqdm
 import os
@@ -73,10 +74,19 @@ def api_generate_distillation_data(
         save_dir: str = "data/",
         num_workers: int = 4,
 ):
+    client = openai.Client(base_url="http://10.2.133.35:30000/v1", api_key="EMPTY")
     dataset = load_dataset(
         "ServiceNow-AI/R1-Distill-SFT", "v1", trust_remote_code=True
     )
     dataset = dataset["train"]
+    preprocess_fn = partial(batch_preprocess_fn, task="chat-eval")
+    dataset = dataset.map(preprocess_fn, batched=True, num_proc=num_workers, remove_columns=dataset.column_names)
+    for i, messages in enumerate(tqdm(dataset, desc="Generating distillation data via API")):
+        response = client.chat.completions.create(
+            model="default",
+            messages=messages,
+        )
+        print(f">> {i} :", response)
 
 
 if __name__ == "__main__":
