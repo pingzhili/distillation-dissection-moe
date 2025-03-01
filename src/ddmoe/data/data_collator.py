@@ -63,8 +63,11 @@ class CustomDataCollatorWithPadding:
     extra_keys_to_ignore: Optional[List[str]] = None
 
     def __call__(self, features: List[Dict[str, Any]]) -> Dict[str, Any]:
-        content_to_ignore = {
-            k: [item.pop(k) for item in features] for k in self.extra_keys_to_ignore
+        features_to_ignore = {
+            k: [item[k] for item in features] for k in self.extra_keys_to_ignore
+        } if self.extra_keys_to_ignore else {}
+        features = {
+            k: [item[k] for item in features] for k in features[0].keys() if k not in self.extra_keys_to_ignore
         } if self.extra_keys_to_ignore else {}
         batch = pad_without_fast_tokenizer_warning(
             self.tokenizer,
@@ -80,5 +83,5 @@ class CustomDataCollatorWithPadding:
         if "label_ids" in batch:
             batch["labels"] = batch["label_ids"]
             del batch["label_ids"]
-        batch = {**batch, **content_to_ignore}
+        batch = {**batch, **features_to_ignore}
         return batch
