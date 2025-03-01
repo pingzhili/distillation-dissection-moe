@@ -60,7 +60,7 @@ def generate_distillation_data(
     # write the response into a file on-the-fly
     for batch in tqdm(dataloader, desc="Generating distillation data"):
         input_ids = batch["input_ids"].cuda()
-        content = batch["content"][0]
+        content = batch["content"]
         generated_ids = model.generate(inputs=input_ids, max_new_tokens=max_length - len(input_ids[0]))
         generated_ids = generated_ids[:, len(input_ids[0]):]
         response = tokenizer.batch_decode(generated_ids, skip_special_tokens=True)[0]
