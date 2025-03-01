@@ -77,7 +77,7 @@ def api_generate_distillation_data(
     dataset = dataset["train"]
     preprocess_fn = partial(batch_preprocess_fn, task="chat-eval")
     dataset = dataset.map(preprocess_fn, batched=True, num_proc=num_workers, remove_columns=dataset.column_names)
-    batch_size = 128
+    batch_size = 512
     progress_bar = tqdm(
         total=len(dataset) // batch_size, desc=f"Generating distillation data via API (batch size is {batch_size})"
     )
