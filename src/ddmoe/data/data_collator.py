@@ -69,7 +69,6 @@ class CustomDataCollatorWithPadding:
         features = [
             {k: v for k, v in feature.items() if k not in self.extra_keys_to_ignore} for feature in features
         ] if self.extra_keys_to_ignore else {}
-        print(features[0].keys())
         batch = pad_without_fast_tokenizer_warning(
             self.tokenizer,
             features,
