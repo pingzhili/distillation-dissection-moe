@@ -83,5 +83,7 @@ class CustomDataCollatorWithPadding:
         if "label_ids" in batch:
             batch["labels"] = batch["label_ids"]
             del batch["label_ids"]
+        if self.tokenizer.pad_token_id is not None:
+            batch["labels"][batch["labels"] == self.tokenizer.pad_token_id] = -100
         batch = {**batch, **features_to_ignore}
         return batch

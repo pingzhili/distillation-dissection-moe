@@ -21,6 +21,7 @@ from transformers import (
     AutoTokenizer,
     AutoModelForCausalLM,
     get_scheduler,
+    DataCollatorWithPadding
 )
 from ddmoe.data import batch_preprocess_fn, CustomDataCollatorWithPadding
 
