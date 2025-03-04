@@ -1,8 +1,7 @@
 from typing import Any, Dict, List, Optional
 
-from transformers import PreTrainedTokenizerBase, AutoTokenizer
+from transformers import PreTrainedTokenizerBase
 from functools import partial
-import torch
 
 __all__ = ["batch_preprocess_fn"]
 
@@ -98,7 +97,7 @@ def sft_olmoe_train_batch_preprocess_fn(
         labels = [-100] * len(input_ids)
 
         assistant_token_id = tokenizer("<|assistant|>", add_special_tokens=False)["input_ids"]
-        end_token_id = tokenizer.convert_tokens_to_ids("<|endoftext|>")
+        end_token_id = tokenizer.convert_tokens_to_ids("|||IP_ADDRESS|||")
 
         pos_assistant = -1
         pos_end_after_response = -1
