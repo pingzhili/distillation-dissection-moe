@@ -66,6 +66,10 @@ def train_sft(
     accelerator.wait_for_everyone()
 
     raw_datasets = load_dataset(dataset_name, split="train", trust_remote_code=True)
+
+    # debugging
+    raw_datasets = raw_datasets.select(range(1000))
+
     tokenizer = AutoTokenizer.from_pretrained(base_model_name, trust_remote_code=True)
     tokenizer.model_max_length = max_length
     model = AutoModelForCausalLM.from_pretrained(base_model_name, trust_remote_code=True)
