@@ -41,7 +41,7 @@ def train_sft(
         warmup_ratio: float = 0.1,
         output_dir: str = "./outputs/",
         num_workers: int = 4,
-        checkpointing_steps: int = 100,
+        checkpointing_steps: int = 5,
         logging_steps: int = 1,
 ):
     accelerator = Accelerator(
