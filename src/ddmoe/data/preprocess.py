@@ -78,7 +78,6 @@ def sft_olmoe_train_batch_preprocess_fn(
         raise ValueError("Tokenizer is required for SFT training.")
 
     # 1. apply general chat template to each example
-
     all_chat_texts = []
 
     for question, response in zip(examples["question"], examples["response"]):
@@ -95,7 +94,7 @@ def sft_olmoe_train_batch_preprocess_fn(
         input_ids = encoded["input_ids"]
         attention_mask = encoded["attention_mask"]
 
-        # 3. Only apply LM loss on the assistant's response & "<|im_end|>"
+        # 3. Only apply LM loss on the assistant's response & "<|endoftext|>"
         labels = [-100] * len(input_ids)
 
         assistant_token_id = tokenizer("<|assistant|>", add_special_tokens=False)["input_ids"]
@@ -103,22 +102,25 @@ def sft_olmoe_train_batch_preprocess_fn(
 
         pos_assistant = -1
         pos_end_after_response = -1
-        pos_assistant_local = 0
 
-        for i, token_id in enumerate(input_ids):
-            if token_id == assistant_token_id[pos_assistant_local]:
-                pos_assistant_local += 1
-            elif pos_assistant_local > 0 and pos_assistant_local < len(assistant_token_id) - 1:
-                pos_assistant = -1
-                pos_assistant_local = 0
+        i = 0
+        while i <= len(input_ids) - len(assistant_token_id):
+            matched = True
+            for j in range(len(assistant_token_id)):
+                if input_ids[i + j] != assistant_token_id[j]:
+                    matched = False
+                    break
 
-            if pos_assistant_local == len(assistant_token_id) - 1:
-                pos_assistant_local = 0
-                pos_assistant = i
-
-            if token_id == end_token_id and pos_assistant != -1:
-                pos_end_after_response = i
+            if matched:
+                pos_assistant = i + len(assistant_token_id) - 1
                 break
+            i += 1
+
+        if pos_assistant != -1:
+            for i in range(pos_assistant + 1, len(input_ids)):
+                if input_ids[i] == end_token_id:
+                    pos_end_after_response = i
+                    break
 
         if pos_assistant != -1 and pos_end_after_response != -1:
             for i in range(pos_assistant + 1, pos_end_after_response):
