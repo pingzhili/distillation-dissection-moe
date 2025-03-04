@@ -25,8 +25,8 @@ def run_collect_data(
 
     # save the merged dataframe
     print(df.head())
-    # set custom_id to int, question and response to string
-    df['custom_id'] = df['custom_id'].astype(int)
+    # set custom_id to int by removing the "request-" prefix, question and response to string
+    df['custom_id'] = df['custom_id'].apply(lambda x: int(x.split('-')[1]))
     df['question'] = df['question'].astype(str)
     df['response'] = df['response'].astype(str)
     df.to_csv(os.path.join(save_dir, "sft-data-from-moonlight.csv"), index=False)
