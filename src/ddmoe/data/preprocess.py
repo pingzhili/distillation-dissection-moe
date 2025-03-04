@@ -115,11 +115,11 @@ def sft_olmoe_train_batch_preprocess_fn(
                 break
             i += 1
 
-        if pos_assistant != -1:
-            for i in range(pos_assistant + 1, len(input_ids)):
-                if input_ids[i] == end_token_id:
-                    pos_end_after_response = i
-                    break
+        # if pos_assistant != -1:
+        #     for i in range(pos_assistant + 1, len(input_ids)):
+        #         if input_ids[i] == end_token_id:
+        #             pos_end_after_response = i
+        #             break
 
         if pos_assistant != -1:
             for i in range(pos_assistant + 1, len(input_ids)):
