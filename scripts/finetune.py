@@ -147,8 +147,6 @@ def train_sft(
         for step, batch in enumerate(dataloader):
             model.train()
             with accelerator.accumulate(model):
-                # if accelerator.is_local_main_process:
-                #     print(batch)
                 outputs = model(**batch)
                 loss = outputs.loss
                 accelerator.backward(loss)
@@ -167,8 +165,8 @@ def train_sft(
                     checkpointing_dir, save_function=accelerator.save, is_main_process=accelerator.is_main_process
                 )
 
-            if completed_steps > num_training_steps:
-                break
+            # if completed_steps > num_training_steps:
+            #     break
 
             accelerator.log({
                 "loss": loss.item(),
