@@ -147,7 +147,8 @@ def train_sft(
         for step, batch in enumerate(dataloader):
             model.train()
             with accelerator.accumulate(model):
-                print(batch)
+                if accelerator.is_local_main_process:
+                    print(batch)
                 outputs = model(**batch)
                 loss = outputs.loss
                 accelerator.backward(loss)
