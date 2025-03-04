@@ -117,7 +117,7 @@ def train_sft(
     num_training_steps = num_update_steps_per_epoch * num_train_epochs
     logger.info(f"num_training_steps = {num_training_steps}")
 
-    accelerator.init_trackers(project_name="ddmoe", experiment_name=f"SFT-{base_model_name}")
+    accelerator.init_trackers(project_name="ddmoe")
 
     # Train!
     total_batch_size = batch_size_per_device * accelerator.num_processes * gradient_accumulation_steps
