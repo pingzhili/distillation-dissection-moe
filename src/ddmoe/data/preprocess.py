@@ -127,7 +127,7 @@ def sft_olmoe_train_batch_preprocess_fn(
             all_input_ids.append(input_ids)
             all_attention_masks.append(attention_mask)
             all_labels.append(labels)
-            print(pos_assistant, pos_end_after_response)
+            # print(pos_assistant, pos_end_after_response)
         else:
             print("Assistant token not found in the input_ids. SKIPPING...")
 
