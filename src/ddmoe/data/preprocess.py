@@ -122,13 +122,12 @@ def sft_olmoe_train_batch_preprocess_fn(
                     break
 
         if pos_assistant != -1 and pos_end_after_response != -1:
-            for i in range(pos_assistant + 1, pos_end_after_response):
+            for i in range(pos_assistant + 1, len(input_ids)):
                 labels[i] = input_ids[i]
 
         all_input_ids.append(input_ids)
         all_attention_masks.append(attention_mask)
         all_labels.append(labels)
-        print(pos_assistant, pos_end_after_response)
 
     return {
         "input_ids": all_input_ids,
