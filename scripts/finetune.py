@@ -68,8 +68,8 @@ def train_sft(
 
     raw_datasets = load_dataset(dataset_name, split="train", trust_remote_code=True)
 
-    # debugging
-    raw_datasets = raw_datasets.select(range(1000))
+    # # debugging
+    # raw_datasets = raw_datasets.select(range(1000))
 
     if "olmoe" in base_model_name.lower():
         tokenizer = AutoTokenizer.from_pretrained("allenai/OLMoE-1B-7B-0125-Instruct", trust_remote_code=True)
@@ -165,8 +165,8 @@ def train_sft(
                     checkpointing_dir, save_function=accelerator.save, is_main_process=accelerator.is_main_process
                 )
 
-            # if completed_steps > num_training_steps:
-            #     break
+            if completed_steps > num_training_steps:
+                break
 
             accelerator.log({
                 "loss": loss.item(),
