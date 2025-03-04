@@ -33,7 +33,7 @@ def train_sft(
         base_model_name: str = "allenai/OLMoE-1B-7B-0125",
         dataset_name: str = "Phando/sft-dataset-from-moonlight",
         max_length: int = 1024,
-        batch_size_per_device: int = 2,
+        batch_size_per_device: int = 1,
         gradient_accumulation_steps: int = 16,
         num_train_epochs: int = 3,
         learning_rate: float = 5e-6,
@@ -147,7 +147,7 @@ def train_sft(
         for step, batch in enumerate(dataloader):
             model.train()
             with accelerator.accumulate(model):
-                print({k: v.shape for k, v in batch.items()})
+                print(batch)
                 outputs = model(**batch)
                 loss = outputs.loss
                 accelerator.backward(loss)
