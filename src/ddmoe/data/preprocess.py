@@ -121,7 +121,7 @@ def sft_olmoe_train_batch_preprocess_fn(
                     pos_end_after_response = i
                     break
 
-        if pos_assistant != -1 and pos_end_after_response != -1:
+        if pos_assistant != -1:
             for i in range(pos_assistant + 1, len(input_ids)):
                 labels[i] = input_ids[i]
 
