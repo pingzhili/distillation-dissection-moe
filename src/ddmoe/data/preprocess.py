@@ -124,6 +124,8 @@ def sft_olmoe_train_batch_preprocess_fn(
         if pos_assistant != -1:
             for i in range(pos_assistant + 1, len(input_ids)):
                 labels[i] = input_ids[i]
+        else:
+            raise ValueError("Assistant token not found in the input_ids.")
 
         all_input_ids.append(input_ids)
         all_attention_masks.append(attention_mask)
