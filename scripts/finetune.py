@@ -85,7 +85,7 @@ def train_sft(
             remove_columns=columns_names,
             num_proc=num_workers,
         )
-    print(sft_dataset[0])
+        print(sft_dataset[0])
     data_collator = CustomDataCollatorWithPadding(tokenizer=tokenizer, pad_to_multiple_of=8, max_length=max_length)
     dataloader = DataLoader(
         sft_dataset,
