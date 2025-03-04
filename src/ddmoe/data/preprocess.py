@@ -12,7 +12,7 @@ def batch_preprocess_fn(
 ) -> Dict[str, List[Any]]:
     task_to_fn = {
         "chat-eval": partial(chat_eval_batch_preprocess_fn, tokenizer=tokenizer),
-        "sft-olmoe-train": partial(sft_train_batch_preprocess_fn, tokenizer=tokenizer),
+        "sft-olmoe-train": partial(sft_olmoe_train_batch_preprocess_fn, tokenizer=tokenizer),
     }
     return task_to_fn[task](examples)
 
@@ -70,7 +70,7 @@ def apply_general_chat_template(
         return tokenizer.apply_chat_template(messages, add_generation_prompt=False, tokenize=False)
 
 
-def sft_train_batch_preprocess_fn(
+def sft_olmoe_train_batch_preprocess_fn(
         examples: Dict[str, List[Any]],
         tokenizer: PreTrainedTokenizerBase,
 ):

@@ -70,7 +70,10 @@ def train_sft(
     # debugging
     raw_datasets = raw_datasets.select(range(1000))
 
-    tokenizer = AutoTokenizer.from_pretrained(base_model_name, trust_remote_code=True)
+    if "olmoe" in base_model_name.lower():
+        tokenizer = AutoTokenizer.from_pretrained("allenai/OLMoE-1B-7B-0125-Instruct", trust_remote_code=True)
+    else:
+        raise NotImplementedError(f"Tokenizer for {base_model_name} not implemented.")
     tokenizer.model_max_length = max_length
     model = AutoModelForCausalLM.from_pretrained(base_model_name, trust_remote_code=True)
 
