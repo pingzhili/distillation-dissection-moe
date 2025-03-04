@@ -107,14 +107,16 @@ def sft_olmoe_train_batch_preprocess_fn(
 
         for i, token_id in enumerate(input_ids):
             if token_id == assistant_token_id[pos_assistant_local]:
-                pos_assistant = i
                 pos_assistant_local += 1
             elif pos_assistant_local > 0 and pos_assistant_local < len(assistant_token_id) - 1:
                 pos_assistant = -1
                 pos_assistant_local = 0
-            elif pos_assistant_local == len(assistant_token_id) - 1:
+
+            if pos_assistant_local == len(assistant_token_id) - 1:
                 pos_assistant_local = 0
-            elif token_id == end_token_id and pos_assistant != -1:
+                pos_assistant = i
+
+            if token_id == end_token_id and pos_assistant != -1:
                 pos_end_after_response = i
                 break
 
