@@ -24,6 +24,11 @@ def run_collect_data(
     df = pd.merge(df_inputs, df_outputs, on='custom_id', how='inner')
 
     # save the merged dataframe
+    print(df.head())
+    # set custom_id to int, question and response to string
+    df['custom_id'] = df['custom_id'].astype(int)
+    df['question'] = df['question'].astype(str)
+    df['response'] = df['response'].astype(str)
     df.to_csv(os.path.join(save_dir, "sft-data-from-moonlight.csv"), index=False)
 
 
