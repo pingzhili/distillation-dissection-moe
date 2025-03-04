@@ -77,7 +77,7 @@ def train_sft(
     with accelerator.main_process_first():
         columns_names = raw_datasets.column_names
         sft_dataset = raw_datasets.map(
-            lambda x: batch_preprocess_fn(x, task="sft-train", tokenizer=tokenizer),
+            lambda x: batch_preprocess_fn(x, task="sft-olmoe-train", tokenizer=tokenizer),
             batched=True,
             remove_columns=columns_names,
             num_proc=num_workers,

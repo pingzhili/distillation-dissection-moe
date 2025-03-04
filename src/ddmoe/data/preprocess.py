@@ -7,15 +7,12 @@ import torch
 __all__ = ["batch_preprocess_fn"]
 
 
-_general_tokenizer = AutoTokenizer.from_pretrained("moonshotai/Moonlight-16B-A3B-Instruct", trust_remote_code=True)
-
-
 def batch_preprocess_fn(
         examples: Dict[str, List[Any]], task: str, tokenizer: PreTrainedTokenizerBase = None
 ) -> Dict[str, List[Any]]:
     task_to_fn = {
         "chat-eval": partial(chat_eval_batch_preprocess_fn, tokenizer=tokenizer),
-        "sft-train": partial(sft_train_batch_preprocess_fn, tokenizer=tokenizer),
+        "sft-olmoe-train": partial(sft_train_batch_preprocess_fn, tokenizer=tokenizer),
     }
     return task_to_fn[task](examples)
 
@@ -58,17 +55,19 @@ def chat_eval_batch_preprocess_fn(
 
 
 def apply_general_chat_template(
-        question: str, response: Optional[str] = None
+        question: str,
+        tokenizer: PreTrainedTokenizerBase,
+        response: Optional[str] = None,
 ):
     messages = [
         {"role": "system", "content": "You are a helpful assistant."},
         {"role": "user", "content": question}
     ]
     if response is None:
-        return _general_tokenizer.apply_chat_template(messages, add_generation_prompt=True, tokenize=False)
+        return tokenizer.apply_chat_template(messages, add_generation_prompt=True, tokenize=False)
     else:
         messages.append({"role": "assistant", "content": response})
-        return _general_tokenizer.apply_chat_template(messages, add_generation_prompt=False, tokenize=False)
+        return tokenizer.apply_chat_template(messages, add_generation_prompt=False, tokenize=False)
 
 
 def sft_train_batch_preprocess_fn(
@@ -83,7 +82,7 @@ def sft_train_batch_preprocess_fn(
     all_chat_texts = []
 
     for question, response in zip(examples["question"], examples["response"]):
-        chat_text = apply_general_chat_template(question, response)
+        chat_text = apply_general_chat_template(question, response=response, tokenizer=tokenizer)
         all_chat_texts.append(chat_text)
 
     # 2. Tokenize the chat
@@ -99,25 +98,22 @@ def sft_train_batch_preprocess_fn(
         # 3. Only apply LM loss on the assistant's response & "<|im_end|>"
         labels = [-100] * len(input_ids)
 
-        im_assistant_id = tokenizer.convert_tokens_to_ids("<|im_assistant|>")
-        im_middle_id = tokenizer.convert_tokens_to_ids("<|im_middle|>")
-        im_end_id = tokenizer.convert_tokens_to_ids("<|im_end|>")
+        user_token_id = tokenizer.convert_tokens_to_ids("<|user|>")
+        assistant_token_id = tokenizer.convert_tokens_to_ids("<|assistant|>")
+        end_token_id = tokenizer.convert_tokens_to_ids("<|endoftext|>")
 
         pos_assistant = -1
-        pos_middle_after_assistant = -1
-        pos_end_after_middle = -1
+        pos_end_after_response = -1
 
         for i, token_id in enumerate(input_ids):
-            if token_id == im_assistant_id:
+            if token_id == assistant_token_id:
                 pos_assistant = i
-            elif token_id == im_middle_id and pos_assistant != -1 and pos_middle_after_assistant == -1:
-                pos_middle_after_assistant = i
-            elif token_id == im_end_id and pos_middle_after_assistant != -1 and pos_end_after_middle == -1:
-                pos_end_after_middle = i
+            elif token_id == end_token_id and pos_assistant != -1:
+                pos_end_after_response = i
                 break
 
-        if pos_middle_after_assistant != -1 and pos_end_after_middle != -1:
-            for i in range(pos_middle_after_assistant + 1, pos_end_after_middle + 1):
+        if pos_assistant != -1 and pos_end_after_response != -1:
+            for i in range(pos_assistant + 1, pos_end_after_response):
                 labels[i] = input_ids[i]
 
         all_input_ids.append(input_ids)
