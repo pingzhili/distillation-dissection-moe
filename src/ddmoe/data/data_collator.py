@@ -63,12 +63,23 @@ class CustomDataCollatorWithPadding:
     extra_keys_to_ignore: Optional[List[str]] = None
 
     def __call__(self, features: List[Dict[str, Any]]) -> Dict[str, Any]:
+        if "label" in features:
+            features["labels"] = features["label"]
+            del features["label"]
+        if "label_ids" in features:
+            features["labels"] = features["label_ids"]
+            del features["label_ids"]
+
         features_to_ignore = {
             k: [item[k] for item in features] for k in self.extra_keys_to_ignore
         } if self.extra_keys_to_ignore else {}
         features = [
             {k: v for k, v in feature.items() if k not in self.extra_keys_to_ignore} for feature in features
         ] if self.extra_keys_to_ignore else features
+
+        # take labels out of features
+        labels_batch = [{"input_ids": feature["labels"]} for feature in features] # Fake name for padding
+        features = [{k: v for k, v in feature.items() if k != "labels"} for feature in features]
         batch = pad_without_fast_tokenizer_warning(
             self.tokenizer,
             features,
@@ -77,13 +88,17 @@ class CustomDataCollatorWithPadding:
             pad_to_multiple_of=self.pad_to_multiple_of,
             return_tensors=self.return_tensors,
         )
-        if "label" in batch:
-            batch["labels"] = batch["label"]
-            del batch["label"]
-        if "label_ids" in batch:
-            batch["labels"] = batch["label_ids"]
-            del batch["label_ids"]
+        labels_batch = pad_without_fast_tokenizer_warning(
+            self.tokenizer,
+            labels_batch,
+            padding=self.padding,
+            max_length=self.max_length,
+            pad_to_multiple_of=self.pad_to_multiple_of,
+            return_tensors=self.return_tensors,
+        )
         if self.tokenizer.pad_token_id is not None:
-            batch["labels"][batch["labels"] == self.tokenizer.pad_token_id] = -100
-        batch = {**batch, **features_to_ignore}
+            labels_batch["input_ids"][labels_batch["input_ids"] == self.tokenizer.pad_token_id] = -100
+        labels_batch["labels"] = labels_batch["input_ids"]
+        del labels_batch["input_ids"]
+        batch = {**batch, **features_to_ignore, **labels_batch}
         return batch
