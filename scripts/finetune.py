@@ -146,6 +146,7 @@ def train_sft(
         for step, batch in enumerate(dataloader):
             model.train()
             with accelerator.accumulate(model):
+                print({k: v.shape for k, v in batch.items()})
                 outputs = model(**batch)
                 loss = outputs.loss
                 accelerator.backward(loss)
