@@ -31,8 +31,9 @@ logger = get_logger(__name__)
 def train_sft(
         base_model_name: str = "allenai/OLMoE-1B-7B-0125",
         dataset_name: str = "Phando/sft-dataset-from-moonlight",
-        batch_size_per_device: int = 2,
-        gradient_accumulation_steps: int = 8,
+        max_length: int = 1024,
+        batch_size_per_device: int = 1,
+        gradient_accumulation_steps: int = 16,
         num_train_epochs: int = 3,
         learning_rate: float = 5e-6,
         weight_decay: float = 0.01,
@@ -66,6 +67,7 @@ def train_sft(
 
     raw_datasets = load_dataset(dataset_name, split="train", trust_remote_code=True)
     tokenizer = AutoTokenizer.from_pretrained(base_model_name, trust_remote_code=True)
+    tokenizer.model_max_length = max_length
     model = AutoModelForCausalLM.from_pretrained(base_model_name, trust_remote_code=True)
 
     with accelerator.main_process_first():
@@ -76,7 +78,7 @@ def train_sft(
             remove_columns=columns_names,
             num_proc=num_workers,
         )
-    data_collator = CustomDataCollatorWithPadding(tokenizer=tokenizer, pad_to_multiple_of=8)
+    data_collator = CustomDataCollatorWithPadding(tokenizer=tokenizer, pad_to_multiple_of=8, max_length=max_length)
     dataloader = DataLoader(
         sft_dataset,
         collate_fn=data_collator,
