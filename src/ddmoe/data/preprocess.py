@@ -98,16 +98,22 @@ def sft_olmoe_train_batch_preprocess_fn(
         # 3. Only apply LM loss on the assistant's response & "<|im_end|>"
         labels = [-100] * len(input_ids)
 
-        user_token_id = tokenizer.convert_tokens_to_ids("<|user|>")
-        assistant_token_id = tokenizer.convert_tokens_to_ids("<|assistant|>")
+        assistant_token_id = tokenizer("<|assistant|>", add_special_tokens=False)["input_ids"]
         end_token_id = tokenizer.convert_tokens_to_ids("<|endoftext|>")
 
         pos_assistant = -1
         pos_end_after_response = -1
+        pos_assistant_local = 0
 
         for i, token_id in enumerate(input_ids):
-            if token_id == assistant_token_id:
+            if token_id == assistant_token_id[pos_assistant_local]:
                 pos_assistant = i
+                pos_assistant_local += 1
+            elif pos_assistant_local > 0 and pos_assistant_local < len(assistant_token_id) - 1:
+                pos_assistant = -1
+                pos_assistant_local = 0
+            elif pos_assistant_local == len(assistant_token_id) - 1:
+                pos_assistant_local = 0
             elif token_id == end_token_id and pos_assistant != -1:
                 pos_end_after_response = i
                 break
