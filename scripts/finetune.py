@@ -7,6 +7,7 @@ import torch
 from accelerate import Accelerator, DistributedType
 from accelerate.logging import get_logger
 from accelerate.utils import set_seed
+import deepspeed
 from datasets import load_dataset
 from torch.utils.data import DataLoader
 from tqdm.auto import tqdm
@@ -65,6 +66,7 @@ def train_sft(
     # debugging
     if debugging:
         raw_datasets = raw_datasets.select(range(1000))
+        checkpointing_steps = 2
 
     if "olmoe" in base_model_name.lower():
         tokenizer = AutoTokenizer.from_pretrained("allenai/OLMoE-1B-7B-0125-Instruct", trust_remote_code=True)
@@ -165,7 +167,9 @@ def train_sft(
                 checkpointing_dir = os.path.join(output_dir, f"checkpoint-{completed_steps}")
                 unwrapped_model = accelerator.unwrap_model(model)
                 unwrapped_model.save_pretrained(
-                    checkpointing_dir, save_function=accelerator.save, is_main_process=accelerator.is_main_process
+                    checkpointing_dir,
+                    is_main_process=accelerator.is_main_process,
+                    state_dict=accelerator.get_state_dict(model),
                 )
 
             if completed_steps > num_training_steps:
