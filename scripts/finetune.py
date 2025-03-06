@@ -36,6 +36,7 @@ def train_sft(
         num_workers: int = 4,
         checkpointing_steps: int = 1000,
         logging_steps: int = 1,
+        debugging: bool = False,
 ):
     accelerator = Accelerator(
         gradient_accumulation_steps=gradient_accumulation_steps, project_dir=output_dir, log_with="wandb"
@@ -62,7 +63,8 @@ def train_sft(
     raw_datasets = load_dataset(dataset_name, split="train", trust_remote_code=True)
 
     # debugging
-    raw_datasets = raw_datasets.select(range(1000))
+    if debugging:
+        raw_datasets = raw_datasets.select(range(1000))
 
     if "olmoe" in base_model_name.lower():
         tokenizer = AutoTokenizer.from_pretrained("allenai/OLMoE-1B-7B-0125-Instruct", trust_remote_code=True)
