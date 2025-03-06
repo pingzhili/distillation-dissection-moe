@@ -1,11 +1,6 @@
-import argparse
-import json
 import logging
 import math
 import os
-import random
-from itertools import chain
-from pathlib import Path
 import transformers
 import datasets
 import torch
@@ -13,7 +8,6 @@ from accelerate import Accelerator, DistributedType
 from accelerate.logging import get_logger
 from accelerate.utils import set_seed
 from datasets import load_dataset
-from huggingface_hub import HfApi
 from torch.utils.data import DataLoader
 from tqdm.auto import tqdm
 from fire import Fire
@@ -21,7 +15,6 @@ from transformers import (
     AutoTokenizer,
     AutoModelForCausalLM,
     get_scheduler,
-    DataCollatorWithPadding
 )
 from ddmoe.data import batch_preprocess_fn, CustomDataCollatorWithPadding
 
@@ -68,11 +61,13 @@ def train_sft(
 
     raw_datasets = load_dataset(dataset_name, split="train", trust_remote_code=True)
 
-    # # debugging
-    # raw_datasets = raw_datasets.select(range(1000))
+    # debugging
+    raw_datasets = raw_datasets.select(range(1000))
 
     if "olmoe" in base_model_name.lower():
         tokenizer = AutoTokenizer.from_pretrained("allenai/OLMoE-1B-7B-0125-Instruct", trust_remote_code=True)
+    elif "deepseek-v2" in base_model_name.lower():
+        tokenizer = AutoTokenizer.from_pretrained("deepseek-ai/DeepSeek-V2-Lite", trust_remote_code=True)
     else:
         raise NotImplementedError(f"Tokenizer for {base_model_name} not implemented.")
     tokenizer.model_max_length = max_length
@@ -80,8 +75,14 @@ def train_sft(
 
     with accelerator.main_process_first():
         columns_names = raw_datasets.column_names
+        if "olmoe" in base_model_name.lower():
+            proc_name = "sft-olmoe-train"
+        elif "deepseek-v2" in base_model_name.lower():
+            proc_name = "sft-deepseek-v2-train"
+        else:
+            raise NotImplementedError(f"Preprocess for {base_model_name} not implemented.")
         sft_dataset = raw_datasets.map(
-            lambda x: batch_preprocess_fn(x, task="sft-olmoe-train", tokenizer=tokenizer),
+            lambda x: batch_preprocess_fn(x, task=proc_name, tokenizer=tokenizer),
             batched=True,
             remove_columns=columns_names,
             num_proc=num_workers,

@@ -11,7 +11,8 @@ def batch_preprocess_fn(
 ) -> Dict[str, List[Any]]:
     task_to_fn = {
         "chat-eval": partial(chat_eval_batch_preprocess_fn, tokenizer=tokenizer),
-        "sft-olmoe-train": partial(sft_olmoe_train_batch_preprocess_fn, tokenizer=tokenizer),
+        "sft-olmoe-train": partial(sft_train_batch_preprocess_fn, tokenizer=tokenizer, boa_token="<|assistant|>"),
+        "sft-deepseek-v2-train": partial(sft_train_batch_preprocess_fn, tokenizer=tokenizer, boa_token="Assistant:"),
     }
     return task_to_fn[task](examples)
 
@@ -69,9 +70,10 @@ def apply_general_chat_template(
         return tokenizer.apply_chat_template(messages, add_generation_prompt=False, tokenize=False)
 
 
-def sft_olmoe_train_batch_preprocess_fn(
+def sft_train_batch_preprocess_fn(
         examples: Dict[str, List[Any]],
         tokenizer: PreTrainedTokenizerBase,
+        boa_token: str,
 ):
     if tokenizer is None:
         raise ValueError("Tokenizer is required for SFT training.")
@@ -96,11 +98,9 @@ def sft_olmoe_train_batch_preprocess_fn(
         # 3. Only apply LM loss on the assistant's response & "<|endoftext|>"
         labels = [-100] * len(input_ids)
 
-        assistant_token_id = tokenizer("<|assistant|>", add_special_tokens=False)["input_ids"]
-        end_token_id = tokenizer.convert_tokens_to_ids("|||IP_ADDRESS|||")
+        assistant_token_id = tokenizer(boa_token, add_special_tokens=False)["input_ids"]
 
         pos_assistant = -1
-        pos_end_after_response = -1
 
         i = 0
         while i <= len(input_ids) - len(assistant_token_id):
@@ -115,19 +115,12 @@ def sft_olmoe_train_batch_preprocess_fn(
                 break
             i += 1
 
-        # if pos_assistant != -1:
-        #     for i in range(pos_assistant + 1, len(input_ids)):
-        #         if input_ids[i] == end_token_id:
-        #             pos_end_after_response = i
-        #             break
-
         if pos_assistant != -1:
             for i in range(pos_assistant + 1, len(input_ids)):
                 labels[i] = input_ids[i]
             all_input_ids.append(input_ids)
             all_attention_masks.append(attention_mask)
             all_labels.append(labels)
-            # print(pos_assistant, pos_end_after_response)
         else:
             print("Assistant token not found in the input_ids. SKIPPING...")
 

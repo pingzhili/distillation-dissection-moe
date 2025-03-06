@@ -4,7 +4,7 @@ from typing import Dict, List, Any
 import numpy as np
 
 # Import the functions to be tested
-from ddmoe.data.preprocess import sft_olmoe_train_batch_preprocess_fn
+from ddmoe.data.preprocess import sft_train_batch_preprocess_fn
 
 
 class TestIntegrationSFTPreprocess(unittest.TestCase):
@@ -28,7 +28,7 @@ class TestIntegrationSFTPreprocess(unittest.TestCase):
 
     def test_integration_preprocessing(self):
         """Test the entire preprocessing pipeline with real tokenizer"""
-        result = sft_olmoe_train_batch_preprocess_fn(self.sample_data, self.tokenizer)
+        result = sft_train_batch_preprocess_fn(self.sample_data, self.tokenizer)
 
         # Check the basic structure of the result
         self.assertIn('input_ids', result)
@@ -93,7 +93,7 @@ class TestIntegrationSFTPreprocess(unittest.TestCase):
     def test_empty_messages(self):
         """Test handling of empty message lists"""
         empty_data = {"messages": []}
-        result = sft_olmoe_train_batch_preprocess_fn(empty_data, self.tokenizer)
+        result = sft_train_batch_preprocess_fn(empty_data, self.tokenizer)
 
         # Should return empty lists
         self.assertEqual(len(result['input_ids']), 0)
@@ -116,7 +116,7 @@ class TestIntegrationSFTPreprocess(unittest.TestCase):
             ]
         }
 
-        result = sft_olmoe_train_batch_preprocess_fn(incomplete_data, self.tokenizer)
+        result = sft_train_batch_preprocess_fn(incomplete_data, self.tokenizer)
 
         # Should handle gracefully by skipping invalid messages
         self.assertEqual(len(result['input_ids']), 0)
@@ -133,7 +133,7 @@ class TestIntegrationSFTPreprocess(unittest.TestCase):
             ]
         }
 
-        result = sft_olmoe_train_batch_preprocess_fn(long_data, self.tokenizer)
+        result = sft_train_batch_preprocess_fn(long_data, self.tokenizer)
 
         # Should process without errors
         self.assertEqual(len(result['input_ids']), 1)
