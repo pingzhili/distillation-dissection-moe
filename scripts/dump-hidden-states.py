@@ -54,6 +54,8 @@ def dump_hidden_states(checkpoint_path: str):
 
     for batch in tqdm(data_loader, desc=f"Dumping hidden states..."):
         batch = {k: v.cuda() for k, v in batch.items()}
+        for k, v in batch.items():
+            batch[k] = v.squeeze(0)
         with torch.no_grad():
             outputs = model(**batch, output_router_logits=True)
         outputs_list.append({
