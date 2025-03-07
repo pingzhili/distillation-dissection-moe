@@ -4,10 +4,9 @@ import os
 import transformers
 import datasets
 import torch
-from accelerate import Accelerator, DistributedType
+from accelerate import Accelerator
 from accelerate.logging import get_logger
 from accelerate.utils import set_seed
-import deepspeed
 from datasets import load_dataset
 from torch.utils.data import DataLoader
 from tqdm.auto import tqdm
