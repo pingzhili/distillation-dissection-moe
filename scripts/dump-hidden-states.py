@@ -63,7 +63,7 @@ def dump_hidden_states(checkpoint_path: str):
             "attention": outputs.attentions,
         })
 
-    save_dir = os.path.join(checkpoint_path, "hidden-states")
+    save_dir = os.path.join(checkpoint_path, "profiling")
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
     torch.save(outputs_list, os.path.join(save_dir, "hidden_states.pt"))
