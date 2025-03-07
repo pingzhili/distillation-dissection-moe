@@ -42,7 +42,7 @@ def dump_hidden_states(checkpoint_path: str):
     else:
         raise NotImplementedError(f"Tokenizer for {checkpoint_path} not implemented.")
 
-    dataset = get_wikitext2(tokenizer=tokenizer, seqlen=512, nsamples=8, split="train")
+    dataset = get_wikitext2(tokenizer=tokenizer, seqlen=512, nsamples=4, split="train")
     data_loader = DataLoader(
         Dataset.from_list(dataset),
         batch_size=1,
@@ -57,7 +57,7 @@ def dump_hidden_states(checkpoint_path: str):
         for k, v in batch.items():
             batch[k] = v.squeeze(0)
         with torch.no_grad():
-            outputs = model(**batch, output_router_logits=True)
+            outputs = model(**batch, output_router_logits=True, output_hidden_states=True, output_attentions=True)
         outputs_list.append({
             "logits": outputs.logits.squeeze(),
             "hidden_states": outputs.hidden_states,
@@ -68,7 +68,7 @@ def dump_hidden_states(checkpoint_path: str):
     save_dir = os.path.join(checkpoint_path, "profiling")
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
-    torch.save(outputs_list, os.path.join(save_dir, "hidden_states.pt"))
+    torch.save(outputs_list, os.path.join(save_dir, "outputs.pt"))
 
 
 if __name__ == "__main__":
