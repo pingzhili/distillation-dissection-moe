@@ -59,7 +59,7 @@ def dump_hidden_states(checkpoint_path: str):
         with torch.no_grad():
             outputs = model(**batch, output_router_logits=True)
         outputs_list.append({
-            "logits": outputs.logits,
+            "logits": outputs.logits.squeeze(),
             "hidden_states": outputs.hidden_states,
             "router_logits": outputs.router_logits,
             "attention": outputs.attentions,
