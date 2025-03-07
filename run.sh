@@ -12,5 +12,7 @@ export CUDA_VISIBLE_DEVICES=0
 #  --base_model_name="deepseek-ai/DeepSeek-V2-Lite" --dataset_name="Phando/sft-dataset-from-moonlight" \
 #  --output_dir="outputs/deepseek-v2-lite-sft" --batch_size_per_device=2 --gradient_accumulation_steps=8 \
 #  --checkpointing_steps=200
+#python scripts/dump-hidden-states.py \
+#    --checkpoint_path="checkpoints/olmoe-1b-7b-0125-sft-distilled-moonlight/checkpoint-4000"
 python scripts/dump-hidden-states.py \
-    --checkpoint_path="checkpoints/olmoe-1b-7b-0125-sft-distilled-moonlight/checkpoint-4000"
+    --checkpoint_path="OLMoE-1B-7B-0125"
