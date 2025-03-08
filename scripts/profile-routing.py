@@ -80,7 +80,7 @@ def get_routing_logits(checkpoint_path: str):
 
     # concate all routing logits for each layer
     all_routing_logits = [outputs['router_logits'] for outputs in outputs_list]  # List[Set[torch.Tensor]]
-    all_routing_logits = [torch.stack(logits, dim=0) for logits in
+    all_routing_logits = [torch.stack(logits, dim=0).cpu() for logits in
                           all_routing_logits]  # List[torch.Tensor of shape (n_layers, seq_length, n_experts)]
     all_routing_logits = torch.concat(all_routing_logits, dim=1)  # shape (n_layers, n_samples * seq_length, n_experts)
 
