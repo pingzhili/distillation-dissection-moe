@@ -1214,6 +1214,7 @@ class DeepseekV3DecoderLayer(nn.Module):
             hidden_states, router_logits = self.mlp(hidden_states)
         else:
             hidden_states = self.mlp(hidden_states)
+            router_logits = None
         hidden_states = residual + hidden_states
 
         outputs = (hidden_states,)
