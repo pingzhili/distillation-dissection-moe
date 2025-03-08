@@ -40,9 +40,13 @@ def get_wikitext2(tokenizer, seqlen: int, nsamples: int, split: str = "train"):
 
 def get_routing_logits(checkpoint_path: str):
     if "moonlight" in checkpoint_path.lower():
-        model = DeepseekV3ForCausalLM.from_pretrained(checkpoint_path, trust_remote_code=True).cuda()
+        model = DeepseekV3ForCausalLM.from_pretrained(
+            checkpoint_path, trust_remote_code=True, device_map="auto"
+        )
     else:
-        model = AutoModelForCausalLM.from_pretrained(checkpoint_path, trust_remote_code=True).cuda()
+        model = AutoModelForCausalLM.from_pretrained(
+            checkpoint_path, trust_remote_code=True, device_map="auto"
+        )
 
     if "olmoe" in checkpoint_path.lower():
         tokenizer = AutoTokenizer.from_pretrained(
