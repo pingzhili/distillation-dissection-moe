@@ -39,7 +39,8 @@ def get_wikitext2(tokenizer, seqlen: int, nsamples: int, split: str = "train"):
 
 
 def get_routing_logits(checkpoint_path: str):
-    if "moonlight" in checkpoint_path.lower():
+    is_moonlight = (checkpoint_path == "moonshotai/Moonlight-16B-A3B-Instruct")
+    if is_moonlight:
         model = DeepseekV3ForCausalLM.from_pretrained(
             checkpoint_path, trust_remote_code=True, device_map="auto"
         )
@@ -52,7 +53,7 @@ def get_routing_logits(checkpoint_path: str):
         tokenizer = AutoTokenizer.from_pretrained(
             "allenai/OLMoE-1B-7B-0125-Instruct", trust_remote_code=True
         )
-    elif "moonlight" in checkpoint_path.lower():
+    elif is_moonlight:
         tokenizer = AutoTokenizer.from_pretrained(
             "moonshotai/Moonlight-16B-A3B-Instruct", trust_remote_code=True
         )
@@ -101,9 +102,13 @@ def profile_hidden_states(
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
 
+    print("Analyzing load balancing...")
     analyze_load_balancing(routing_logits_list, model_names, save_dir)
+    print("Analyzing routing entropy...")
     analyze_routing_entropy(routing_logits_list, model_names, save_dir)
+    print("Analyzing routing sparsity...")
     analyze_routing_sparsity(routing_logits_list, model_names, save_dir)
+    print("Analyzing expert collaboration...")
     analyze_expert_collaboration(routing_logits_list, model_names, save_dir)
 
 
