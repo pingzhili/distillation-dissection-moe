@@ -9,6 +9,7 @@ from torch.utils.data import DataLoader
 from tqdm import tqdm
 from transformers import AutoModelForCausalLM, AutoTokenizer, default_data_collator
 
+from ddmoe.models import DeepseekV3ForCausalLM
 from ddmoe.profiler.functional import (
     analyze_expert_collaboration, analyze_load_balancing, analyze_routing_entropy, analyze_routing_sparsity,
 )
@@ -39,7 +40,10 @@ def get_wikitext2(tokenizer, seqlen: int, nsamples: int, split: str = "train"):
 
 def get_routing_logits(checkpoint_path: str):
     if "moonlight" in checkpoint_path.lower():
+        model = DeepseekV3ForCausalLM.from_pretrained(checkpoint_path, trust_remote_code=True).cuda()
+    else:
         model = AutoModelForCausalLM.from_pretrained(checkpoint_path, trust_remote_code=True).cuda()
+
     if "olmoe" in checkpoint_path.lower():
         tokenizer = AutoTokenizer.from_pretrained(
             "allenai/OLMoE-1B-7B-0125-Instruct", trust_remote_code=True
