@@ -11,7 +11,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer, default_data_colla
 
 from ddmoe.models import DeepseekV3ForCausalLM
 from ddmoe.profiler.functional import (
-    analyze_expert_collaboration, analyze_load_balancing, analyze_routing_entropy, analyze_routing_sparsity,
+    analyze_expert_collaboration,
 )
 
 set_seed(233)
@@ -109,12 +109,12 @@ def profile_hidden_states(
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
 
-    print("Analyzing load balancing...")
-    analyze_load_balancing(routing_logits_list, model_names, save_dir)
-    print("Analyzing routing entropy...")
-    analyze_routing_entropy(routing_logits_list, model_names, save_dir)
-    print("Analyzing routing sparsity...")
-    analyze_routing_sparsity(routing_logits_list, model_names, save_dir)
+    # print("Analyzing load balancing...")
+    # analyze_load_balancing(routing_logits_list, model_names, save_dir)
+    # print("Analyzing routing entropy...")
+    # analyze_routing_entropy(routing_logits_list, model_names, save_dir)
+    # print("Analyzing routing sparsity...")
+    # analyze_routing_sparsity(routing_logits_list, model_names, save_dir)
     print("Analyzing expert collaboration...")
     analyze_expert_collaboration(routing_logits_list, model_names, save_dir)
 
