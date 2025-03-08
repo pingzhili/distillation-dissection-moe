@@ -52,6 +52,10 @@ def get_routing_logits(checkpoint_path: str):
         tokenizer = AutoTokenizer.from_pretrained(
             "allenai/OLMoE-1B-7B-0125-Instruct", trust_remote_code=True
         )
+    elif "moonlight" in checkpoint_path.lower():
+        tokenizer = AutoTokenizer.from_pretrained(
+            "moonshotai/Moonlight-16B-A3B-Instruct", trust_remote_code=True
+        )
     else:
         raise NotImplementedError(f"Tokenizer for {checkpoint_path} not implemented.")
 
