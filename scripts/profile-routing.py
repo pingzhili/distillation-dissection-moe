@@ -44,10 +44,12 @@ def get_routing_logits(checkpoint_path: str):
         model = DeepseekV3ForCausalLM.from_pretrained(
             checkpoint_path, trust_remote_code=True, device_map="auto"
         )
+        first_k_dense_replace = model.config.first_k_dense_replace
     else:
         model = AutoModelForCausalLM.from_pretrained(
             checkpoint_path, trust_remote_code=True, device_map="auto"
         )
+        first_k_dense_replace = 0
 
     if "olmoe" in checkpoint_path.lower():
         tokenizer = AutoTokenizer.from_pretrained(
@@ -88,6 +90,11 @@ def get_routing_logits(checkpoint_path: str):
     all_routing_logits = [torch.stack(logits, dim=0).cpu() for logits in
                           all_routing_logits]  # List[torch.Tensor of shape (n_layers, seq_length, n_experts)]
     all_routing_logits = torch.concat(all_routing_logits, dim=1)  # shape (n_layers, n_samples * seq_length, n_experts)
+    if is_moonlight:
+        # pad the first "first_k_dense_replace" layers with zeros
+        all_routing_logits = torch.cat(
+            [torch.zeros(first_k_dense_replace, all_routing_logits.shape[1], all_routing_logits.shape[2]),
+             all_routing_logits], dim=0)
 
     return all_routing_logits
 
