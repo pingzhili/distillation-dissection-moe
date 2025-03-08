@@ -1478,6 +1478,7 @@ class DeepseekV3Model(DeepseekV3PreTrainedModel):
                 position_ids=position_ids,
                 past_key_value=past_key_values,
                 output_attentions=output_attentions,
+                output_router_logits=output_router_logits,
                 use_cache=use_cache,
             )
 
