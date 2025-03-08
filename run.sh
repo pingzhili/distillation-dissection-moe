@@ -14,5 +14,5 @@ export CUDA_VISIBLE_DEVICES=0
 #  --checkpointing_steps=200
 #python scripts/dump-hidden-states.py \
 #    --checkpoint_path="checkpoints/olmoe-1b-7b-0125-sft-distilled-moonlight/checkpoint-4000"
-python scripts/profile.py \
+python scripts/profile-routing.py \
     --all_checkpoint_paths="allenai/OLMoE-1B-7B-0125,moonshotai/Moonlight-16B-A3B-Instruct,checkpoints/olmoe-1b-7b-0125-sft-distilled-moonlight/checkpoint-4000"
