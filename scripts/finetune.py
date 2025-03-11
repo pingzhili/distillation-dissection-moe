@@ -79,7 +79,12 @@ def train_sft(
     # lora
     if enable_lora:
         peft_config = LoraConfig(
-            task_type=TaskType.CAUSAL_LM, inference_mode=False, r=32, lora_alpha=64, lora_dropout=0.1
+            task_type=TaskType.CAUSAL_LM,
+            inference_mode=False,
+            r=32,
+            lora_alpha=64,
+            lora_dropout=0.1,
+            target_modules="all-linear"
         )
         model = get_peft_model(model, peft_config)
         model.print_trainable_parameters()
