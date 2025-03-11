@@ -162,9 +162,9 @@ def dump_router_token_hidden_states(checkpoint_path: str):
 
     for batch in tqdm(data_loader, desc=f"Dumping router token hidden states..."):
         batch = {k: v.cuda() for k, v in batch.items()}
-        for k, v in batch.items():
-            batch[k] = v.squeeze(0)
-        input_id_list.append(batch["input_ids"].detach().cpu())
+        # for k, v in batch.items():
+        #     batch[k] = v.squeeze(0)
+        input_id_list.append(batch["input_ids"].squeeze(0).detach().cpu())
         with torch.no_grad():
             _ = model(**batch)
 
