@@ -22,6 +22,7 @@ def compare_olmoe_routing_results(
     num_layers = len(before_router_hidden_states) - 1
     num_samples = len(before_router_hidden_states["input_ids"])
     for i in range(num_layers):
+        aligned_after_router_hidden_states[f"model.layers.{i}.mlp"] = {}
         aligned_after_router_hidden_states[f"model.layers.{i}.mlp"]["selected_experts"] = []
         aligned_after_router_hidden_states[f"model.layers.{i}.mlp"]["input"] = []
 
