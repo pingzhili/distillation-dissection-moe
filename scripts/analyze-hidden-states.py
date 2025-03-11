@@ -66,6 +66,8 @@ def compare_olmoe_routing_results(
 
             progress_bar.update(1)
 
+    print(f"Found {len(different_routing_list)} tokens with different routing results")
+
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
 
