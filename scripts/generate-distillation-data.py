@@ -34,7 +34,7 @@ def run_generate_distillation_data(
         num_workers: int = 4,
 ):
     model = DeepseekV3ForCausalLM.from_pretrained(
-        model_name, torch_dtype="auto", trust_remote_code=True, device_map=f"cuda:{local_rank}"
+        model_name, torch_dtype="auto", trust_remote_code=True, device_map=f"cuda:0"
     )
     tokenizer = AutoTokenizer.from_pretrained(model_name, trust_remote_code=True)
     tokenizer.pad_token_id = tokenizer.eos_token_id
