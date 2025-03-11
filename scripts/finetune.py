@@ -1,21 +1,20 @@
 import logging
 import math
 import os
-import transformers
+
 import datasets
 import torch
+import transformers
 from accelerate import Accelerator
 from accelerate.logging import get_logger
 from accelerate.utils import set_seed
 from datasets import load_dataset
+from fire import Fire
+from peft import get_peft_model, LoraConfig, TaskType
 from torch.utils.data import DataLoader
 from tqdm.auto import tqdm
-from fire import Fire
-from transformers import (
-    AutoTokenizer,
-    AutoModelForCausalLM,
-    get_scheduler,
-)
+from transformers import (AutoModelForCausalLM, AutoTokenizer, get_scheduler)
+
 from ddmoe.data import batch_preprocess_fn, CustomDataCollatorWithPadding
 
 set_seed(233)
@@ -37,6 +36,7 @@ def train_sft(
         checkpointing_steps: int = 1000,
         logging_steps: int = 1,
         debugging: bool = False,
+        enable_lora: bool = False,
 ):
     accelerator = Accelerator(
         gradient_accumulation_steps=gradient_accumulation_steps, project_dir=output_dir, log_with="wandb"
@@ -75,6 +75,14 @@ def train_sft(
         raise NotImplementedError(f"Tokenizer for {base_model_name} not implemented.")
     tokenizer.model_max_length = max_length
     model = AutoModelForCausalLM.from_pretrained(base_model_name, trust_remote_code=True)
+
+    # lora
+    if enable_lora:
+        peft_config = LoraConfig(
+            task_type=TaskType.CAUSAL_LM, inference_mode=False, r=32, lora_alpha=64, lora_dropout=0.1
+        )
+        model = get_peft_model(model, peft_config)
+        model.print_trainable_parameters()
 
     with accelerator.main_process_first():
         columns_names = raw_datasets.column_names
