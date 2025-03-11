@@ -12,9 +12,6 @@ def compare_olmoe_routing_results(
     before_router_hidden_states = torch.load(before_router_checkpoint_path)
     after_router_hidden_states = torch.load(after_router_checkpoint_path)
 
-    # Dictionary to store input_ids with different routing results
-    different_routing_inputs = {}
-
     # Iterate through each sample
     # Keys are: dict_keys(['model.layers.0.mlp', 'model.layers.1.mlp', 'model.layers.2.mlp', 'model.layers.3.mlp', 'model.layers.4.mlp', 'model.layers.5.mlp', 'model.layers.6.mlp', 'model.layers.7.mlp', 'model.layers.8.mlp', 'model.layers.9.mlp', 'model.layers.10.mlp', 'model.layers.11.mlp', 'model.layers.12.mlp', 'model.layers.13.mlp', 'model.layers.14.mlp', 'model.layers.15.mlp', 'input_ids'])
     aligned_after_router_hidden_states = {}
