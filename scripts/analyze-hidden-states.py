@@ -10,9 +10,9 @@ def compare_olmoe_routing_results(
         after_router_checkpoint_path: str,
         save_dir: str = "./results",
 ):
-    before_router_hidden_states = torch.load(before_router_checkpoint_path)
+    before_router_hidden_states = torch.load(before_router_checkpoint_path, map_location="cuda")
     print(f"Loaded before router hidden states from {before_router_checkpoint_path}")
-    after_router_hidden_states = torch.load(after_router_checkpoint_path)
+    after_router_hidden_states = torch.load(after_router_checkpoint_path, map_location="cuda")
     print(f"Loaded after router hidden states from {after_router_checkpoint_path}")
 
     # Iterate through each sample
