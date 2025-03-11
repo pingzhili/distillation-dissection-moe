@@ -22,7 +22,8 @@ def compare_olmoe_routing_results(
     num_layers = len(before_router_hidden_states) - 1
     num_samples = len(before_router_hidden_states["input_ids"])
     for i in range(num_layers):
-        aligned_after_router_hidden_states[f"model.layers.{i}.mlp"] = []
+        aligned_after_router_hidden_states[f"model.layers.{i}.mlp"]["selected_experts"] = []
+        aligned_after_router_hidden_states[f"model.layers.{i}.mlp"]["input"] = []
 
     for input_ids in tqdm(before_router_hidden_states["input_ids"], desc="Aligning hidden states..."):
         aligned_after_router_hidden_states["input_ids"].append(input_ids)
@@ -33,8 +34,12 @@ def compare_olmoe_routing_results(
                 original_after_idx = i
                 break
         for i in range(num_layers):
-            aligned_after_router_hidden_states[f"model.layers.{i}.mlp"].append(
-                after_router_hidden_states[f"model.layers.{i}.mlp"][original_after_idx])
+            aligned_after_router_hidden_states[f"model.layers.{i}.mlp"]["selected_experts"].append(
+                after_router_hidden_states[f"model.layers.{i}.mlp"]["selected_experts"][original_after_idx]
+            )
+            aligned_after_router_hidden_states[f"model.layers.{i}.mlp"]["input"].append(
+                after_router_hidden_states[f"model.layers.{i}.mlp"]["input"][original_after_idx]
+            )
 
     # Compare the routing results and capture the tokens with different routing results
     different_routing_list = []  # list of (token input_id, layer_id, before_routing, after_routing, before_token_input, after_token_input)
