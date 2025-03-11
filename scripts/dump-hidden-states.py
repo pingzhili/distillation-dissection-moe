@@ -73,7 +73,7 @@ def dump_model_hidden_states(checkpoint_path: str):
     if checkpoint_path == "allenai/OLMoE-1B-7B-0125":
         save_dir = "./checkpoints/OLMoE-1B-7B-0125/profiling"
     else:
-        save_dir = os.path.join(checkpoint_path, "profiling")
+        save_dir = os.path.join(checkpoint_path, "model_profiling")
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
     torch.save(outputs_list, os.path.join(save_dir, "outputs.pt"))
