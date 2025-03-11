@@ -58,8 +58,8 @@ def compare_olmoe_routing_results(
                     different_routing_list.append((
                         before_router_hidden_states["input_ids"][sample_id][token_id].item(),
                         layer_id,
-                        before_routing[token_id].item(),
-                        after_routing[token_id].item(),
+                        before_routing[token_id],
+                        after_routing[token_id],
                         before_input[token_id],
                         after_input[token_id],
                     ))
