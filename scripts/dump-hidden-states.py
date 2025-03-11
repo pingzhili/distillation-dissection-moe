@@ -89,7 +89,7 @@ def dump_router_token_hidden_states(checkpoint_path: str):
         raise NotImplementedError(f"Tokenizer for {checkpoint_path} not implemented.")
 
     dataset = load_dataset("Phando/sft-dataset-valid", split="train", trust_remote_code=True)
-    preprocess_fn = partial(batch_preprocess_fn, task="chat-gen", tokenizer=tokenizer)
+    preprocess_fn = partial(batch_preprocess_fn, task="chat-forward", tokenizer=tokenizer)
     columns = dataset.column_names
     dataset = dataset.map(preprocess_fn, batched=True, num_proc=8, remove_columns=columns)
     data_loader = DataLoader(
