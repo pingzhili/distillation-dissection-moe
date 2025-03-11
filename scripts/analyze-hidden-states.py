@@ -46,6 +46,7 @@ def compare_olmoe_routing_results(
     different_routing_list = []  # list of (token input_id, layer_id, before_routing, after_routing, before_token_input, after_token_input)
     progress_bar = tqdm(total=num_samples * num_layers,
                         desc=f"Comparing routing results on {num_samples} samples x {num_layers} layers...")
+    total_num_tokens = 0
     for sample_id in range(num_samples):
         for layer_id in range(num_layers):
             before_routing = before_router_hidden_states[f"model.layers.{layer_id}.mlp"]["selected_experts"][sample_id]
@@ -54,6 +55,7 @@ def compare_olmoe_routing_results(
             before_input = before_router_hidden_states[f"model.layers.{layer_id}.mlp"]["input"][sample_id]
             after_input = aligned_after_router_hidden_states[f"model.layers.{layer_id}.mlp"]["input"][sample_id]
             for token_id in range(before_routing.shape[0]):
+                total_num_tokens += 1
                 if not torch.allclose(before_routing[token_id], after_routing[token_id]):
                     different_routing_list.append((
                         before_router_hidden_states["input_ids"][sample_id][token_id].item(),
@@ -66,7 +68,7 @@ def compare_olmoe_routing_results(
 
             progress_bar.update(1)
 
-    print(f"Found {len(different_routing_list)} tokens with different routing results")
+    print(f"Found {len(different_routing_list)} tokens with different routing results over {total_num_tokens} tokens")
 
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
