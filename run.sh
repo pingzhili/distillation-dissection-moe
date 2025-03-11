@@ -12,7 +12,7 @@ export CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7
 #  --output_dir="outputs/olmoe-1b-7b-0125-sft"
 accelerate launch --config_file configs/zero-3.yaml scripts/finetune.py \
   --base_model_name="deepseek-ai/DeepSeek-V2-Lite" --dataset_name="Phando/sft-dataset-from-moonlight" \
-  --output_dir="outputs/deepseek-v2-lite-sft" --batch_size_per_device=1 --gradient_accumulation_steps=16 \
+  --output_dir="outputs/deepseek-v2-lite-sft" --batch_size_per_device=2 --gradient_accumulation_steps=16 \
   --checkpointing_steps=200 --enable_lora=True
 #python scripts/dump-hidden-states.py \
 #    --checkpoint_path="checkpoints/olmoe-1b-7b-0125-sft-distilled-moonlight/checkpoint-4000"
