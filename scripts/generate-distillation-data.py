@@ -1,16 +1,18 @@
+import json
+import os
+import time
+from functools import partial
+
+import openai
 import torch
-from fire import Fire
 from datasets import load_dataset
+from fire import Fire
 from torch.utils.data import DataLoader
-from transformers import set_seed, AutoTokenizer
+from tqdm import tqdm
+from transformers import AutoTokenizer, set_seed
+
 from ddmoe.data import batch_preprocess_fn, CustomDataCollatorWithPadding
 from ddmoe.models import DeepseekV3ForCausalLM
-import openai
-from functools import partial
-from tqdm import tqdm
-import os
-import json
-import time
 
 set_seed(233)
 
@@ -46,7 +48,7 @@ def run_generate_distillation_data(
     else:
         raise ValueError(f"Dataset {dataset_name} not found.")
     dataset = dataset["train"]
-    preprocess_fn = partial(batch_preprocess_fn, task="chat-eval", tokenizer=tokenizer)
+    preprocess_fn = partial(batch_preprocess_fn, task="chat-gen", tokenizer=tokenizer)
     dataset = dataset.map(preprocess_fn, batched=True, num_proc=num_workers, remove_columns=dataset.column_names)
     data_collator = CustomDataCollatorWithPadding(
         tokenizer=tokenizer, pad_to_multiple_of=8, extra_keys_to_ignore=["content"]
@@ -75,7 +77,7 @@ def api_generate_distillation_data(
         dataset_name, "v1", trust_remote_code=True
     )
     dataset = dataset["train"]
-    preprocess_fn = partial(batch_preprocess_fn, task="chat-eval")
+    preprocess_fn = partial(batch_preprocess_fn, task="chat-gen")
     dataset = dataset.map(preprocess_fn, batched=True, num_proc=num_workers, remove_columns=dataset.column_names)
     batch_size = 128
     progress_bar = tqdm(

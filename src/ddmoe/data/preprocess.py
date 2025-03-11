@@ -1,7 +1,7 @@
+from functools import partial
 from typing import Any, Dict, List, Optional
 
 from transformers import PreTrainedTokenizerBase
-from functools import partial
 
 __all__ = ["batch_preprocess_fn"]
 
@@ -10,7 +10,8 @@ def batch_preprocess_fn(
         examples: Dict[str, List[Any]], task: str, tokenizer: PreTrainedTokenizerBase = None
 ) -> Dict[str, List[Any]]:
     task_to_fn = {
-        "chat-eval": partial(chat_eval_batch_preprocess_fn, tokenizer=tokenizer),
+        "chat-gen": partial(chat_eval_batch_preprocess_fn, tokenizer=tokenizer),
+        "chat-forward": partial(chat_forward_batch_preprocess_fn, tokenizer=tokenizer),
         "sft-olmoe-train": partial(sft_train_batch_preprocess_fn, tokenizer=tokenizer, boa_token="<|assistant|>"),
         "sft-deepseek-v2-train": partial(sft_train_batch_preprocess_fn, tokenizer=tokenizer, boa_token="Assistant:"),
     }
@@ -52,6 +53,23 @@ def chat_eval_batch_preprocess_fn(
     else:
         input_ids_list = tokenizer.apply_chat_template(chat_list, add_generation_prompt=True)
         return {"input_ids": input_ids_list, "content": messages_list}
+
+
+def chat_forward_batch_preprocess_fn(
+        examples: Dict[str, List[Any]], tokenizer: Optional[PreTrainedTokenizerBase] = None
+) -> Dict[str, List[Any]]:
+    question_list = [messeges[0]["content"] for messeges in examples["messages"]]
+    response_list = [messeges[1]["content"] for messeges in examples["messages"]]
+    chat_list = [
+        [{"role": "system", "content": "You are a helpful assistant provided by Moonshot-AI."},
+         {"role": "user", "content": question},
+         {"role": "assistant", "content": response}] for question, response in zip(question_list, response_list)
+    ]
+    if tokenizer is None:
+        return {"content": chat_list}
+    else:
+        input_ids_list = tokenizer.apply_chat_template(chat_list, add_generation_prompt=True)
+        return {"input_ids": input_ids_list}
 
 
 def apply_general_chat_template(
