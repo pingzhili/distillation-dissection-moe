@@ -63,8 +63,9 @@ def compare_olmoe_routing_results(
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
 
-    print(f"Saving different routing tokens to {os.path.join(save_dir, 'different_routing")}")
-    torch.save(different_routing_list, os.path.join(save_dir, "different_routing_tokens.pt"))
+    save_path = os.path.join(save_dir, "different_routing_tokens.txt")
+    print(f"Saving different routing tokens to {save_path}")
+    torch.save(different_routing_list, save_path)
 
 
 if __name__ == "__main__":
