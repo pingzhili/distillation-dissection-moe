@@ -6,7 +6,7 @@ import torch
 from accelerate.utils import set_seed
 from datasets import Dataset, load_dataset
 from fire import Fire
-from torch import functional as F
+from torch.nn import functional as F
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 from transformers import AutoModelForCausalLM, AutoTokenizer, DataCollatorWithPadding, default_data_collator
