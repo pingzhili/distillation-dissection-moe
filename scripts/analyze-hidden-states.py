@@ -120,6 +120,8 @@ def calculate_expert_token_distibution(
     interested_layers = list(range(0, num_layers, 4))
     for sample_id in range(num_samples):
         for layer_id in range(num_layers):
+            if layer_id not in interested_layers:
+                continue
             before_input = before_router_hidden_states[f"model.layers.{layer_id}.mlp"]["input"][sample_id]
             after_input = after_router_hidden_states[f"model.layers.{layer_id}.mlp"]["input"][sample_id]
             before_routing = before_router_hidden_states[f"model.layers.{layer_id}.mlp"]["selected_experts"][sample_id]
