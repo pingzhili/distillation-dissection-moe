@@ -117,19 +117,13 @@ def calculate_expert_token_distibution(
 
     progress_bar = tqdm(total=num_samples * num_layers, desc=f"Collecting expert input distributions...")
 
-    interested_layers = list(range(0, num_layers, 4))
     for sample_id in range(num_samples):
         for layer_id in range(num_layers):
-            if layer_id not in interested_layers:
-                continue
             before_input = before_router_hidden_states[f"model.layers.{layer_id}.mlp"]["input"][sample_id]
             after_input = after_router_hidden_states[f"model.layers.{layer_id}.mlp"]["input"][sample_id]
             before_routing = before_router_hidden_states[f"model.layers.{layer_id}.mlp"]["selected_experts"][sample_id]
             after_routing = after_router_hidden_states[f"model.layers.{layer_id}.mlp"]["selected_experts"][sample_id]
             for token_id in range(before_routing.shape[0]):
-                # 90% percent skip this token
-                if random.random() < 0.8:
-                    continue
                 for i in range(num_routed_experts_per_token):
                     before_routed_expert = before_routing[token_id][i].item()
                     after_routed_expert = after_routing[token_id][i].item()
@@ -148,6 +142,7 @@ def calculate_expert_token_distibution(
             before_expert_input = before_expert_input_per_layer[layer_id][expert_id]
             after_expert_input = after_expert_input_per_layer[layer_id][expert_id]
             if len(before_expert_input) == 0:
+                print(f"(WARNING) No token routed to expert {expert_id} in layer {layer_id}")
                 continue
             before_sampled_input = random.sample(before_expert_input,
                                                  min(num_samples_per_expert, len(before_expert_input)))
