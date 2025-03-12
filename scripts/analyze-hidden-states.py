@@ -116,6 +116,8 @@ def calculate_expert_token_distibution(
     after_expert_input_per_layer = {i: {j: [] for j in range(num_experts)} for i in range(num_layers)}
 
     progress_bar = tqdm(total=num_samples * num_layers, desc=f"Collecting expert input distributions...")
+
+    interested_layers = list(range(0, num_layers, 4))
     for sample_id in range(num_samples):
         for layer_id in range(num_layers):
             before_input = before_router_hidden_states[f"model.layers.{layer_id}.mlp"]["input"][sample_id]
