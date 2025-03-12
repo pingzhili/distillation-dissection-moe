@@ -123,6 +123,9 @@ def calculate_expert_token_distibution(
             before_routing = before_router_hidden_states[f"model.layers.{layer_id}.mlp"]["selected_experts"][sample_id]
             after_routing = after_router_hidden_states[f"model.layers.{layer_id}.mlp"]["selected_experts"][sample_id]
             for token_id in range(before_routing.shape[0]):
+                # 90% percent skip this token
+                if random.random() < 0.8:
+                    continue
                 for i in range(num_routed_experts_per_token):
                     before_routed_expert = before_routing[token_id][i].item()
                     after_routed_expert = after_routing[token_id][i].item()
