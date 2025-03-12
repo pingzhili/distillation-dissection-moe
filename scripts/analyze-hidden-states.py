@@ -99,6 +99,7 @@ def calculate_expert_token_distibution(
         before_router_checkpoint_path: str,
         after_router_checkpoint_path: str,
         save_dir: str = "./results",
+        hidden_size: int = 2048,
 ):
     # calculate the token distribution of each expert before and after the router, on a 2D plot using PCA
     before_router_hidden_states = torch.load(before_router_checkpoint_path, map_location="cuda")
@@ -143,6 +144,8 @@ def calculate_expert_token_distibution(
             after_expert_input = after_expert_input_per_layer[layer_id][expert_id]
             if len(before_expert_input) == 0:
                 print(f"(WARNING) No token routed to expert {expert_id} in layer {layer_id}")
+                before_expert_input_per_layer[layer_id][expert_id] = torch.zeros((1, hidden_size))
+                after_expert_input_per_layer[layer_id][expert_id] = torch.zeros((1, hidden_size))
                 continue
             before_sampled_input = random.sample(before_expert_input,
                                                  min(num_samples_per_expert, len(before_expert_input)))
