@@ -47,6 +47,10 @@ def compare_olmoe_routing_results(
     progress_bar = tqdm(total=num_samples * num_layers,
                         desc=f"Comparing routing results on {num_samples} samples x {num_layers} layers...")
     total_num_tokens = 0
+    # number of different routing experts count
+    num_experts_per_token = 8
+    diff_experts_count = {i: 0 for i in range(num_experts_per_token + 1)}
+
     for sample_id in range(num_samples):
         for layer_id in range(num_layers):
             before_routing = before_router_hidden_states[f"model.layers.{layer_id}.mlp"]["selected_experts"][sample_id]
@@ -65,10 +69,17 @@ def compare_olmoe_routing_results(
                         before_input[token_id],
                         after_input[token_id],
                     ))
+                    num_diff_experts = torch.sum(before_routing[token_id] != after_routing[token_id]).item()
+                    diff_experts_count[num_diff_experts] += 1
+                else:
+                    diff_experts_count[0] += 1
 
             progress_bar.update(1)
 
+    progress_bar.close()
     print(f"Found {len(different_routing_list)} tokens with different routing results over {total_num_tokens} tokens")
+    for i in range(num_experts_per_token + 1):
+        print(f"# of tokens with {i} different experts: {diff_experts_count[i]}")
 
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
