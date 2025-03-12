@@ -1,8 +1,13 @@
 import os
+import random
 
 import torch
 from fire import Fire
+from matplotlib import pyplot as plt
+from sklearn.decomposition import PCA
 from tqdm import tqdm
+
+random.seed(233)
 
 
 def compare_olmoe_routing_results(
@@ -90,5 +95,95 @@ def compare_olmoe_routing_results(
     print("Done!")
 
 
+def calculate_expert_token_distibution(
+        before_router_checkpoint_path: str,
+        after_router_checkpoint_path: str,
+        save_dir: str = "./results",
+):
+    # calculate the token distribution of each expert before and after the router, on a 2D plot using PCA
+    before_router_hidden_states = torch.load(before_router_checkpoint_path, map_location="cuda")
+    print(f"Loaded before router hidden states from {before_router_checkpoint_path}")
+    after_router_hidden_states = torch.load(after_router_checkpoint_path, map_location="cuda")
+    print(f"Loaded after router hidden states from {after_router_checkpoint_path}")
+
+    num_layers = len(before_router_hidden_states) - 1
+    num_samples = len(before_router_hidden_states["input_ids"])
+    num_experts = before_router_hidden_states[f"model.layers.0.mlp"]["input"][0].shape[0]
+    num_routed_experts_per_token = 8
+
+    # Concatenate the input and selected experts for each layer, and then group them by expert
+    before_expert_input_per_layer = {i: {j: [] for j in range(num_experts)} for i in range(num_layers)}
+    after_expert_input_per_layer = {i: {j: [] for j in range(num_experts)} for i in range(num_layers)}
+
+    progress_bar = tqdm(total=num_samples * num_layers, desc=f"Collecting expert input distributions...")
+    for sample_id in range(num_samples):
+        for layer_id in range(num_layers):
+            before_input = before_router_hidden_states[f"model.layers.{layer_id}.mlp"]["input"][sample_id]
+            after_input = after_router_hidden_states[f"model.layers.{layer_id}.mlp"]["input"][sample_id]
+            before_routing = before_router_hidden_states[f"model.layers.{layer_id}.mlp"]["selected_experts"][sample_id]
+            after_routing = after_router_hidden_states[f"model.layers.{layer_id}.mlp"]["selected_experts"][sample_id]
+            for token_id in range(before_routing.shape[0]):
+                for i in range(num_routed_experts_per_token):
+                    before_routed_expert = before_routing[token_id][i].item()
+                    after_routed_expert = after_routing[token_id][i].item()
+                    before_expert_input_per_layer[layer_id][before_routed_expert].append(before_input[token_id].cpu())
+                    after_expert_input_per_layer[layer_id][after_routed_expert].append(after_input[token_id].cpu())
+
+            progress_bar.update(1)
+
+    progress_bar.close()
+
+    # Visualize by randomly sampling a subset of tokens
+    num_samples_per_expert = 128
+    progress_bar = tqdm(total=num_layers * num_samples_per_expert, desc="Collecting expert input distributions...")
+    for layer_id in range(num_layers):
+        for expert_id in range(num_experts):
+            before_expert_input = before_expert_input_per_layer[layer_id][expert_id]
+            after_expert_input = after_expert_input_per_layer[layer_id][expert_id]
+            if len(before_expert_input) == 0:
+                continue
+            before_sampled_input = random.sample(before_expert_input,
+                                                 min(num_samples_per_expert, len(before_expert_input)))
+            after_sampled_input = random.sample(after_expert_input,
+                                                min(num_samples_per_expert, len(after_expert_input)))
+            before_expert_input_per_layer[layer_id][expert_id] = torch.stack(before_sampled_input, dim=0)
+            after_expert_input_per_layer[layer_id][expert_id] = torch.stack(after_sampled_input, dim=0)
+
+            progress_bar.update(1)
+
+    progress_bar.close()
+
+    # Save the expert input distributions
+    if not os.path.exists(save_dir):
+        os.makedirs(save_dir)
+
+    save_path = os.path.join(save_dir, f"expert_input_distributions_{num_samples_per_expert}.pt")
+    print(f"Saving expert input distributions (randomly sampled {num_samples_per_expert}) to {save_path}")
+
+    torch.save({
+        "before_expert_input_per_layer": before_expert_input_per_layer,
+        "after_expert_input_per_layer": after_expert_input_per_layer,
+    }, save_path)
+
+    # Visualize with MIT colors
+    # PCA
+    for layer_id in range(num_layers):
+        print(f"Visualizing expert input distribution for layer {layer_id}...")
+        before_expert_input = torch.cat([v for v in before_expert_input_per_layer[layer_id].values()], dim=0)
+        after_expert_input = torch.cat([v for v in after_expert_input_per_layer[layer_id].values()], dim=0)
+        pca = PCA(n_components=2)
+        before_pca = pca.fit_transform(before_expert_input)
+        after_pca = pca.fit_transform(after_expert_input)
+        plt.figure(figsize=(8, 8))
+        plt.scatter(before_pca[:, 0], before_pca[:, 1], c="blue", label="Before Router")
+        plt.scatter(after_pca[:, 0], after_pca[:, 1], c="red", label="After Router")
+        plt.title(f"Layer {layer_id} Expert Input Distribution")
+        plt.legend()
+        plt.savefig(os.path.join(save_dir, f"layer_{layer_id}_expert_input_distribution.png"))
+        plt.close()
+
+    print("Done!")
+
+
 if __name__ == "__main__":
-    Fire(compare_olmoe_routing_results)
+    Fire(calculate_expert_token_distibution)
