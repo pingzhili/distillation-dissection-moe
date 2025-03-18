@@ -81,7 +81,7 @@ def dump_model_hidden_states(checkpoint_path: str, save_dir: str):
 
 def dump_router_token_hidden_states(checkpoint_path: str, save_dir: str):
     if "Moonlight-16B-A3B-Instruct" in checkpoint_path:
-        model = DeepseekV3ForCausalLM.from_pretrained(checkpoint_path, trust_remote_code=True).cuda()
+        model = DeepseekV3ForCausalLM.from_pretrained(checkpoint_path, trust_remote_code=True, device_map="auto")
     else:
         model = AutoModelForCausalLM.from_pretrained(checkpoint_path, trust_remote_code=True).cuda()
     if "olmoe" in checkpoint_path.lower():

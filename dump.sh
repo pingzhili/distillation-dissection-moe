@@ -1,5 +1,5 @@
 export PYTHONPATH=$PYTHONPATH:src
-export CUDA_VISIBLE_DEVICES=0
+export CUDA_VISIBLE_DEVICES=0,1
 #python scripts/dump-hidden-states.py \
 #    --checkpoint_path="checkpoints/olmoe-1b-7b-0125-sft-distilled-moonlight/checkpoint-4000" --content="router_tokens" \
 #    --save_dir="./outputs/profiling/olmoe-distill-4000"
