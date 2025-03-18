@@ -13,7 +13,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer, DataCollatorWithPa
 from transformers.models.olmoe.modeling_olmoe import OlmoeSparseMoeBlock
 
 from ddmoe.data import batch_preprocess_fn
-from ddmoe.models.deepseek import DeepseekV3MoE
+from ddmoe.models.deepseek import DeepseekV3ForCausalLM, DeepseekV3MoE
 
 set_seed(233)
 
@@ -40,7 +40,10 @@ def get_wikitext2(tokenizer, seqlen: int, nsamples: int, split: str = "train"):
 
 
 def dump_model_hidden_states(checkpoint_path: str, save_dir: str):
-    model = AutoModelForCausalLM.from_pretrained(checkpoint_path, trust_remote_code=True).cuda()
+    if "Moonlight-16B-A3B-Instruct" in checkpoint_path:
+        model = DeepseekV3ForCausalLM.from_pretrained(checkpoint_path, trust_remote_code=True).cuda()
+    else:
+        model = AutoModelForCausalLM.from_pretrained(checkpoint_path, trust_remote_code=True).cuda()
     if "olmoe" in checkpoint_path.lower():
         tokenizer = AutoTokenizer.from_pretrained(
             "allenai/OLMoE-1B-7B-0125-Instruct", trust_remote_code=True
@@ -77,7 +80,10 @@ def dump_model_hidden_states(checkpoint_path: str, save_dir: str):
 
 
 def dump_router_token_hidden_states(checkpoint_path: str, save_dir: str):
-    model = AutoModelForCausalLM.from_pretrained(checkpoint_path, trust_remote_code=True).cuda()
+    if "Moonlight-16B-A3B-Instruct" in checkpoint_path:
+        model = DeepseekV3ForCausalLM.from_pretrained(checkpoint_path, trust_remote_code=True).cuda()
+    else:
+        model = AutoModelForCausalLM.from_pretrained(checkpoint_path, trust_remote_code=True).cuda()
     if "olmoe" in checkpoint_path.lower():
         tokenizer = AutoTokenizer.from_pretrained(
             "allenai/OLMoE-1B-7B-0125-Instruct", trust_remote_code=True
