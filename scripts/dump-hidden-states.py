@@ -13,6 +13,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer, DataCollatorWithPa
 from transformers.models.olmoe.modeling_olmoe import OlmoeSparseMoeBlock
 
 from ddmoe.data import batch_preprocess_fn
+from ddmoe.models.deepseek import DeepseekV3MoE
 
 set_seed(233)
 
@@ -38,7 +39,7 @@ def get_wikitext2(tokenizer, seqlen: int, nsamples: int, split: str = "train"):
     return dataset
 
 
-def dump_model_hidden_states(checkpoint_path: str):
+def dump_model_hidden_states(checkpoint_path: str, save_dir: str):
     model = AutoModelForCausalLM.from_pretrained(checkpoint_path, trust_remote_code=True).cuda()
     if "olmoe" in checkpoint_path.lower():
         tokenizer = AutoTokenizer.from_pretrained(
@@ -70,21 +71,18 @@ def dump_model_hidden_states(checkpoint_path: str):
             "attention": outputs.attentions,
         })
 
-    if checkpoint_path == "allenai/OLMoE-1B-7B-0125":
-        save_dir = "./checkpoints/OLMoE-1B-7B-0125/profiling"
-    else:
-        save_dir = os.path.join(checkpoint_path, "model_profiling")
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
     torch.save(outputs_list, os.path.join(save_dir, "outputs.pt"))
 
 
-def dump_router_token_hidden_states(checkpoint_path: str):
+def dump_router_token_hidden_states(checkpoint_path: str, save_dir: str):
     model = AutoModelForCausalLM.from_pretrained(checkpoint_path, trust_remote_code=True).cuda()
     if "olmoe" in checkpoint_path.lower():
         tokenizer = AutoTokenizer.from_pretrained(
             "allenai/OLMoE-1B-7B-0125-Instruct", trust_remote_code=True
         )
+    # elif ""
     else:
         raise NotImplementedError(f"Tokenizer for {checkpoint_path} not implemented.")
 
@@ -102,7 +100,7 @@ def dump_router_token_hidden_states(checkpoint_path: str):
     routing_hidden_states_per_module = {}
 
     # custom forward on MoE block
-    def get_custom_forward(module_name: str):
+    def get_custom_olmoe_forward(module_name: str):
         def _custom_forward(self, hidden_states: torch.Tensor):
             batch_size, sequence_length, hidden_dim = hidden_states.shape
             assert batch_size == 1, "Batch size must be 1 for router token hidden states dumping"
@@ -154,10 +152,31 @@ def dump_router_token_hidden_states(checkpoint_path: str):
 
         return _custom_forward
 
+    def get_custom_moonlight_forward(module_name: str):
+        def _custom_forward(self, hidden_states: torch.Tensor):
+            routing_hidden_states_per_module[module_name]["input"].append(hidden_states.squeeze().detach().cpu())
+            identity = hidden_states
+            orig_shape = hidden_states.shape
+            topk_idx, topk_weight, logits = self.gate(hidden_states)
+            routing_hidden_states_per_module[module_name]["selected_experts"].append(
+                topk_idx.squeeze().detach().cpu())
+            hidden_states = hidden_states.view(-1, hidden_states.shape[-1])
+            flat_topk_idx = topk_idx.view(-1)
+            if not self.training:
+                y = self.moe_infer(hidden_states, topk_idx, topk_weight).view(*orig_shape)
+            if self.config.n_shared_experts is not None:
+                y = y + self.shared_experts(identity)
+            return y, logits
+
+        return _custom_forward
+
     input_id_list = []
     for name, module in model.named_modules():
         if isinstance(module, OlmoeSparseMoeBlock):
-            module.forward = get_custom_forward(name).__get__(module, type(module))
+            module.forward = get_custom_olmoe_forward(name).__get__(module, type(module))
+            routing_hidden_states_per_module[name] = {"input": [], "selected_experts": []}
+        elif isinstance(module, DeepseekV3MoE):
+            module.forward = get_custom_moonlight_forward(name).__get__(module, type(module))
             routing_hidden_states_per_module[name] = {"input": [], "selected_experts": []}
 
     for batch in tqdm(data_loader, desc=f"Dumping router token hidden states..."):
@@ -169,17 +188,16 @@ def dump_router_token_hidden_states(checkpoint_path: str):
             _ = model(**batch)
 
     routing_hidden_states_per_module["input_ids"] = input_id_list
-    save_dir = os.path.join(checkpoint_path, "expert_profiling")
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
     torch.save(routing_hidden_states_per_module, os.path.join(save_dir, "router_tokens.pt"))
 
 
-def main(content: str, checkpoint_path: str):
+def main(content: str, checkpoint_path: str, save_dir: str):
     if content == "hidden_states":
-        dump_model_hidden_states(checkpoint_path)
+        dump_model_hidden_states(checkpoint_path, save_dir=save_dir)
     elif content == "router_tokens":
-        dump_router_token_hidden_states(checkpoint_path)
+        dump_router_token_hidden_states(checkpoint_path, save_dir=save_dir)
     else:
         raise ValueError(f"Invalid content: {content}")
 
