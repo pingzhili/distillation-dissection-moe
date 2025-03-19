@@ -43,7 +43,7 @@ def run_generate_distillation_data(
     model.generation_config.pad_token_id = model.generation_config.eos_token_id[0]
     if dataset_name == "ServiceNow-AI/R1-Distill-SFT":
         dataset = load_dataset(
-            dataset_name, "v1", trust_remote_code=True
+            "ServiceNow-AI/R1-Distill-SFT", "v1", trust_remote_code=True
         )
     else:
         raise ValueError(f"Dataset {dataset_name} not found.")
