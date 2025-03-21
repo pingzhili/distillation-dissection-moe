@@ -29,5 +29,5 @@ from datasets import load_dataset
 # sft_full.push_to_hub("Phando/sft-dataset-from-moonlight-noid")
 
 sft_full = load_dataset("Phando/sft-dataset-from-moonlight-noid", split="train")
-print(sft_full["source_dataset"].unique())
-print(sft_full["source"].unique())
+print(set(sft_full["source_dataset"]))
+print(set(sft_full["source"]))
