@@ -19,6 +19,7 @@ for sample in tqdm(sft_full, desc="Processing the samples in sft_full"):
 
 sft_full = sft_full.add_column("source", source_list)
 sft_full = sft_full.add_column("id", id_list)
+sft_full = sft_full.add_column("source_dataset", source_dataset_list)
 
 print(f"Before filtering, the number of samples in sft_full is {len(sft_full)}")
 # remove the samples with "source" is "ai2-adapt-dev/tulu_hard_coded_repeated_10"
