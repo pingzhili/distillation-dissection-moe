@@ -13,5 +13,5 @@ accelerate launch --config_file configs/zero-3-offload.yaml scripts/finetune.py 
   --output_dir="outputs/olmoe-1b-7b-0125-sft-filtered"
 #accelerate launch --config_file configs/zero-3.yaml scripts/finetune.py \
 #  --base_model_name="deepseek-ai/DeepSeek-V2-Lite" --dataset_name="Phando/sft-dataset-from-moonlight-filtered" \
-#  --output_dir="outputs/deepseek-v2-lite-sft" --batch_size_per_device=1 --gradient_accumulation_steps=16 \
+#  --output_dir="outputs/deepseek-v2-lite-sft-filtered" --batch_size_per_device=1 --gradient_accumulation_steps=16 \
 #  --checkpointing_steps=200 --enable_lora=True
