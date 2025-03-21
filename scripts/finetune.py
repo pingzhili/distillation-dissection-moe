@@ -13,7 +13,7 @@ from fire import Fire
 from peft import get_peft_model, LoraConfig, TaskType
 from torch.utils.data import DataLoader
 from tqdm.auto import tqdm
-from transformers import AutoModelForCausalLM, AutoTokenizer, get_scheduler, OlmoeForCausalLM
+from transformers import AutoModelForCausalLM, AutoTokenizer, get_scheduler
 
 from ddmoe.data import batch_preprocess_fn, CustomDataCollatorWithPadding
 
@@ -74,10 +74,7 @@ def train_sft(
     else:
         raise NotImplementedError(f"Tokenizer for {base_model_name} not implemented.")
     tokenizer.model_max_length = max_length
-    if "olmoe" in base_model_name.lower():
-        model = OlmoeForCausalLM.from_pretrained(base_model_name)
-    else:
-        model = AutoModelForCausalLM.from_pretrained(base_model_name, trust_remote_code=True)
+    model = AutoModelForCausalLM.from_pretrained(base_model_name, trust_remote_code=True)
 
     # lora
     if enable_lora:
