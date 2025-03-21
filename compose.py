@@ -5,12 +5,12 @@ original = load_dataset("ServiceNow-AI/R1-Distill-SFT", "v1", split="train")
 sft_full = load_dataset("Phando/sft-dataset-from-moonlight", split="train")
 
 question_to_sample = {
-    sample["messages"][0]["content"]: sample for sample in original
+    sample["messages"][0]["content"]: sample for sample in tqdm(original, desc="Building question_to_sample mapping")
 }
 source_list = []
 source_dataset_list = []
 id_list = []
-for sample in tqdm(sft_full):
+for sample in tqdm(sft_full, desc="Processing the samples in sft_full"):
     question = sample["question"]
     full_sample = question_to_sample[question]
     source_list.append(full_sample["source"])
