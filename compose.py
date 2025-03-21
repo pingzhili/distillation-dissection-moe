@@ -28,4 +28,4 @@ print(f"Before filtering, the number of samples in sft_full is {len(sft_full)}")
 sft_full = sft_full.filter(lambda example: example["source"] != "ai2-adapt-dev/tulu_hard_coded_repeated_10")
 print(f"After filtering, the number of samples in sft_full is {len(sft_full)}")
 
-sft_full.push_to_hub("Phando/sft-dataset-from-moonlight-noid")
+# sft_full.push_to_hub("Phando/sft-dataset-from-moonlight-noid")
