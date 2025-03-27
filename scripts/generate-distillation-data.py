@@ -23,9 +23,9 @@ def append_generation(response, prompt, output_file):
         f.write(json.dumps(entry, ensure_ascii=False) + "\n")
 
 
-def api_generate_distillation_data(
+def api_generate_distillation_data_batched(
         dataset_name: str = "ServiceNow-AI/R1-Distill-SFT",
-        base_url: str = "http://localhost:23333/v1",
+        base_url: str = "http://localhost:8014/v1",
         save_dir: str = "data/phimoe/",
         model_name: str = "microsoft/Phi-3.5-MoE-instruct",
         num_workers: int = 4,
@@ -98,5 +98,37 @@ def api_generate_distillation_data(
         progress_bar.update(1)
 
 
+def api_generate_distillation_data_eager(
+        dataset_name: str = "ServiceNow-AI/R1-Distill-SFT",
+        base_url: str = "http://localhost:8014/v1",
+        save_dir: str = "data/phimoe/",
+        model_name: str = "microsoft/Phi-3.5-MoE-instruct",
+        num_workers: int = 4,
+):
+    client = openai.Client(base_url=base_url, api_key="EMPTY")
+    dataset = load_dataset(
+        dataset_name, "v1", trust_remote_code=True
+    )
+    dataset = dataset["train"]
+    # remove those samples with "source" is "ai2-adapt-dev/tulu_hard_coded_repeated_10"
+    dataset = dataset.filter(lambda example: example["source"] != "ai2-adapt-dev/tulu_hard_coded_repeated_10")
+    preprocess_fn = partial(batch_preprocess_fn, task="chat-gen")
+    dataset = dataset.map(preprocess_fn, batched=True, num_proc=num_workers, remove_columns=dataset.column_names)
+
+    for j, messages in enumerate(dataset["content"]):
+        completion = client.chat.completions.create(
+            model=model_name,
+            messages=messages,
+        )
+        response = completion.choices[0].message.content
+        prompt = messages[0]["content"]
+        result_content = json.dumps({
+            "response": response,
+            "prompt": prompt,
+        }, ensure_ascii=False) + "\n"
+        with open(os.path.join(save_dir, f"distillation_data.jsonl"), 'ab') as file:
+            file.write(result_content)
+
+
 if __name__ == "__main__":
-    Fire(api_generate_distillation_data)
+    Fire(api_generate_distillation_data_eager)
