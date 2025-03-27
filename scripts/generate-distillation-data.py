@@ -115,18 +115,18 @@ def api_generate_distillation_data_eager(
     preprocess_fn = partial(batch_preprocess_fn, task="chat-gen")
     dataset = dataset.map(preprocess_fn, batched=True, num_proc=num_workers, remove_columns=dataset.column_names)
 
-    for j, messages in enumerate(dataset["content"]):
-        completion = client.chat.completions.create(
-            model=model_name,
-            messages=messages,
-        )
-        response = completion.choices[0].message.content
-        prompt = messages[0]["content"]
-        result_content = json.dumps({
-            "response": response,
-            "prompt": prompt,
-        }, ensure_ascii=False) + "\n"
-        with open(os.path.join(save_dir, f"distillation_data.jsonl"), 'ab') as file:
+    with open(os.path.join(save_dir, "distillation_data.jsonl"), 'a') as file:
+        for j, messages in enumerate(dataset["content"]):
+            completion = client.chat.completions.create(
+                model=model_name,
+                messages=messages,
+            )
+            response = completion.choices[0].message.content
+            prompt = messages[0]["content"]
+            result_content = json.dumps({
+                "response": response,
+                "prompt": prompt,
+            }, ensure_ascii=False) + "\n"
             file.write(result_content)
 
 
