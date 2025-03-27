@@ -116,7 +116,7 @@ def api_generate_distillation_data_eager(
     dataset = dataset.map(preprocess_fn, batched=True, num_proc=num_workers, remove_columns=dataset.column_names)
 
     with open(os.path.join(save_dir, "distillation_data.jsonl"), 'a') as file:
-        for j, messages in enumerate(dataset["content"]):
+        for j, messages in tqdm(enumerate(dataset["content"]), desc="Generating distillation data via API"):
             completion = client.chat.completions.create(
                 model=model_name,
                 messages=messages,
