@@ -25,7 +25,7 @@ def append_generation(response, prompt, output_file):
 
 def api_generate_distillation_data(
         dataset_name: str = "ServiceNow-AI/R1-Distill-SFT",
-        base_url: str = "http://localhost:8014/v1",
+        base_url: str = "http://localhost:23333/v1",
         save_dir: str = "data/phimoe/",
         model_name: str = "microsoft/Phi-3.5-MoE-instruct",
         num_workers: int = 4,
