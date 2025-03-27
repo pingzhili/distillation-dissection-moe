@@ -122,7 +122,7 @@ def api_generate_distillation_data_eager(
                 messages=messages,
             )
             response = completion.choices[0].message.content
-            prompt = messages[0]["content"]
+            prompt = messages[1]["content"]
             result_content = json.dumps({
                 "response": response,
                 "prompt": prompt,
