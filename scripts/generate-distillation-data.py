@@ -25,8 +25,8 @@ def append_generation(response, prompt, output_file):
 
 def api_generate_distillation_data(
         dataset_name: str = "ServiceNow-AI/R1-Distill-SFT",
-        base_url: str = "http://127.0.0.1:30000/v1",
-        save_dir: str = "data/",
+        base_url: str = "http://127.0.0.1:8014/v1",
+        save_dir: str = "data/phimoe/",
         num_workers: int = 4,
 ):
     client = openai.Client(base_url=base_url, api_key="EMPTY")
