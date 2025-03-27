@@ -25,8 +25,9 @@ def append_generation(response, prompt, output_file):
 
 def api_generate_distillation_data(
         dataset_name: str = "ServiceNow-AI/R1-Distill-SFT",
-        base_url: str = "http://127.0.0.1:8014/v1",
+        base_url: str = "http://0.0.0.0:8014/v1",
         save_dir: str = "data/phimoe/",
+        model_name: str = "microsoft/Phi-3.5-MoE-instruct",
         num_workers: int = 4,
 ):
     client = openai.Client(base_url=base_url, api_key="EMPTY")
@@ -53,7 +54,7 @@ def api_generate_distillation_data(
                 request = {
                     "custom_id": f"request-{i * batch_size + j}",
                     "body": {
-                        "model": "microsoft/Phi-3.5-MoE-instruct",
+                        "model": model_name,
                         "url": "/v1/chat/completions",
                         "messages": messages,
                         "max_tokens": 1024
