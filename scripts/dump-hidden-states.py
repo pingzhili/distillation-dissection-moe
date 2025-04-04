@@ -125,8 +125,7 @@ def dump_router_token_hidden_states(checkpoint_path: str, save_dir: str):
             routing_weights, selected_experts = torch.topk(routing_weights, self.top_k, dim=-1)
 
             # Added
-            routing_hidden_states_per_module[module_name]["selected_experts"].append(
-                selected_experts.squeeze().detach().cpu())
+            routing_hidden_states_per_module[module_name]["selected_experts"].append(selected_experts.squeeze().detach().cpu())
 
             if self.norm_topk_prob:
                 routing_weights /= routing_weights.sum(dim=-1, keepdim=True)

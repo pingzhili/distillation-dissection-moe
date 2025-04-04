@@ -1,11 +1,14 @@
 export PYTHONPATH=$PYTHONPATH:src
-export CUDA_VISIBLE_DEVICES=0,1
-#python scripts/dump-hidden-states.py \
-#    --checkpoint_path="checkpoints/olmoe-1b-7b-0125-sft-distilled-moonlight/checkpoint-4000" --content="router_tokens" \
-#    --save_dir="./outputs/profiling/olmoe-distill-4000"
-#python scripts/dump-hidden-states.py \
-#    --checkpoint_path="allenai/OLMoE-1B-7B-0125" --content="router_tokens" \
-#    --save_dir="./outputs/profiling/olmoe-original"
+export CUDA_VISIBLE_DEVICES=3,4
+python scripts/dump-hidden-states.py \
+   --checkpoint_path="checkpoints/olmoe-1b-7b-0125-sft-distilled-moonlight-filtered/checkpoint-10000" --content="router_tokens" \
+   --save_dir="./outputs/profiling/olmoe-sft-distill-10000"
+python scripts/dump-hidden-states.py \
+   --checkpoint_path="checkpoints/olmoe-1b-7b-0125-sft-original-filtered/checkpoint-10000" --content="router_tokens" \
+   --save_dir="./outputs/profiling/olmoe-sft-original-10000"
+python scripts/dump-hidden-states.py \
+   --checkpoint_path="allenai/OLMoE-1B-7B-0125" --content="router_tokens" \
+   --save_dir="./outputs/profiling/olmoe-base"
 python scripts/dump-hidden-states.py \
     --checkpoint_path="moonshotai/Moonlight-16B-A3B-Instruct" --content="router_tokens" \
     --save_dir="./outputs/profiling/moonlight"
