@@ -78,8 +78,11 @@ class CustomDataCollatorWithPadding:
         ] if self.extra_keys_to_ignore else features
 
         # take labels out of features
-        labels_batch = [{"input_ids": feature["labels"]} for feature in features] # Fake name for padding
-        features = [{k: v for k, v in feature.items() if k != "labels"} for feature in features]
+        if "labels" in features[0]:
+            labels_batch = [{"input_ids": feature["labels"]} for feature in features] # Fake name for padding
+            features = [{k: v for k, v in feature.items() if k != "labels"} for feature in features]
+        else:
+            labels_batch = None
         batch = pad_without_fast_tokenizer_warning(
             self.tokenizer,
             features,
@@ -88,17 +91,20 @@ class CustomDataCollatorWithPadding:
             pad_to_multiple_of=self.pad_to_multiple_of,
             return_tensors=self.return_tensors,
         )
-        labels_batch = pad_without_fast_tokenizer_warning(
-            self.tokenizer,
-            labels_batch,
-            padding=self.padding,
-            max_length=self.max_length,
-            pad_to_multiple_of=self.pad_to_multiple_of,
+        if labels_batch is not None:
+            labels_batch = pad_without_fast_tokenizer_warning(
+                self.tokenizer,
+                labels_batch,
+                padding=self.padding,
+                max_length=self.max_length,
+                pad_to_multiple_of=self.pad_to_multiple_of,
             return_tensors=self.return_tensors,
         )
-        if self.tokenizer.pad_token_id is not None:
+        if self.tokenizer.pad_token_id is not None and labels_batch is not None:
             labels_batch["input_ids"][labels_batch["input_ids"] == self.tokenizer.pad_token_id] = -100
-        labels_batch["labels"] = labels_batch["input_ids"]
-        del labels_batch["input_ids"]
+            labels_batch["labels"] = labels_batch["input_ids"]
+            del labels_batch["input_ids"]
+        else:
+            labels_batch = {}
         batch = {**batch, **features_to_ignore, **labels_batch}
         return batch

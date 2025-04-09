@@ -1,0 +1,57 @@
+Dimension analysis for olmoe_base_vs_olmoe_original:
+
+Most frequently changed dimensions across layers:
+Dimension 955: Found in top 20 of 14 layers
+Dimension 220: Found in top 20 of 13 layers
+Dimension 1698: Found in top 20 of 11 layers
+Dimension 1506: Found in top 20 of 11 layers
+Dimension 1421: Found in top 20 of 10 layers
+Dimension 1806: Found in top 20 of 10 layers
+Dimension 1934: Found in top 20 of 10 layers
+Dimension 921: Found in top 20 of 9 layers
+Dimension 292: Found in top 20 of 9 layers
+Dimension 163: Found in top 20 of 8 layers
+Dimension 513: Found in top 20 of 8 layers
+Dimension 1187: Found in top 20 of 7 layers
+Dimension 1573: Found in top 20 of 7 layers
+Dimension 1139: Found in top 20 of 7 layers
+Dimension 1827: Found in top 20 of 7 layers
+Dimension 137: Found in top 20 of 6 layers
+Dimension 162: Found in top 20 of 6 layers
+Dimension 1125: Found in top 20 of 6 layers
+Dimension 588: Found in top 20 of 6 layers
+Dimension 121: Found in top 20 of 6 layers
+
+Detailed layer-by-layer analysis:
+
+Layer 0 top 10 dimensions: [1421, 1698, 1198, 163, 224, 1423, 336, 1479, 1453, 28]
+
+Layer 1 top 10 dimensions: [1823, 1453, 1115, 1817, 1884, 903, 1560, 1261, 1421, 2001]
+
+Layer 2 top 10 dimensions: [582, 532, 903, 132, 1480, 1361, 2001, 280, 1563, 360]
+
+Layer 3 top 10 dimensions: [1699, 220, 132, 163, 1480, 1573, 582, 1698, 1618, 955]
+
+Layer 4 top 10 dimensions: [220, 1699, 1421, 1573, 1698, 955, 163, 1614, 137, 168]
+
+Layer 5 top 10 dimensions: [220, 1421, 955, 1699, 1573, 1698, 137, 1506, 1614, 853]
+
+Layer 6 top 10 dimensions: [220, 955, 1421, 1698, 137, 1573, 163, 1187, 1699, 1113]
+
+Layer 7 top 10 dimensions: [220, 955, 1698, 1421, 1934, 163, 1187, 1573, 137, 1113]
+
+Layer 8 top 10 dimensions: [220, 955, 1698, 1421, 1187, 1934, 163, 1306, 1806, 1573]
+
+Layer 9 top 10 dimensions: [220, 1698, 1421, 955, 1934, 1187, 162, 1806, 921, 1306]
+
+Layer 10 top 10 dimensions: [1934, 220, 1698, 955, 1421, 1806, 921, 1139, 1506, 1125]
+
+Layer 11 top 10 dimensions: [1934, 1698, 220, 1139, 955, 1421, 1806, 292, 289, 513]
+
+Layer 12 top 10 dimensions: [1934, 292, 1139, 588, 289, 513, 220, 505, 1125, 955]
+
+Layer 13 top 10 dimensions: [1934, 292, 588, 1139, 289, 513, 1125, 1827, 955, 121]
+
+Layer 14 top 10 dimensions: [292, 1934, 588, 289, 513, 955, 121, 1139, 1286, 680]
+
+Layer 15 top 10 dimensions: [121, 955, 1934, 292, 563, 1139, 505, 1078, 1311, 523]

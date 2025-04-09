@@ -1,1 +1,3 @@
 - Employ "ddmoe" conda environment for all code running.
+- "README.md" contains the overall idea of this proejct and long-term experimental plan.
+- Working directory is always "distillation-dissection-moe".

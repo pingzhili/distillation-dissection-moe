@@ -24,6 +24,7 @@ logger = get_logger(__name__)
 def train_sft(
         base_model_name: str = "allenai/OLMoE-1B-7B-0125",
         dataset_name: str = "Phando/sft-dataset-from-moonlight",
+        subset_name: str = "",
         max_length: int = 1024,
         batch_size_per_device: int = 8,
         gradient_accumulation_steps: int = 2,

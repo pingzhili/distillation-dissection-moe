@@ -1,0 +1,282 @@
+Top tokens with changed routing for olmoe_distill_vs_olmoe_original:
+
+Token:  \ (ID: 393) - Count: 35
+  Example 1 (Layer 7):
+    Model 1 experts: [12, 14, 16, 34, 9, 55, 22, 33]
+    Model 2 experts: [35, 21, 2, 58, 45, 12, 27, 13]
+    Overlap: 1/8
+  Example 2 (Layer 7):
+    Model 1 experts: [12, 14, 16, 34, 55, 33, 9, 22]
+    Model 2 experts: [21, 35, 58, 2, 45, 27, 12, 13]
+    Overlap: 1/8
+  Example 3 (Layer 7):
+    Model 1 experts: [12, 34, 14, 16, 55, 9, 22, 58]
+    Model 2 experts: [35, 21, 58, 2, 12, 45, 29, 8]
+    Overlap: 2/8
+
+Token: \ (ID: 61) - Count: 11
+  Example 1 (Layer 7):
+    Model 1 experts: [12, 14, 16, 9, 34, 58, 55, 33]
+    Model 2 experts: [21, 35, 58, 2, 12, 27, 45, 29]
+    Overlap: 2/8
+  Example 2 (Layer 7):
+    Model 1 experts: [12, 34, 14, 55, 22, 33, 9, 7]
+    Model 2 experts: [21, 35, 58, 2, 27, 45, 12, 8]
+    Overlap: 1/8
+  Example 3 (Layer 7):
+    Model 1 experts: [12, 14, 34, 16, 9, 55, 22, 33]
+    Model 2 experts: [21, 35, 58, 2, 12, 45, 27, 29]
+    Overlap: 1/8
+
+Token:  product (ID: 1885) - Count: 9
+  Example 1 (Layer 11):
+    Model 1 experts: [49, 63, 18, 14, 58, 1, 15, 34]
+    Model 2 experts: [28, 14, 10, 26, 40, 62, 38, 37]
+    Overlap: 1/8
+  Example 2 (Layer 11):
+    Model 1 experts: [28, 54, 18, 34, 35, 14, 15, 19]
+    Model 2 experts: [28, 14, 10, 38, 2, 62, 25, 37]
+    Overlap: 2/8
+  Example 3 (Layer 12):
+    Model 1 experts: [23, 50, 48, 14, 13, 46, 36, 18]
+    Model 2 experts: [23, 13, 39, 26, 10, 29, 44, 20]
+    Overlap: 2/8
+
+Token:  the (ID: 253) - Count: 8
+  Example 1 (Layer 3):
+    Model 1 experts: [61, 40, 15, 39, 18, 10, 14, 23]
+    Model 2 experts: [40, 49, 45, 62, 43, 35, 39, 53]
+    Overlap: 2/8
+  Example 2 (Layer 3):
+    Model 1 experts: [61, 40, 15, 39, 18, 10, 14, 23]
+    Model 2 experts: [40, 49, 45, 35, 62, 39, 43, 53]
+    Overlap: 2/8
+  Example 3 (Layer 4):
+    Model 1 experts: [14, 7, 27, 47, 17, 56, 46, 25]
+    Model 2 experts: [14, 17, 44, 24, 26, 50, 3, 11]
+    Overlap: 2/8
+
+Token:  to (ID: 281) - Count: 8
+  Example 1 (Layer 7):
+    Model 1 experts: [54, 24, 19, 8, 11, 28, 51, 52]
+    Model 2 experts: [12, 7, 54, 34, 33, 42, 24, 9]
+    Overlap: 2/8
+  Example 2 (Layer 8):
+    Model 1 experts: [43, 28, 46, 17, 2, 51, 62, 18]
+    Model 2 experts: [48, 44, 6, 33, 59, 62, 2, 60]
+    Overlap: 2/8
+  Example 3 (Layer 9):
+    Model 1 experts: [43, 53, 32, 59, 29, 3, 39, 61]
+    Model 2 experts: [20, 11, 6, 31, 8, 7, 40, 61]
+    Overlap: 1/8
+
+Token:  this (ID: 436) - Count: 7
+  Example 1 (Layer 12):
+    Model 1 experts: [23, 44, 7, 21, 25, 8, 0, 38]
+    Model 2 experts: [23, 44, 26, 12, 42, 17, 56, 13]
+    Overlap: 2/8
+  Example 2 (Layer 13):
+    Model 1 experts: [13, 35, 53, 43, 16, 6, 44, 4]
+    Model 2 experts: [51, 16, 39, 42, 60, 25, 23, 9]
+    Overlap: 1/8
+  Example 3 (Layer 13):
+    Model 1 experts: [13, 38, 0, 3, 35, 11, 40, 43]
+    Model 2 experts: [6, 38, 62, 16, 39, 61, 60, 0]
+    Overlap: 2/8
+
+Token:  there (ID: 627) - Count: 6
+  Example 1 (Layer 11):
+    Model 1 experts: [16, 63, 42, 36, 14, 19, 51, 13]
+    Model 2 experts: [16, 38, 10, 14, 2, 40, 25, 39]
+    Overlap: 2/8
+  Example 2 (Layer 13):
+    Model 1 experts: [24, 34, 11, 14, 13, 15, 6, 50]
+    Model 2 experts: [24, 42, 25, 16, 60, 6, 59, 62]
+    Overlap: 2/8
+  Example 3 (Layer 15):
+    Model 1 experts: [61, 25, 8, 27, 24, 51, 63, 30]
+    Model 2 experts: [32, 37, 50, 19, 16, 22, 33, 44]
+    Overlap: 0/8
+
+Token: : (ID: 27) - Count: 5
+  Example 1 (Layer 11):
+    Model 1 experts: [44, 7, 5, 22, 47, 29, 24, 40]
+    Model 2 experts: [44, 52, 38, 33, 22, 37, 4, 56]
+    Overlap: 2/8
+  Example 2 (Layer 15):
+    Model 1 experts: [37, 52, 5, 19, 33, 11, 12, 32]
+    Model 2 experts: [17, 52, 30, 34, 58, 8, 37, 53]
+    Overlap: 2/8
+  Example 3 (Layer 15):
+    Model 1 experts: [52, 17, 3, 58, 34, 30, 12, 24]
+    Model 2 experts: [37, 33, 52, 16, 32, 5, 44, 11]
+    Overlap: 1/8
+
+Token: . (ID: 15) - Count: 5
+  Example 1 (Layer 13):
+    Model 1 experts: [54, 4, 23, 16, 18, 28, 51, 39]
+    Model 2 experts: [2, 5, 39, 9, 55, 25, 62, 17]
+    Overlap: 1/8
+  Example 2 (Layer 14):
+    Model 1 experts: [9, 39, 52, 47, 19, 54, 1, 61]
+    Model 2 experts: [60, 9, 58, 11, 42, 22, 12, 1]
+    Overlap: 2/8
+  Example 3 (Layer 15):
+    Model 1 experts: [52, 58, 60, 27, 38, 30, 26, 25]
+    Model 2 experts: [52, 33, 32, 44, 24, 16, 11, 12]
+    Overlap: 1/8
+
+Token:  answer (ID: 3662) - Count: 5
+  Example 1 (Layer 15):
+    Model 1 experts: [54, 23, 8, 28, 44, 24, 42, 17]
+    Model 2 experts: [44, 5, 19, 24, 11, 37, 22, 12]
+    Overlap: 2/8
+  Example 2 (Layer 15):
+    Model 1 experts: [54, 28, 42, 23, 35, 24, 40, 8]
+    Model 2 experts: [5, 11, 44, 24, 37, 19, 23, 12]
+    Overlap: 2/8
+  Example 3 (Layer 15):
+    Model 1 experts: [56, 25, 22, 7, 61, 16, 27, 35]
+    Model 2 experts: [12, 24, 22, 34, 44, 17, 16, 8]
+    Overlap: 2/8
+
+Token:  question (ID: 1953) - Count: 5
+  Example 1 (Layer 15):
+    Model 1 experts: [54, 28, 24, 2, 23, 34, 17, 18]
+    Model 2 experts: [5, 19, 42, 54, 34, 12, 46, 44]
+    Overlap: 2/8
+  Example 2 (Layer 15):
+    Model 1 experts: [54, 12, 15, 5, 2, 23, 62, 42]
+    Model 2 experts: [12, 22, 44, 24, 4, 18, 9, 5]
+    Overlap: 2/8
+  Example 3 (Layer 15):
+    Model 1 experts: [54, 15, 2, 12, 62, 23, 42, 8]
+    Model 2 experts: [12, 24, 5, 11, 4, 47, 22, 18]
+    Overlap: 1/8
+
+Token:  tone (ID: 10541) - Count: 4
+  Example 1 (Layer 8):
+    Model 1 experts: [36, 57, 51, 46, 49, 38, 63, 34]
+    Model 2 experts: [62, 6, 59, 46, 38, 7, 22, 39]
+    Overlap: 2/8
+  Example 2 (Layer 12):
+    Model 1 experts: [48, 52, 50, 14, 8, 29, 23, 53]
+    Model 2 experts: [23, 26, 56, 13, 24, 39, 10, 53]
+    Overlap: 2/8
+  Example 3 (Layer 13):
+    Model 1 experts: [31, 57, 42, 25, 62, 61, 50, 22]
+    Model 2 experts: [42, 60, 51, 39, 59, 25, 16, 24]
+    Overlap: 2/8
+
+Token: ( (ID: 9) - Count: 4
+  Example 1 (Layer 9):
+    Model 1 experts: [20, 6, 11, 7, 8, 42, 40, 31]
+    Model 2 experts: [52, 50, 34, 6, 54, 39, 8, 51]
+    Overlap: 2/8
+  Example 2 (Layer 9):
+    Model 1 experts: [20, 6, 8, 11, 7, 40, 60, 31]
+    Model 2 experts: [6, 52, 50, 8, 34, 54, 42, 51]
+    Overlap: 2/8
+  Example 3 (Layer 9):
+    Model 1 experts: [20, 6, 11, 7, 8, 40, 42, 31]
+    Model 2 experts: [52, 50, 6, 34, 8, 54, 39, 51]
+    Overlap: 2/8
+
+Token:  review (ID: 2278) - Count: 4
+  Example 1 (Layer 11):
+    Model 1 experts: [18, 20, 34, 15, 58, 54, 14, 35]
+    Model 2 experts: [28, 14, 10, 29, 62, 38, 51, 2]
+    Overlap: 1/8
+  Example 2 (Layer 12):
+    Model 1 experts: [14, 52, 50, 48, 23, 8, 29, 46]
+    Model 2 experts: [23, 39, 29, 3, 26, 12, 57, 13]
+    Overlap: 2/8
+  Example 3 (Layer 14):
+    Model 1 experts: [34, 63, 15, 28, 51, 44, 48, 46]
+    Model 2 experts: [34, 17, 22, 54, 29, 50, 4, 63]
+    Overlap: 2/8
+
+Token: Opp (ID: 42153) - Count: 4
+  Example 1 (Layer 11):
+    Model 1 experts: [56, 37, 33, 51, 10, 29, 38, 14]
+    Model 2 experts: [12, 17, 41, 49, 51, 38, 40, 25]
+    Overlap: 2/8
+  Example 2 (Layer 12):
+    Model 1 experts: [59, 58, 54, 6, 23, 12, 38, 51]
+    Model 2 experts: [20, 10, 24, 51, 57, 41, 23, 29]
+    Overlap: 2/8
+  Example 3 (Layer 13):
+    Model 1 experts: [2, 5, 9, 39, 55, 25, 62, 42]
+    Model 2 experts: [10, 18, 28, 31, 23, 4, 7, 42]
+    Overlap: 1/8
+
+Token:  that (ID: 326) - Count: 4
+  Example 1 (Layer 14):
+    Model 1 experts: [37, 54, 45, 2, 43, 5, 14, 3]
+    Model 2 experts: [54, 17, 29, 34, 51, 22, 58, 30]
+    Overlap: 1/8
+  Example 2 (Layer 14):
+    Model 1 experts: [54, 45, 3, 2, 42, 22, 62, 11]
+    Model 2 experts: [54, 17, 22, 58, 29, 34, 36, 9]
+    Overlap: 2/8
+  Example 3 (Layer 15):
+    Model 1 experts: [61, 56, 49, 7, 26, 25, 59, 27]
+    Model 2 experts: [24, 12, 61, 18, 59, 14, 44, 47]
+    Overlap: 2/8
+
+Token: |> (ID: 49651) - Count: 4
+  Example 1 (Layer 15):
+    Model 1 experts: [52, 38, 58, 24, 39, 60, 26, 14]
+    Model 2 experts: [24, 33, 9, 52, 16, 32, 44, 1]
+    Overlap: 2/8
+  Example 2 (Layer 15):
+    Model 1 experts: [24, 8, 30, 58, 4, 52, 34, 1]
+    Model 2 experts: [32, 24, 44, 33, 19, 5, 4, 22]
+    Overlap: 2/8
+  Example 3 (Layer 15):
+    Model 1 experts: [24, 8, 4, 30, 52, 34, 58, 17]
+    Model 2 experts: [24, 32, 44, 33, 19, 8, 18, 5]
+    Overlap: 2/8
+
+Token: , (ID: 13) - Count: 4
+  Example 1 (Layer 15):
+    Model 1 experts: [4, 56, 46, 10, 49, 13, 25, 27]
+    Model 2 experts: [8, 12, 33, 18, 42, 27, 4, 30]
+    Overlap: 2/8
+  Example 2 (Layer 15):
+    Model 1 experts: [56, 48, 7, 16, 39, 14, 26, 38]
+    Model 2 experts: [39, 48, 62, 47, 46, 45, 10, 13]
+    Overlap: 2/8
+  Example 3 (Layer 15):
+    Model 1 experts: [4, 46, 10, 13, 56, 34, 59, 11]
+    Model 2 experts: [37, 18, 32, 12, 4, 33, 8, 46]
+    Overlap: 2/8
+
+Token:  by (ID: 407) - Count: 3
+  Example 1 (Layer 5):
+    Model 1 experts: [40, 51, 39, 59, 25, 28, 38, 37]
+    Model 2 experts: [19, 35, 10, 54, 40, 20, 59, 29]
+    Overlap: 2/8
+  Example 2 (Layer 9):
+    Model 1 experts: [61, 6, 11, 31, 57, 40, 20, 4]
+    Model 2 experts: [61, 44, 24, 43, 57, 1, 15, 8]
+    Overlap: 2/8
+  Example 3 (Layer 9):
+    Model 1 experts: [20, 6, 11, 61, 40, 31, 57, 7]
+    Model 2 experts: [61, 43, 57, 44, 24, 15, 8, 4]
+    Overlap: 2/8
+
+Token: Answer (ID: 32869) - Count: 3
+  Example 1 (Layer 11):
+    Model 1 experts: [51, 20, 47, 27, 35, 63, 2, 18]
+    Model 2 experts: [51, 28, 2, 62, 37, 40, 14, 38]
+    Overlap: 2/8
+  Example 2 (Layer 11):
+    Model 1 experts: [51, 20, 35, 63, 18, 14, 47, 27]
+    Model 2 experts: [51, 14, 62, 28, 2, 37, 23, 5]
+    Overlap: 2/8
+  Example 3 (Layer 15):
+    Model 1 experts: [44, 24, 8, 23, 52, 30, 2, 28]
+    Model 2 experts: [44, 24, 22, 18, 12, 9, 19, 5]
+    Overlap: 2/8
+

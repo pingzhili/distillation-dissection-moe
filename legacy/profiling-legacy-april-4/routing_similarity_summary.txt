@@ -1,0 +1,4 @@
+Summary of Routing Pattern Similarities:
+Distilled vs Base: 0.9739
+Original vs Base: 0.9757
+Distilled vs Original: 0.9934

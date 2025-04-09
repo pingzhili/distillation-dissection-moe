@@ -64,11 +64,12 @@ def chat_profile_batch_preprocess_fn(
          {"role": "assistant", "content": response}]
         for question, response in zip(examples["question"], examples["response"])
     ]
+    source_list = list(examples["source"])
     if tokenizer is None:
-        return {"content": chat_list}
+        return {"content": chat_list, "source": source_list}
     else:
         input_ids_list = tokenizer.apply_chat_template(chat_list, add_generation_prompt=True)
-        return {"input_ids": input_ids_list}
+        return {"input_ids": input_ids_list, "source": source_list}
 
 
 def apply_general_chat_template(

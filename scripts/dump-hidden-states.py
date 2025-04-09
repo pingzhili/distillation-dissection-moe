@@ -4,79 +4,18 @@ from functools import partial
 
 import torch
 from accelerate.utils import set_seed
-from datasets import Dataset, load_dataset
+from datasets import load_dataset
 from fire import Fire
 from torch.nn import functional as F
 from torch.utils.data import DataLoader
 from tqdm import tqdm
-from transformers import AutoModelForCausalLM, AutoTokenizer, DataCollatorWithPadding, default_data_collator
+from transformers import AutoModelForCausalLM, AutoTokenizer
 from transformers.models.olmoe.modeling_olmoe import OlmoeSparseMoeBlock
 
-from ddmoe.data import batch_preprocess_fn
+from ddmoe.data import batch_preprocess_fn, CustomDataCollatorWithPadding
 from ddmoe.models.deepseek import DeepseekV3ForCausalLM, DeepseekV3MoE
 
 set_seed(233)
-
-
-def get_wikitext2(tokenizer, seqlen: int, nsamples: int, split: str = "train"):
-    if split == "train":
-        data = load_dataset("wikitext", "wikitext-2-raw-v1", split="train")
-    elif split == "validation":
-        data = load_dataset("wikitext", "wikitext-2-raw-v1", split="test")
-    else:
-        raise ValueError(f"Invalid split: {split}")
-    # length of 288059 should be enough
-    text = "".join([" \n" if s == "" else s for s in data["text"][:1000]])
-
-    enc = tokenizer(text, return_tensors="pt")
-    dataset = []
-    for _ in range(nsamples):
-        i = random.randint(0, enc.input_ids.shape[1] - seqlen - 1)
-        j = i + seqlen
-        inp = enc.input_ids[:, i:j]
-        attention_mask = torch.ones_like(inp)
-        dataset.append({"input_ids": inp, "attention_mask": attention_mask})
-    return dataset
-
-
-def dump_model_hidden_states(checkpoint_path: str, save_dir: str):
-    if "Moonlight-16B-A3B-Instruct" in checkpoint_path:
-        model = DeepseekV3ForCausalLM.from_pretrained(checkpoint_path, trust_remote_code=True).cuda()
-    else:
-        model = AutoModelForCausalLM.from_pretrained(checkpoint_path, trust_remote_code=True).cuda()
-    if "olmoe" in checkpoint_path.lower():
-        tokenizer = AutoTokenizer.from_pretrained(
-            "allenai/OLMoE-1B-7B-0125-Instruct", trust_remote_code=True
-        )
-    else:
-        raise NotImplementedError(f"Tokenizer for {checkpoint_path} not implemented.")
-
-    dataset = get_wikitext2(tokenizer=tokenizer, seqlen=512, nsamples=4, split="train")
-    data_loader = DataLoader(
-        Dataset.from_list(dataset),
-        batch_size=1,
-        collate_fn=default_data_collator,
-        shuffle=True,
-    )
-
-    outputs_list = []
-
-    for batch in tqdm(data_loader, desc=f"Dumping hidden states..."):
-        batch = {k: v.cuda() for k, v in batch.items()}
-        for k, v in batch.items():
-            batch[k] = v.squeeze(0)
-        with torch.no_grad():
-            outputs = model(**batch, output_router_logits=True, output_hidden_states=True, output_attentions=True)
-        outputs_list.append({
-            "logits": outputs.logits.squeeze(),
-            "hidden_states": outputs.hidden_states,
-            "router_logits": outputs.router_logits,
-            "attention": outputs.attentions,
-        })
-
-    if not os.path.exists(save_dir):
-        os.makedirs(save_dir)
-    torch.save(outputs_list, os.path.join(save_dir, "outputs.pt"))
 
 
 def dump_router_token_hidden_states(checkpoint_path: str, save_dir: str):
@@ -98,15 +37,18 @@ def dump_router_token_hidden_states(checkpoint_path: str, save_dir: str):
     dataset = load_dataset("Phando/sft-dataset-valid", split="train", trust_remote_code=True)
     preprocess_fn = partial(batch_preprocess_fn, task="chat-profile", tokenizer=tokenizer)
     columns = dataset.column_names
-    dataset = dataset.map(preprocess_fn, batched=True, num_proc=8, remove_columns=columns)
+    print(columns)
+    dataset = dataset.map(preprocess_fn, batched=True, num_proc=8, remove_columns=["question", "response"])
+    print(dataset[0])
     data_loader = DataLoader(
         dataset,
         batch_size=1,
-        collate_fn=DataCollatorWithPadding(tokenizer=tokenizer),
+        collate_fn=CustomDataCollatorWithPadding(tokenizer=tokenizer, extra_keys_to_ignore=["source"]),
         shuffle=True,
     )
 
     routing_hidden_states_per_module = {}
+
 
     # custom forward on MoE block
     def get_custom_olmoe_forward(module_name: str):
@@ -179,6 +121,7 @@ def dump_router_token_hidden_states(checkpoint_path: str, save_dir: str):
         return _custom_forward
 
     input_id_list = []
+    sources_list = []
     for name, module in model.named_modules():
         if isinstance(module, OlmoeSparseMoeBlock):
             module.forward = get_custom_olmoe_forward(name).__get__(module, type(module))
@@ -188,6 +131,7 @@ def dump_router_token_hidden_states(checkpoint_path: str, save_dir: str):
             routing_hidden_states_per_module[name] = {"input": [], "selected_experts": []}
 
     for batch in tqdm(data_loader, desc=f"Dumping router token hidden states..."):
+        sources_list.append(batch.pop("source")[0])
         batch = {k: v.cuda() for k, v in batch.items()}
         # for k, v in batch.items():
         #     batch[k] = v.squeeze(0)
@@ -196,15 +140,14 @@ def dump_router_token_hidden_states(checkpoint_path: str, save_dir: str):
             _ = model(**batch)
 
     routing_hidden_states_per_module["input_ids"] = input_id_list
+    routing_hidden_states_per_module["sources"] = sources_list
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
     torch.save(routing_hidden_states_per_module, os.path.join(save_dir, "router_tokens.pt"))
 
 
 def main(content: str, checkpoint_path: str, save_dir: str):
-    if content == "hidden_states":
-        dump_model_hidden_states(checkpoint_path, save_dir=save_dir)
-    elif content == "router_tokens":
+    if content == "router_tokens":
         dump_router_token_hidden_states(checkpoint_path, save_dir=save_dir)
     else:
         raise ValueError(f"Invalid content: {content}")

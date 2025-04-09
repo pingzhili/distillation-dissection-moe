@@ -1,0 +1,59 @@
+=== EXPERT UTILIZATION SIMILARITY ===
+
+olmoe-sft-distill-10000_vs_olmoe-sft-original-10000: 0.9985
+Module-level similarities:
+  model.layers.12.mlp: 0.9994
+  model.layers.8.mlp: 0.9984
+  model.layers.13.mlp: 0.9981
+  model.layers.6.mlp: 0.9991
+  model.layers.2.mlp: 0.9987
+  model.layers.1.mlp: 0.9982
+  model.layers.3.mlp: 0.9979
+  model.layers.7.mlp: 0.9972
+  model.layers.9.mlp: 0.9990
+  model.layers.11.mlp: 0.9991
+  model.layers.5.mlp: 0.9989
+  model.layers.4.mlp: 0.9989
+  model.layers.10.mlp: 0.9995
+  model.layers.15.mlp: 0.9974
+  model.layers.0.mlp: 0.9979
+  model.layers.14.mlp: 0.9977
+
+olmoe-sft-distill-10000_vs_olmoe-base: 0.9924
+Module-level similarities:
+  model.layers.12.mlp: 0.9966
+  model.layers.8.mlp: 0.9916
+  model.layers.13.mlp: 0.9934
+  model.layers.6.mlp: 0.9920
+  model.layers.2.mlp: 0.9883
+  model.layers.1.mlp: 0.9854
+  model.layers.3.mlp: 0.9911
+  model.layers.7.mlp: 0.9934
+  model.layers.9.mlp: 0.9954
+  model.layers.11.mlp: 0.9946
+  model.layers.5.mlp: 0.9914
+  model.layers.4.mlp: 0.9928
+  model.layers.10.mlp: 0.9964
+  model.layers.15.mlp: 0.9908
+  model.layers.0.mlp: 0.9943
+  model.layers.14.mlp: 0.9905
+
+olmoe-sft-original-10000_vs_olmoe-base: 0.9929
+Module-level similarities:
+  model.layers.12.mlp: 0.9974
+  model.layers.8.mlp: 0.9945
+  model.layers.13.mlp: 0.9928
+  model.layers.6.mlp: 0.9929
+  model.layers.2.mlp: 0.9891
+  model.layers.1.mlp: 0.9857
+  model.layers.3.mlp: 0.9937
+  model.layers.7.mlp: 0.9956
+  model.layers.9.mlp: 0.9959
+  model.layers.11.mlp: 0.9941
+  model.layers.5.mlp: 0.9916
+  model.layers.4.mlp: 0.9911
+  model.layers.10.mlp: 0.9958
+  model.layers.15.mlp: 0.9915
+  model.layers.0.mlp: 0.9940
+  model.layers.14.mlp: 0.9907
+
