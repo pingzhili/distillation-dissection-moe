@@ -72,6 +72,8 @@ def train_sft(
         tokenizer = AutoTokenizer.from_pretrained("allenai/OLMoE-1B-7B-0125-Instruct", trust_remote_code=True)
     elif "deepseek-v2" in base_model_name.lower():
         tokenizer = AutoTokenizer.from_pretrained("deepseek-ai/DeepSeek-V2-Lite", trust_remote_code=True)
+    elif "moonlight" in base_model_name.lower():
+        tokenizer = AutoTokenizer.from_pretrained("moonshotai/Moonlight-16B-A3B-Instruct", trust_remote_code=True)
     else:
         raise NotImplementedError(f"Tokenizer for {base_model_name} not implemented.")
     tokenizer.model_max_length = max_length
@@ -96,6 +98,8 @@ def train_sft(
             proc_name = "sft-olmoe-train"
         elif "deepseek-v2" in base_model_name.lower():
             proc_name = "sft-deepseek-v2-train"
+        elif "moonlight" in base_model_name.lower():
+            proc_name = "sft-moonlight-train"
         else:
             raise NotImplementedError(f"Preprocess for {base_model_name} not implemented.")
         sft_dataset = raw_datasets.map(
