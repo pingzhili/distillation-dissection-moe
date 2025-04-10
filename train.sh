@@ -1,6 +1,8 @@
 export PYTHONPATH=$PYTHONPATH:src
 export CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7
 export NCCL_P2P_DISABLE=1
+export TORCH_DISTRIBUTED_TIMEOUT=7200000
+export NCCL_BLOCKING_WAIT=0
 #export CUDA_LAUNCH_BLOCKING=1
 #export TORCH_USE_CUDA_DSA=1
 # python debug.py
@@ -18,9 +20,9 @@ export NCCL_P2P_DISABLE=1
 
 #accelerate launch --config_file configs/zero-3.yaml scripts/finetune-sft.py \
 #  --base_model_name="deepseek-ai/DeepSeek-V2-Lite" --dataset_name="Phando/sft-dataset-from-moonlight-filtered" \
-#  --output_dir="outputs/deepseek-v2-lite-sft-filtered" --batch_size_per_device=1 --gradient_accumulation_steps=16 \
+#  --output_dir="outputs/deepseek-v2-lite-sft-filtered" --babtch_size_per_device=1 --gradient_accumulation_steps=16 \
 #  --checkpointing_steps=200 --enable_lora=True
 
 accelerate launch --config_file configs/zero-3-offload.yaml scripts/finetune-sft.py \
   --base_model_name="moonshotai/Moonlight-16B-A3B-Instruct" --dataset_name="Phando/sft-r1-distill" \
-  --output_dir="outputs/moonlight-instruct-sft-r1-distill" --debugging=True
+  --output_dir="outputs/moonlight-instruct-sft-r1-distill"

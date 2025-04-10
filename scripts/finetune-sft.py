@@ -16,6 +16,7 @@ from tqdm.auto import tqdm
 from transformers import AutoModelForCausalLM, AutoTokenizer, get_scheduler
 
 from ddmoe.data import batch_preprocess_fn, CustomDataCollatorWithPadding
+from ddmoe.models.deepseek import DeepseekV3ForCausalLM, DeepseekV3MoE
 
 set_seed(233)
 logger = get_logger(__name__)
@@ -25,8 +26,8 @@ def train_sft(
         base_model_name: str = "allenai/OLMoE-1B-7B-0125",
         dataset_name: str = "Phando/sft-dataset-original-filtered",
         max_length: int = 1024,
-        batch_size_per_device: int = 8,
-        gradient_accumulation_steps: int = 2,
+        batch_size_per_device: int = 4,
+        gradient_accumulation_steps: int = 4,
         num_train_epochs: int = 2,
         learning_rate: float = 5e-6,
         weight_decay: float = 0.01,
@@ -76,7 +77,10 @@ def train_sft(
     else:
         raise NotImplementedError(f"Tokenizer for {base_model_name} not implemented.")
     tokenizer.model_max_length = max_length
-    model = AutoModelForCausalLM.from_pretrained(base_model_name, trust_remote_code=True)
+    if "moonlight" in base_model_name.lower():
+        model = DeepseekV3ForCausalLM.from_pretrained(base_model_name, trust_remote_code=True)
+    else:
+        model = AutoModelForCausalLM.from_pretrained(base_model_name, trust_remote_code=True)
 
     # lora
     if enable_lora:
