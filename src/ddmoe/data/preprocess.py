@@ -14,7 +14,7 @@ def batch_preprocess_fn(
         "chat-profile": partial(chat_profile_batch_preprocess_fn, tokenizer=tokenizer),
         "sft-olmoe-train": partial(sft_train_batch_preprocess_fn, tokenizer=tokenizer, boa_token="<|assistant|>"),
         "sft-deepseek-v2-train": partial(sft_train_batch_preprocess_fn, tokenizer=tokenizer, boa_token="Assistant:"),
-        "sft-moonlight-train": partial(sft_train_batch_preprocess_fn, tokenizer=tokenizer, boa_token="Assistant:")
+        "sft-moonlight-train": partial(sft_train_batch_preprocess_fn, tokenizer=tokenizer, boa_token="<|im_assistant|>assistant<|im_middle|>")
     }
     return task_to_fn[task](examples)
 
