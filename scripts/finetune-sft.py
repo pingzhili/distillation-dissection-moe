@@ -1,4 +1,3 @@
-import datetime
 import logging
 import math
 import os
@@ -6,13 +5,12 @@ import os
 import datasets
 import torch
 import transformers
-from accelerate import Accelerator
+from accelerate import Accelerator, InitProcessGroupKwargs
 from accelerate.logging import get_logger
 from accelerate.utils import set_seed
 from datasets import load_dataset
 from fire import Fire
 from peft import get_peft_model, LoraConfig, TaskType
-from torch import distributed as dist
 from torch.utils.data import DataLoader
 from tqdm.auto import tqdm
 from transformers import AutoModelForCausalLM, AutoTokenizer, get_scheduler
@@ -22,7 +20,6 @@ from ddmoe.models.deepseek import DeepseekV3ForCausalLM
 
 set_seed(233)
 logger = get_logger(__name__)
-dist.init_process_group(backend='nccl', init_method='env://', timeout=datetime.timedelta(seconds=5400))
 
 
 def train_sft(
@@ -43,7 +40,8 @@ def train_sft(
         enable_lora: bool = False,
 ):
     accelerator = Accelerator(
-        gradient_accumulation_steps=gradient_accumulation_steps, project_dir=output_dir, log_with="wandb"
+        gradient_accumulation_steps=gradient_accumulation_steps, project_dir=output_dir, log_with="wandb",
+        kwargs_handlers=[InitProcessGroupKwargs(timeout=5400)]
     )
     logging.basicConfig(
         format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
