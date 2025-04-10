@@ -395,6 +395,7 @@ class MoEGate(nn.Module):
         self.n_routed_experts = config.n_routed_experts
         self.routed_scaling_factor = config.routed_scaling_factor
         self.scoring_func = config.scoring_func
+        self.alpha = config.aux_loss_alpha
         self.seq_aux = config.seq_aux
         self.topk_method = config.topk_method
         self.n_group = config.n_group
@@ -431,6 +432,7 @@ class MoEGate(nn.Module):
                 f"insupportable scoring function for MoE gating: {self.scoring_func}"
             )
 
+        aux_loss = None
         ### select top-k experts
         if self.topk_method == "noaux_tc":
             assert not self.training
@@ -457,6 +459,32 @@ class MoEGate(nn.Module):
                 tmp_scores, k=self.top_k, dim=-1, sorted=False
             )
             topk_weight = scores.gather(1, topk_idx)
+        elif self.topk_method == "group_limited_greedy":
+            group_scores = (
+                scores.view(bsz * seq_len, self.n_group, -1).max(dim=-1).values
+            )  # [n, n_group]
+            group_idx = torch.topk(
+                group_scores, k=self.topk_group, dim=-1, sorted=False
+            )[
+                1
+            ]  # [n, top_k_group]
+            group_mask = torch.zeros_like(group_scores)  # [n, n_group]
+            group_mask.scatter_(1, group_idx, 1)  # [n, n_group]
+            score_mask = (
+                group_mask.unsqueeze(-1)
+                .expand(
+                    bsz * seq_len, self.n_group, self.n_routed_experts // self.n_group
+                )
+                .reshape(bsz * seq_len, -1)
+            )  # [n, e]
+            tmp_scores = scores.masked_fill(~score_mask.bool(), 0.0)  # [n, e]
+            topk_weight, topk_idx = torch.topk(
+                tmp_scores, k=self.top_k, dim=-1, sorted=False
+            )
+        elif self.topk_method == "greedy":
+            topk_weight, topk_idx = torch.topk(
+                scores, k=self.top_k, dim=-1, sorted=False
+            )
         else:
             raise NotImplementedError(
                 f"insupportable TopK function for MoE gating: {self.topk_method}"
@@ -468,7 +496,57 @@ class MoEGate(nn.Module):
             topk_weight = topk_weight / denominator
         topk_weight = topk_weight * self.routed_scaling_factor  # must multiply the scaling factor
 
-        return topk_idx, topk_weight, logits
+        if self.training and self.alpha > 0.0:
+            scores_for_aux = scores
+            aux_topk = self.top_k
+            # always compute aux loss based on the naive greedy topk method
+            topk_idx_for_aux_loss = topk_idx.view(bsz, -1)
+            if self.seq_aux:
+                scores_for_seq_aux = scores_for_aux.view(bsz, seq_len, -1)
+                ce = torch.zeros(
+                    bsz, self.n_routed_experts, device=hidden_states.device
+                )
+                ce.scatter_add_(
+                    1,
+                    topk_idx_for_aux_loss,
+                    torch.ones(bsz, seq_len * aux_topk, device=hidden_states.device),
+                ).div_(seq_len * aux_topk / self.n_routed_experts)
+                aux_loss = (ce * scores_for_seq_aux.mean(dim=1)).sum(
+                    dim=1
+                ).mean() * self.alpha
+            else:
+                mask_ce = F.one_hot(
+                    topk_idx_for_aux_loss.view(-1), num_classes=self.n_routed_experts
+                )
+                ce = mask_ce.float().mean(0)
+                Pi = scores_for_aux.mean(0)
+                fi = ce * self.n_routed_experts
+                aux_loss = (Pi * fi).sum() * self.alpha
+        else:
+            aux_loss = None
+
+        return topk_idx, topk_weight, aux_loss, logits
+
+
+class AddAuxiliaryLoss(torch.autograd.Function):
+    """
+    The trick function of adding auxiliary (aux) loss,
+    which includes the gradient of the aux loss during backpropagation.
+    """
+
+    @staticmethod
+    def forward(ctx, x, loss):
+        assert loss.numel() == 1
+        ctx.dtype = loss.dtype
+        ctx.required_aux_loss = loss.requires_grad
+        return x
+
+    @staticmethod
+    def backward(ctx, grad_output):
+        grad_loss = None
+        if ctx.required_aux_loss:
+            grad_loss = torch.ones(1, dtype=ctx.dtype, device=grad_output.device)
+        return grad_output, grad_loss
 
 
 class DeepseekV3MoE(nn.Module):
@@ -521,10 +599,20 @@ class DeepseekV3MoE(nn.Module):
     def forward(self, hidden_states):
         identity = hidden_states
         orig_shape = hidden_states.shape
-        topk_idx, topk_weight, logits = self.gate(hidden_states)
+        topk_idx, topk_weight, aux_loss, logits = self.gate(hidden_states)
         hidden_states = hidden_states.view(-1, hidden_states.shape[-1])
         flat_topk_idx = topk_idx.view(-1)
-        if not self.training:
+        if self.training:
+            hidden_states = hidden_states.repeat_interleave(
+                self.num_experts_per_tok, dim=0
+            )
+            y = torch.empty_like(hidden_states)
+            for i, expert in enumerate(self.experts):
+                y[flat_topk_idx == i] = expert(hidden_states[flat_topk_idx == i])
+            y = (y.view(*topk_weight.shape, -1) * topk_weight.unsqueeze(-1)).sum(dim=1)
+            y = y.to(hidden_states.dtype).view(*orig_shape)
+            # y = AddAuxiliaryLoss.apply(y, aux_loss)
+        else:
             y = self.moe_infer(hidden_states, topk_idx, topk_weight).view(*orig_shape)
         if self.config.n_shared_experts is not None:
             y = y + self.shared_experts(identity)
