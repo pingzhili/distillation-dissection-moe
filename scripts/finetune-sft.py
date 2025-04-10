@@ -1,3 +1,4 @@
+import datetime
 import logging
 import math
 import os
@@ -11,6 +12,7 @@ from accelerate.utils import set_seed
 from datasets import load_dataset
 from fire import Fire
 from peft import get_peft_model, LoraConfig, TaskType
+from torch import distributed as dist
 from torch.utils.data import DataLoader
 from tqdm.auto import tqdm
 from transformers import AutoModelForCausalLM, AutoTokenizer, get_scheduler
@@ -20,6 +22,7 @@ from ddmoe.models.deepseek import DeepseekV3ForCausalLM, DeepseekV3MoE
 
 set_seed(233)
 logger = get_logger(__name__)
+dist.init_process_group(backend='nccl', init_method='env://', timeout=datetime.timedelta(seconds=5400))
 
 
 def train_sft(
