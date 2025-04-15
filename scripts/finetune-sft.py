@@ -214,7 +214,9 @@ def train_sft(
     unwrapped_model = accelerator.unwrap_model(model)
     checkpointing_dir = os.path.join(output_dir, f"checkpoint-{completed_steps}")
     unwrapped_model.save_pretrained(
-        checkpointing_dir, save_function=accelerator.save, is_main_process=accelerator.is_main_process
+        checkpointing_dir,
+        is_main_process=accelerator.is_main_process,
+        state_dict=accelerator.get_state_dict(model),
     )
     logger.info(f"Saving model checkpoint to {checkpointing_dir}")
     accelerator.wait_for_everyone()
