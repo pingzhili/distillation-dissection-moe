@@ -1,5 +1,5 @@
 export PYTHONPATH=$PYTHONPATH:src
-export CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7
+export CUDA_VISIBLE_DEVICES=0,1,2,3
 export NCCL_P2P_DISABLE=1
 #export TORCH_DISTRIBUTED_TIMEOUT=7200000
 #export NCCL_BLOCKING_WAIT=0
@@ -24,8 +24,8 @@ export NCCL_P2P_DISABLE=1
 
 #  open-thought source: {'riddle_sense', 'camelai_biology', 'camelai_chemistry', 'taco', 'code_contests', 'codeforces', 'camelai_physics', 'apps', 'numina_math'}
 for SUB_TASK in "riddle_sense" "camelai_biology" "camelai_chemistry" "taco" "code_contests" "codeforces" "camelai_physics" "apps" "numina_math"; do
-  accelerate launch --config_file configs/slurm-8gpu.yaml \
-    --num_processes=8 \
+  accelerate launch --config_file configs/slurm-4gpu.yaml \
+    --num_processes=4 \
     --num_machines=1 \
     --machine_rank=0 \
     --main_process_port=23333 \
@@ -38,5 +38,5 @@ for SUB_TASK in "riddle_sense" "camelai_biology" "camelai_chemistry" "taco" "cod
     --dataset_filter_condition="example['source'] == '$SUB_TASK'" \
     --num_train_epochs=3 \
     --batch_size_per_device=16 \
-    --gradient_accumulation_steps=1
+    --gradient_accumulation_steps=2
 done
