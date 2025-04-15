@@ -25,6 +25,7 @@ logger = get_logger(__name__)
 def train_sft(
         base_model_name: str = "allenai/OLMoE-1B-7B-0125",
         dataset_name: str = "Phando/sft-dataset-original-filtered",
+        dataset_filter_condition: str = None,
         max_length: int = 1024,
         batch_size_per_device: int = 4,
         gradient_accumulation_steps: int = 4,
@@ -63,6 +64,12 @@ def train_sft(
     accelerator.wait_for_everyone()
 
     raw_datasets = load_dataset(dataset_name, split="train", trust_remote_code=True)
+    if dataset_filter_condition is not None:
+        # e.g. "example['source'] == 'riddle_sense'"
+        before_filter = len(raw_datasets)
+        raw_datasets = raw_datasets.filter(lambda example: eval(dataset_filter_condition))
+        after_filter = len(raw_datasets)
+        logger.info(f"Filtered {before_filter - after_filter} samples from {before_filter} samples")
 
     # debugging
     if debugging:
