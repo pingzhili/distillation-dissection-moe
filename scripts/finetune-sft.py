@@ -10,6 +10,7 @@ from accelerate.logging import get_logger
 from accelerate.utils import set_seed
 from datasets import load_dataset
 from fire import Fire
+from pandas import Timedelta
 from peft import get_peft_model, LoraConfig, TaskType
 from torch.utils.data import DataLoader
 from tqdm.auto import tqdm
@@ -42,7 +43,7 @@ def train_sft(
 ):
     accelerator = Accelerator(
         gradient_accumulation_steps=gradient_accumulation_steps, project_dir=output_dir, log_with="wandb",
-        kwargs_handlers=[InitProcessGroupKwargs(timeout=5400)]
+        kwargs_handlers=[InitProcessGroupKwargs(timeout=Timedelta(hours=1))]
     )
     logging.basicConfig(
         format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
