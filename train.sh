@@ -34,7 +34,7 @@ accelerate launch --config_file configs/slurm-8gpu.yaml \
   --machine_rank=0 \
   --main_process_port=23333 \
   --mixed_precision=fp16 \
-  $WORK/scripts/finetune-sft.py \
+  scripts/finetune-sft.py \
   --output_dir=$OUTPUT_DIR \
   --base_model_name="allenai/OLMoE-1B-7B-0125" \
   --output_dir="outputs/olmoe-sft" \
