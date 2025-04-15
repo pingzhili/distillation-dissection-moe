@@ -14,29 +14,25 @@ export NCCL_P2P_DISABLE=1
 #  --base_model_name="allenai/OLMoE-1B-7B-0125" --dataset_name="Phando/sft-dataset-from-moonlight-filtered" \
 #  --output_dir="outputs/olmoe-1b-7b-0125-sft-filtered"
 
-# accelerate launch --config_file configs/zero-3-offload.yaml scripts/finetune-sft.py \
-#   --base_model_name="allenai/OLMoE-1B-7B-0125" --dataset_name="Phando/sft-dataset-original-filtered" \
-#   --output_dir="outputs/olmoe-1b-7b-0125-sft-original-filtered"
-
-#accelerate launch --config_file configs/zero-3.yaml scripts/finetune-sft.py \
-#  --base_model_name="deepseek-ai/DeepSeek-V2-Lite" --dataset_name="Phando/sft-dataset-from-moonlight-filtered" \
-#  --output_dir="outputs/deepseek-v2-lite-sft-filtered" --babtch_size_per_device=1 --gradient_accumulation_steps=16 \
-#  --checkpointing_steps=200 --enable_lora=True
+ accelerate launch --config_file configs/zero-3-offload.yaml scripts/finetune-sft.py \
+   --base_model_name="allenai/OLMoE-1B-7B-0125" --dataset_name="Phando/sft-dataset-original-filtered" \
+   --output_dir="outputs/olmoe-1b-7b-0125-sft-original-filtered-debug"
 
 #accelerate launch --config_file configs/zero-3-offload.yaml scripts/finetune-sft.py \
 #  --base_model_name="moonshotai/Moonlight-16B-A3B-Instruct" --dataset_name="Phando/sft-r1-distill" \
 #  --output_dir="outputs/moonlight-instruct-sft-r1-distill"
 
 #  open-thought source: {'riddle_sense', 'camelai_biology', 'camelai_chemistry', 'taco', 'code_contests', 'codeforces', 'camelai_physics', 'apps', 'numina_math'}
-accelerate launch --config_file configs/slurm-8gpu.yaml \
-  --num_processes=8 \
-  --num_machines=1 \
-  --machine_rank=0 \
-  --main_process_port=23333 \
-  --mixed_precision=fp16 \
-  scripts/finetune-sft.py \
-  --output_dir=$OUTPUT_DIR \
-  --base_model_name="allenai/OLMoE-1B-7B-0125" \
-  --output_dir="outputs/olmoe-sft" \
-  --dataset_name="Phando/OpenThoughts-114k-SFT" \
-  --dataset_filter_condition="example['source'] == 'riddle_sense'"
+#export SUB_TASK="riddle_sense"
+#accelerate launch --config_file configs/slurm-8gpu.yaml \
+#  --num_processes=8 \
+#  --num_machines=1 \
+#  --machine_rank=0 \
+#  --main_process_port=23333 \
+#  --mixed_precision=fp16 \
+#  scripts/finetune-sft.py \
+#  --output_dir=$OUTPUT_DIR \
+#  --base_model_name="allenai/OLMoE-1B-7B-0125" \
+#  --output_dir="outputs/olmoe-sft-$SUB_TASK" \
+#  --dataset_name="Phando/OpenThoughts-114k-SFT" \
+#  --dataset_filter_condition="example['source'] == '$SUB_TASK'"

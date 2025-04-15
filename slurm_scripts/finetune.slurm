@@ -21,7 +21,7 @@ export HF_HOME=$WORK/hf_cache
 mkdir -p $OUTPUT_DIR HF_HOME
 
 
-export SUB_TAS
+export SUB_TASK="riddle_sense"
 srun --ntasks=$SLURM_NTASKS accelerate launch --config_file configs/slurm-8gpu.yaml \
   --num_processes=$SLURM_NTASKS \
   --num_machines=1 \
