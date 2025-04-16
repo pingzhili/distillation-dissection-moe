@@ -40,6 +40,7 @@ def train_sft(
         logging_steps: int = 1,
         debugging: bool = False,
         enable_lora: bool = False,
+        num_machines: int = 1,
 ):
     accelerator = Accelerator(
         gradient_accumulation_steps=gradient_accumulation_steps, project_dir=output_dir, log_with="wandb",
