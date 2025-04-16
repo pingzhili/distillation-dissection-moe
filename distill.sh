@@ -33,7 +33,7 @@ for SUB_TASK in "riddle_sense" "camelai_biology" "camelai_chemistry" "camelai_ph
     scripts/finetune-sft.py \
     --output_dir=$OUTPUT_DIR \
     --base_model_name="allenai/OLMoE-1B-7B-0125" \
-    --output_dir="outputs/olmoe-sft-$SUB_TASK" \
+    --output_dir="outputs/olmoe-distill-$SUB_TASK" \
     --dataset_name="Phando/OpenThoughts-114k-R1-Distill" \
     --dataset_filter_condition="example['source'] == '$SUB_TASK'" \
     --num_train_epochs=3 \
@@ -51,7 +51,7 @@ for SUB_TASK in "taco" "code_contests" "codeforces" "apps" "numina_math"; do
     scripts/finetune-sft.py \
     --output_dir=$OUTPUT_DIR \
     --base_model_name="allenai/OLMoE-1B-7B-0125" \
-    --output_dir="outputs/olmoe-sft-$SUB_TASK" \
+    --output_dir="outputs/olmoe-distill-$SUB_TASK" \
     --dataset_name="Phando/OpenThoughts-114k-R1-Distill" \
     --dataset_filter_condition="example['source'] == '$SUB_TASK'" \
     --num_train_epochs=3 \
