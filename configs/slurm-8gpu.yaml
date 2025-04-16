@@ -7,9 +7,6 @@ deepspeed_config:
   zero_stage: 3
 distributed_type: DEEPSPEED
 fsdp_config: { }
-machine_rank: ${SLURM_PROCID}
-main_process_ip: ${MASTER_ADDR}
-main_process_port: ${MASTER_PORT}
 main_training_function: main
 mixed_precision: fp16
 num_machines: 8
