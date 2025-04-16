@@ -5,7 +5,7 @@
 #SBATCH -p gh                   # Queue (partition) name
 #SBATCH -N 8                    # Total number of nodes
 #SBATCH -n 8                    # Total number of tasks
-#SBATCH -t 48:00:00             # Run time (hh:mm:ss)
+#SBATCH -t 24:00:00             # Run time (hh:mm:ss)
 #SBATCH -A NAIRR240454          # Project allocation name
 
 module load gcc cuda
