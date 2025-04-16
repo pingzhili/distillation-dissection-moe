@@ -24,7 +24,7 @@ mkdir -p $OUTPUT_DIR HF_HOME
 
 export SUB_TASK="apps"
 srun --ntasks=$SLURM_NTASKS --export=ALL,MASTER_ADDR=$MASTER_ADDR,MASTER_PORT=$MASTER_PORT \
-  accelerate launch --config_file configs/slurm-8gpu.yaml \
+  accelerate launch --config_file configs/slurm-8gpu.yaml --same_network --rdzv_backend c10d  \
   --machine_rank $SLURM_PROCID --main_process_ip $MASTER_ADDR --main_process_port $MASTER_PORT \
   $WORK/distillation-dissection-moe/scripts/finetune-sft.py \
   --output_dir=$OUTPUT_DIR \

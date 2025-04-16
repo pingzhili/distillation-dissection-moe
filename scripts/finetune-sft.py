@@ -43,7 +43,7 @@ def train_sft(
 ):
     accelerator = Accelerator(
         gradient_accumulation_steps=gradient_accumulation_steps, project_dir=output_dir, log_with="wandb",
-        kwargs_handlers=[InitProcessGroupKwargs(timeout=Timedelta(hours=1))]
+        kwargs_handlers=[InitProcessGroupKwargs(timeout=Timedelta(hours=1))],
     )
     logging.basicConfig(
         format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
