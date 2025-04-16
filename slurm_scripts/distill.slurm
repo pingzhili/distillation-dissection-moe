@@ -12,6 +12,7 @@ module load gcc cuda
 
 source $WORK/miniconda3/bin/activate ddmoe
 export WANDB_API_KEY=2b60f655a687ad1161d31f0002256865e1ace428
+export PYTHONPATH=$PYTHONPATH:src
 
 export MASTER_ADDR=$(scontrol show hostnames $SLURM_JOB_NODELIST | head -n 1)
 export MASTER_PORT=23333
