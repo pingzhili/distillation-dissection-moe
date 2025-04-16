@@ -29,7 +29,7 @@ srun --ntasks=$SLURM_NTASKS accelerate launch --config_file configs/slurm-8gpu.y
   --main_process_ip=$MASTER_ADDR \
   --main_process_port=$MASTER_PORT \
   --mixed_precision=fp16 \
-  $WORK/scripts/finetune-sft.py \
+  $WORK/distillation-dissection-moe/scripts/finetune-sft.py \
   --output_dir=$OUTPUT_DIR \
   --base_model_name="allenai/OLMoE-1B-7B-0125" \
   --output_dir="outputs/olmoe-distill-$SUB_TASK" \
