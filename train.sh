@@ -24,7 +24,7 @@ export NCCL_P2P_DISABLE=1
 
 #  open-thought source: {'riddle_sense', 'camelai_biology', 'camelai_chemistry', 'taco', 'code_contests', 'codeforces', 'camelai_physics', 'apps', 'numina_math'}
 #for SUB_TASK in "riddle_sense" "camelai_biology" "camelai_chemistry" "camelai_physics"; do
-#  accelerate launch --config_file configs/slurm-4gpu-ga2.yaml \
+#  accelerate launch --config_file configs/zero3-4gpu-ga2.yaml \
 #    --num_processes=4 \
 #    --num_machines=1 \
 #    --machine_rank=0 \
@@ -42,7 +42,7 @@ export NCCL_P2P_DISABLE=1
 #done
 
 for SUB_TASK in "taco" "code_contests" "codeforces" "apps" "numina_math"; do
-  accelerate launch --config_file configs/slurm-4gpu-ga4.yaml \
+  accelerate launch --config_file configs/zero3-4gpu-ga4.yaml \
     --num_processes=4 \
     --num_machines=1 \
     --machine_rank=0 \

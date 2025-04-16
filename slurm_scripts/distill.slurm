@@ -23,13 +23,8 @@ mkdir -p $OUTPUT_DIR HF_HOME
 
 
 for SUB_TASK in "riddle_sense" "camelai_biology" "camelai_chemistry" "taco" "code_contests" "codeforces" "camelai_physics" "apps" "numina_math"; do
-srun --ntasks=$SLURM_NTASKS accelerate launch --config_file configs/slurm-8gpu.yaml \
-  --num_processes=$SLURM_NTASKS \
-  --num_machines=1 \
-  --machine_rank=0 \
-  --main_process_ip=$MASTER_ADDR \
-  --main_process_port=$MASTER_PORT \
-  --mixed_precision=fp16 \
+srun --ntasks=$SLURM_NTASKS --export=ALL,MASTER_ADDR=$MASTER_ADDR,MASTER_PORT=$MASTER_PORT \
+  accelerate launch --config_file configs/slurm-8gpu.yaml \
   $WORK/distillation-dissection-moe/scripts/finetune-sft.py \
   --output_dir=$OUTPUT_DIR \
   --base_model_name="allenai/OLMoE-1B-7B-0125" \
