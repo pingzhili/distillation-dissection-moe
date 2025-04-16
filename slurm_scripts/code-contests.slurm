@@ -22,7 +22,7 @@ export HF_HOME=$WORK/hf_cache
 mkdir -p $OUTPUT_DIR HF_HOME
 
 
-for SUB_TASK in "riddle_sense" "camelai_biology" "camelai_chemistry" "taco" "code_contests" "codeforces" "camelai_physics" "apps" "numina_math"; do
+export SUB_TASK="code_contests"
 srun --ntasks=$SLURM_NTASKS --export=ALL,MASTER_ADDR=$MASTER_ADDR,MASTER_PORT=$MASTER_PORT \
   accelerate launch --config_file configs/slurm-8gpu.yaml \
   --machine_rank $SLURM_PROCID --main_process_ip $MASTER_ADDR --main_process_port $MASTER_PORT \
@@ -33,6 +33,5 @@ srun --ntasks=$SLURM_NTASKS --export=ALL,MASTER_ADDR=$MASTER_ADDR,MASTER_PORT=$M
   --dataset_name="Phando/OpenThoughts-114k-R1-Distill" \
   --dataset_filter_condition="example['source'] == '$SUB_TASK'" \
     --num_train_epochs=3 \
-    --batch_size_per_device=16 \
-    --gradient_accumulation_steps=1
-done
+    --batch_size_per_device=8 \
+    --gradient_accumulation_steps=2
