@@ -33,5 +33,5 @@ srun --ntasks=$SLURM_NTASKS --export=ALL,MASTER_ADDR=$MASTER_ADDR,MASTER_PORT=$M
   --dataset_name="Phando/OpenThoughts-114k-R1-Distill" \
   --dataset_filter_condition="example['source'] == '$SUB_TASK'" \
     --num_train_epochs=3 \
-    --batch_size_per_device=8 \
-    --gradient_accumulation_steps=2
+    --batch_size_per_device=4 \
+    --gradient_accumulation_steps=4
