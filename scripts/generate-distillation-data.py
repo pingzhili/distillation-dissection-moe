@@ -106,14 +106,20 @@ def api_generate_distillation_data_eager(
         num_workers: int = 4,
 ):
     client = openai.Client(base_url=base_url, api_key="EMPTY")
-    dataset = load_dataset(
-        dataset_name, "v1", trust_remote_code=True
-    )
+    is_gsm_8k = "gsm8k" in dataset_name.lower()
+    if is_gsm_8k:
+        dataset = load_dataset(
+            dataset_name, "main", trust_remote_code=True
+        )
+    else:
+        dataset = load_dataset(
+            dataset_name, "v1", trust_remote_code=True
+        )
     dataset = dataset["train"]
     # remove those samples with "source" is "ai2-adapt-dev/tulu_hard_coded_repeated_10"
-    if "gsm8k" not in dataset_name.lower():
+    if not is_gsm_8k:
         dataset = dataset.filter(lambda example: example["source"] != "ai2-adapt-dev/tulu_hard_coded_repeated_10")
-    if "gsm8k" in dataset_name.lower():
+    if is_gsm_8k:
         preprocess_fn = partial(batch_preprocess_fn, task="chat-gen-gsm8k")
     else:
         preprocess_fn = partial(batch_preprocess_fn, task="chat-gen")
