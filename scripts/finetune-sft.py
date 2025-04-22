@@ -27,6 +27,8 @@ def train_sft(
         base_model_name: str = "allenai/OLMoE-1B-7B-0125",
         dataset_name: str = "Phando/sft-dataset-original-filtered",
         dataset_filter_condition: str = None,
+        num_samples: int = None,
+        sampling_seed: int = 233,
         max_length: int = 1024,
         batch_size_per_device: int = 4,
         gradient_accumulation_steps: int = 4,
@@ -40,7 +42,6 @@ def train_sft(
         logging_steps: int = 1,
         debugging: bool = False,
         enable_lora: bool = False,
-        num_machines: int = 1,
 ):
     accelerator = Accelerator(
         gradient_accumulation_steps=gradient_accumulation_steps, project_dir=output_dir, log_with="wandb",

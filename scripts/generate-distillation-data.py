@@ -111,8 +111,12 @@ def api_generate_distillation_data_eager(
     )
     dataset = dataset["train"]
     # remove those samples with "source" is "ai2-adapt-dev/tulu_hard_coded_repeated_10"
-    dataset = dataset.filter(lambda example: example["source"] != "ai2-adapt-dev/tulu_hard_coded_repeated_10")
-    preprocess_fn = partial(batch_preprocess_fn, task="chat-gen")
+    if "gsm8k" not in dataset_name.lower():
+        dataset = dataset.filter(lambda example: example["source"] != "ai2-adapt-dev/tulu_hard_coded_repeated_10")
+    if "gsm8k" in dataset_name.lower():
+        preprocess_fn = partial(batch_preprocess_fn, task="chat-gen-gsm8k")
+    else:
+        preprocess_fn = partial(batch_preprocess_fn, task="chat-gen")
     dataset = dataset.map(preprocess_fn, batched=True, num_proc=num_workers, remove_columns=dataset.column_names)
 
     with open(os.path.join(save_dir, "distillation_data.jsonl"), 'a') as file:

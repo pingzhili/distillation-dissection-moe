@@ -11,10 +11,12 @@ def batch_preprocess_fn(
 ) -> Dict[str, List[Any]]:
     task_to_fn = {
         "chat-gen": partial(chat_eval_batch_preprocess_fn, tokenizer=tokenizer),
+        "chat-gen-gsm8k": partial(gsm8k_chat_eval_batch_preprocess_fn, tokenizer=tokenizer),
         "chat-profile": partial(chat_profile_batch_preprocess_fn, tokenizer=tokenizer),
         "sft-olmoe-train": partial(sft_train_batch_preprocess_fn, tokenizer=tokenizer, boa_token="<|assistant|>"),
         "sft-deepseek-v2-train": partial(sft_train_batch_preprocess_fn, tokenizer=tokenizer, boa_token="Assistant:"),
-        "sft-moonlight-train": partial(sft_train_batch_preprocess_fn, tokenizer=tokenizer, boa_token="<|im_assistant|>assistant<|im_middle|>")
+        "sft-moonlight-train": partial(sft_train_batch_preprocess_fn, tokenizer=tokenizer,
+                                       boa_token="<|im_assistant|>assistant<|im_middle|>")
     }
     return task_to_fn[task](examples)
 
@@ -54,6 +56,20 @@ def chat_eval_batch_preprocess_fn(
     else:
         input_ids_list = tokenizer.apply_chat_template(chat_list, add_generation_prompt=True)
         return {"input_ids": input_ids_list, "content": messages_list}
+
+
+def gsm8k_chat_eval_batch_preprocess_fn(
+        examples: Dict[str, List[Any]], tokenizer: Optional[PreTrainedTokenizerBase] = None
+) -> Dict[str, List[Any]]:
+    chat_list = [
+        [{"role": "system", "content": "Please reason step by step, and put your final answer within \\boxed{{}}."},
+         {"role": "user", "content": message}] for message in examples["question"]
+    ]
+    if tokenizer is None:
+        return {"content": chat_list}
+    else:
+        input_ids_list = tokenizer.apply_chat_template(chat_list, add_generation_prompt=True)
+        return {"input_ids": input_ids_list, "content": examples["question"]}
 
 
 def chat_profile_batch_preprocess_fn(
