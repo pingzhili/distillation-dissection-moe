@@ -6,6 +6,7 @@ from functools import partial
 import openai
 from datasets import load_dataset
 from fire import Fire
+from loguru import logger
 from tqdm import tqdm
 from transformers import set_seed
 
@@ -105,6 +106,10 @@ def api_generate_distillation_data_eager(
         model_name: str = "microsoft/Phi-3.5-MoE-instruct",
         num_workers: int = 4,
 ):
+    if not os.path.exists(save_dir):
+        os.makedirs(save_dir)
+        logger.info(f"Created directory {save_dir}")
+
     client = openai.Client(base_url=base_url, api_key="EMPTY")
     is_gsm_8k = "gsm8k" in dataset_name.lower()
     if is_gsm_8k:
@@ -116,6 +121,7 @@ def api_generate_distillation_data_eager(
             dataset_name, "v1", trust_remote_code=True
         )
     dataset = dataset["train"]
+
     # remove those samples with "source" is "ai2-adapt-dev/tulu_hard_coded_repeated_10"
     if not is_gsm_8k:
         dataset = dataset.filter(lambda example: example["source"] != "ai2-adapt-dev/tulu_hard_coded_repeated_10")
