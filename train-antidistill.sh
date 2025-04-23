@@ -14,6 +14,8 @@ accelerate launch --config_file configs/zero3-2gpu-ga4.yaml \
     --main_process_port=23333 \
     --mixed_precision=fp16 \
     scripts/finetune-antidistill.py \
+    --anti_kd_coef=$KD_COEF \
+    --kd_temperature=$KD_TEMP \
     --output_dir=$OUTPUT_DIR \
     --num_train_epochs=$EPOCH \
     --batch_size_per_device=16 \
