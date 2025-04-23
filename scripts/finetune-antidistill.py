@@ -213,15 +213,10 @@ def train_antidistill(
             if completed_steps % checkpointing_steps == 0 and accelerator.sync_gradients:
                 checkpointing_dir = os.path.join(output_dir, f"checkpoint-{completed_steps}")
                 unwrapped_model = accelerator.unwrap_model(model).teacher_model
-                wrapper_state_dict = accelerator.get_state_dict(model)
-                state_dict_to_save = {}
-                for key in wrapper_state_dict.keys():
-                    if "teacher" in key and "lm_head" in key:
-                        state_dict_to_save[key] = wrapper_state_dict[key]
                 unwrapped_model.save_pretrained(
                     checkpointing_dir,
                     is_main_process=accelerator.is_main_process,
-                    state_dict=state_dict_to_save,
+                    state_dict=accelerator.get_state_dict(model),
                 )
 
             if completed_steps > num_training_steps:
@@ -237,15 +232,10 @@ def train_antidistill(
     accelerator.wait_for_everyone()
     unwrapped_model = accelerator.unwrap_model(model).teacher_model
     checkpointing_dir = os.path.join(output_dir, f"checkpoint-{completed_steps}")
-    wrapper_state_dict = accelerator.get_state_dict(model)
-    state_dict_to_save = {}
-    for key in wrapper_state_dict.keys():
-        if "teacher" in key and "lm_head" in key:
-            state_dict_to_save[key] = wrapper_state_dict[key]
     unwrapped_model.save_pretrained(
         checkpointing_dir,
         is_main_process=accelerator.is_main_process,
-        state_dict=state_dict_to_save,
+        state_dict=accelerator.get_state_dict(model),
     )
     logger.info(f"Saving model checkpoint to {checkpointing_dir}")
     accelerator.wait_for_everyone()
