@@ -147,6 +147,7 @@ def train_antidistill(
             "weight_decay": 0.0
         },
     ]
+    logger.info(optimizer_grouped_parameters)
     optimizer = torch.optim.AdamW(optimizer_grouped_parameters, lr=learning_rate)
     num_update_steps_per_epoch = math.ceil(len(dataloader) / gradient_accumulation_steps)
     num_training_steps = num_update_steps_per_epoch * num_train_epochs
