@@ -119,6 +119,9 @@ def train_antidistill(
         anti_kd_coef=anti_kd_coef,
         kd_temperature=kd_temperature
     )
+    for n, p in model.named_parameters():
+        if p.requires_grad:
+            logger.info(f"{n} requires grad.")
 
     with accelerator.main_process_first():
         columns_names = raw_datasets.column_names
@@ -162,9 +165,6 @@ def train_antidistill(
     model, optimizer, dataloader, lr_scheduler = accelerator.prepare(
         model, optimizer, dataloader, lr_scheduler
     )
-
-    logger.info(
-        f"Total trainable parameters: {sum(safe_get_full_fp32_param(p).numel() for p in model.parameters() if p.requires_grad)}")
 
     # We need to recalculate our total training steps as the size of the training dataloader may have changed.
     num_update_steps_per_epoch = math.ceil(len(dataloader) / gradient_accumulation_steps)
