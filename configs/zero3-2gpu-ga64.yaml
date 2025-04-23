@@ -16,4 +16,4 @@ main_training_function: main
 mixed_precision: fp16
 num_machines: 1
 num_processes: 2
-use_cpu: true
+use_cpu: false
