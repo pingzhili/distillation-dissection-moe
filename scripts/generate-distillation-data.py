@@ -112,6 +112,8 @@ def api_generate_distillation_data_eager(
 
     client = openai.Client(base_url=base_url, api_key="EMPTY")
     is_gsm_8k = "gsm8k" in dataset_name.lower()
+    is_reasoning = "r1" in dataset_name.lower()
+
     if is_gsm_8k:
         dataset = load_dataset(
             dataset_name, "main", trust_remote_code=True
@@ -137,9 +139,11 @@ def api_generate_distillation_data_eager(
                 model=model_name,
                 messages=messages,
             )
+            reasoning_response = completion.choices[0].message.reasoning_content
             response = completion.choices[0].message.content
-            prompt = messages[1]["content"]
+            prompt = messages[-1]["content"]
             result_content = json.dumps({
+                "reasoning_response": reasoning_response,
                 "response": response,
                 "prompt": prompt,
             }, ensure_ascii=False) + "\n"
