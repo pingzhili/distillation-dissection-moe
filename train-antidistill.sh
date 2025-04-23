@@ -18,6 +18,6 @@ accelerate launch --config_file configs/zero3-2gpu-ga64.yaml \
     --kd_temperature=$KD_TEMP \
     --output_dir=$OUTPUT_DIR \
     --num_train_epochs=$EPOCH \
-    --batch_size_per_device=2 \
+    --batch_size_per_device=1 \
     --gradient_accumulation_steps=64
 #    --debugging=True
