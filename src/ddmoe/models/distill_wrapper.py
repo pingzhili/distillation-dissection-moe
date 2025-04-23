@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from typing import Optional, Tuple
 
 import torch
@@ -8,6 +9,7 @@ from transformers import PreTrainedModel
 from transformers.modeling_outputs import ModelOutput
 
 
+@dataclass
 class AntiDistillCausalLMOutputWithPast(ModelOutput):
     loss: Optional[torch.FloatTensor] = None
     logits: torch.FloatTensor = None
