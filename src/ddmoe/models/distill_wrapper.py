@@ -50,7 +50,7 @@ class AntiDistillWrapper(nn.Module):
             param.requires_grad = False
 
         for name, param in self.teacher_model.named_parameters():
-            if "lm_head" in name:
+            if "lm_head" in name or "embed_tokens" in name:
                 param.requires_grad = True
                 logger.info(f"LM head: {name} (set to trainable? {param.requires_grad})")
 
