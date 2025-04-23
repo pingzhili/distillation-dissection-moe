@@ -138,10 +138,14 @@ def train_antidistill(
     no_decay = ["bias", "layer_norm.weight"]
     optimizer_grouped_parameters = [
         {
-            "params": [p for n, p in model.named_parameters() if not any(nd in n for nd in no_decay)],
+            "params": [p for n, p in model.named_parameters() if
+                       not any(nd in n for nd in no_decay) and p.requires_grad],
             "weight_decay": weight_decay,
         },
-        {"params": [p for n, p in model.named_parameters() if any(nd in n for nd in no_decay)], "weight_decay": 0.0},
+        {
+            "params": [p for n, p in model.named_parameters() if any(nd in n for nd in no_decay) and p.requires_grad],
+            "weight_decay": 0.0
+        },
     ]
     optimizer = torch.optim.AdamW(optimizer_grouped_parameters, lr=learning_rate)
     num_update_steps_per_epoch = math.ceil(len(dataloader) / gradient_accumulation_steps)
