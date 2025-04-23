@@ -246,7 +246,7 @@ def train_antidistill(
     logger.info(f"Saving model checkpoint to {checkpointing_dir}")
     accelerator.wait_for_everyone()
     accelerator.end_training()
-    logger.info("Training completed.")
+    logger.info("Training completed")
 
 
 if __name__ == "__main__":
