@@ -59,7 +59,8 @@ class AntiDistillWrapper(nn.Module):
         assert self.training, "AntiDistillWrapper should only be used in training mode"
 
         teacher_outputs = self.teacher_model(*args, **kwargs)
-        proxy_outputs = self.proxy_model(*args, **kwargs)
+        with torch.no_grad():
+            proxy_outputs = self.proxy_model(*args, **kwargs)
 
         lm_loss = teacher_outputs.loss
         teacher_logits = teacher_outputs.logits[..., :self.vocab_size]
