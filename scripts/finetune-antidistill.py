@@ -46,6 +46,7 @@ def process_r1_thinking_data(
         labels = [-100] * (len(input_ids) - len(labels)) + labels  # label -100 for prefilling tokens
         if len(input_ids) > tokenizer.model_max_length:
             # skip
+            logger.info(f"Skip sample {i} with length {len(input_ids)}")
             continue
 
         assert len(labels) == len(input_ids)
