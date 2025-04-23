@@ -10,7 +10,6 @@ from accelerate import Accelerator, InitProcessGroupKwargs
 from accelerate.logging import get_logger
 from accelerate.utils import set_seed
 from datasets import load_dataset
-from deepspeed.utils import safe_get_full_fp32_param
 from fire import Fire
 from pandas import Timedelta
 from torch.utils.data import DataLoader
@@ -45,6 +44,9 @@ def process_r1_thinking_data(
 
         input_ids.extend(labels)
         labels = [-100] * (len(input_ids) - len(labels)) + labels  # label -100 for prefilling tokens
+        if len(input_ids) > tokenizer.model_max_length:
+            # skip
+            continue
 
         assert len(labels) == len(input_ids)
         input_ids_list.append(input_ids)
@@ -63,7 +65,7 @@ def train_antidistill(
         teacher_model_name: str = "deepseek-ai/DeepSeek-R1-Distill-Qwen-7B",
         proxy_model_name: str = "Qwen/Qwen2.5-3B",
         dataset_path: str = "data/r1-qwen-7b-gsm8k/distillation_data.jsonl",
-        max_length: int = 1024,
+        max_length: int = 2048,
         batch_size_per_device: int = 4,
         gradient_accumulation_steps: int = 4,
         num_train_epochs: int = 2,
