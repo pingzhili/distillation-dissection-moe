@@ -51,7 +51,7 @@ def process_r1_thinking_data(
 
     return {
         "input_ids": input_ids_list,
-        "labesl": labels_list
+        "labels": labels_list
     }
 
 
