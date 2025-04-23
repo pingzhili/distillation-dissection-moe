@@ -7,7 +7,7 @@ KD_TEMP=1.0
 EPOCH=3
 OUTPUT_DIR="outputs/qwen7b-antidistill-coef$KD_COEF-temp$KD_TEMP-epoch$EPOCH"
 
-accelerate launch --config_file configs/zero3-2gpu-ga64.yaml \
+accelerate launch --config_file configs/zero3-2gpu-ga16.yaml \
     --num_processes=2 \
     --num_machines=1 \
     --machine_rank=0 \
@@ -18,6 +18,6 @@ accelerate launch --config_file configs/zero3-2gpu-ga64.yaml \
     --kd_temperature=$KD_TEMP \
     --output_dir=$OUTPUT_DIR \
     --num_train_epochs=$EPOCH \
-    --batch_size_per_device=1 \
-    --gradient_accumulation_steps=64 \
+    --batch_size_per_device=4 \
+    --gradient_accumulation_steps=16 \
     --debugging=True
