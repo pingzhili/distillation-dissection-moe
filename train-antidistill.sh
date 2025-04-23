@@ -1,5 +1,5 @@
 export PYTHONPATH=$PYTHONPATH:src
-export CUDA_VISIBLE_DEVICES=0,1,2,3
+export CUDA_VISIBLE_DEVICES=0,1
 export NCCL_P2P_DISABLE=1
 
 KD_COEF=0.1
@@ -7,8 +7,8 @@ KD_TEMP=1.0
 EPOCH=3
 OUTPUT_DIR="outputs/olmoe-antidistill-coef$KD_COEF-temp$KD_TEMP-epoch$EPOCH"
 
-accelerate launch --config_file configs/zero3-4gpu-ga2.yaml \
-    --num_processes=4 \
+accelerate launch --config_file configs/zero3-2gpu-ga4.yaml \
+    --num_processes=2 \
     --num_machines=1 \
     --machine_rank=0 \
     --main_process_port=23333 \
@@ -17,5 +17,5 @@ accelerate launch --config_file configs/zero3-4gpu-ga2.yaml \
     --output_dir=$OUTPUT_DIR \
     --num_train_epochs=$EPOCH \
     --batch_size_per_device=16 \
-    --gradient_accumulation_steps=2 \
+    --gradient_accumulation_steps=4 \
     --debugging=True
