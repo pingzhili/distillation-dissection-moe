@@ -104,7 +104,7 @@ def train_antidistill(
 
     # debugging
     if debugging:
-        raw_datasets = raw_datasets.select(range(200))
+        raw_datasets = raw_datasets.select(range(100))
         checkpointing_steps = 2
 
     tokenizer = AutoTokenizer.from_pretrained(teacher_model_name, trust_remote_code=True)
