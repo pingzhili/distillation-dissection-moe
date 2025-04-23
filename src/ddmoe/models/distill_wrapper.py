@@ -31,6 +31,7 @@ class AntiDistillWrapper(nn.Module):
         super().__init__()
         self.teacher_model = teacher_model
         self.proxy_model = proxy_model
+        self.vocab_size = min(teacher_model.config.vocab_size, proxy_model.config.vocab_size)
         self.anti_kd_coef = anti_kd_coef
         self.kd_temperature = kd_temperature
 
@@ -59,8 +60,8 @@ class AntiDistillWrapper(nn.Module):
         proxy_outputs = self.proxy_model(*args, **kwargs)
 
         lm_loss = teacher_outputs.loss
-        teacher_logits = teacher_outputs.logits
-        proxy_logits = proxy_outputs.logits
+        teacher_logits = teacher_outputs.logits[..., :self.vocab_size]
+        proxy_logits = proxy_outputs.logits[..., :self.vocab_size]
 
         kd_criteria = nn.KLDivLoss(reduction="batchmean")
         kd_loss = kd_criteria(
