@@ -10,6 +10,7 @@ from accelerate import Accelerator, InitProcessGroupKwargs
 from accelerate.logging import get_logger
 from accelerate.utils import set_seed
 from datasets import load_dataset
+from deepspeed.utils import safe_get_full_fp32_param
 from fire import Fire
 from pandas import Timedelta
 from torch.utils.data import DataLoader
@@ -161,6 +162,9 @@ def train_antidistill(
     model, optimizer, dataloader, lr_scheduler = accelerator.prepare(
         model, optimizer, dataloader, lr_scheduler
     )
+
+    logger.info(
+        f"Total trainable parameters: {sum(safe_get_full_fp32_param(p).numel() for p in model.parameters() if p.requires_grad)}")
 
     # We need to recalculate our total training steps as the size of the training dataloader may have changed.
     num_update_steps_per_epoch = math.ceil(len(dataloader) / gradient_accumulation_steps)

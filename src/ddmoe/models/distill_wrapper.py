@@ -55,9 +55,6 @@ class AntiDistillWrapper(nn.Module):
                 param.requires_grad = True
                 logger.info(f"Setting trainable on {name} (set to trainable? {param.requires_grad})")
 
-        total_trainable_params = sum(p.numel() for p in self.teacher_model.parameters() if p.requires_grad)
-        logger.info(f"Total trainable parameters: {total_trainable_params}")
-
     def forward(self, *args, **kwargs) -> AntiDistillCausalLMOutputWithPast:
         assert self.training, "AntiDistillWrapper should only be used in training mode"
 
