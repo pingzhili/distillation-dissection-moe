@@ -7,7 +7,7 @@ KD_TEMP=1.0
 EPOCH=3
 OUTPUT_DIR="outputs/olmoe-antidistill-coef$KD_COEF-temp$KD_TEMP-epoch$EPOCH"
 
-accelerate launch --config_file configs/zero3-2gpu-ga4.yaml \
+accelerate launch --config_file configs/zero3-2gpu-ga8.yaml \
     --num_processes=2 \
     --num_machines=1 \
     --machine_rank=0 \
