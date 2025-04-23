@@ -44,11 +44,11 @@ class AntiDistillWrapper(nn.Module):
         logger.info(f"KD temperature: {kd_temperature}")
 
         logger.info("Only train TEACHER model's LM head, freeze all others")
-        # for param in self.proxy_model.parameters():
-        #     param.requires_grad = False
-        #
-        # for param in self.teacher_model.parameters():
-        #     param.requires_grad = False
+        for param in self.proxy_model.parameters():
+            param.requires_grad = False
+
+        for param in self.teacher_model.parameters():
+            param.requires_grad = False
 
         for name, param in self.teacher_model.named_parameters():
             if "lm_head" in name or "embed_tokens" in name:
