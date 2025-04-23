@@ -32,6 +32,7 @@ class AntiDistillWrapper(nn.Module):
     ):
         super().__init__()
         self.teacher_model = teacher_model
+        self.teacher_model.train()
         self.proxy_model = proxy_model
         self.vocab_size = min(teacher_model.config.vocab_size, proxy_model.config.vocab_size)
         self.anti_kd_coef = anti_kd_coef
@@ -52,7 +53,7 @@ class AntiDistillWrapper(nn.Module):
         for name, param in self.teacher_model.named_parameters():
             if "lm_head" in name or "embed_tokens" in name:
                 param.requires_grad = True
-                logger.info(f"LM head: {name} (set to trainable? {param.requires_grad})")
+                logger.info(f"Setting trainable on {name} (set to trainable? {param.requires_grad})")
 
         total_trainable_params = sum(p.numel() for p in self.teacher_model.parameters() if p.requires_grad)
         logger.info(f"Total trainable parameters: {total_trainable_params}")
