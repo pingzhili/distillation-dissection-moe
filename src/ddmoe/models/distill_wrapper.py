@@ -53,7 +53,7 @@ class AntiDistillWrapper(nn.Module):
         for param in self.proxy_model.parameters():
             param.requires_grad = False
 
-        total_trainable_params = sum(p.numel() for p in self.parameters() if p.requires_grad)
+        total_trainable_params = sum(p.numel() for p in self.teacher_model.parameters() if p.requires_grad)
         logger.info(f"Total trainable parameters: {total_trainable_params}")
 
     def forward(self, *args, **kwargs) -> AntiDistillCausalLMOutputWithPast:
