@@ -7,12 +7,7 @@ KD_TEMP=1.0
 EPOCH=3
 OUTPUT_DIR="outputs/qwen7b-antidistill-coef$KD_COEF-temp$KD_TEMP-epoch$EPOCH"
 
-accelerate launch --config_file configs/zero3-4gpu-ga32.yaml \
-    --num_processes=2 \
-    --num_machines=1 \
-    --machine_rank=0 \
-    --main_process_port=23333 \
-    --mixed_precision=bf16 \
+accelerate launch --config_file configs/zero3-4gpu-ga32.yaml --main_process_port=23333 \
     scripts/finetune-antidistill.py \
     --anti_kd_coef=$KD_COEF \
     --kd_temperature=$KD_TEMP \
