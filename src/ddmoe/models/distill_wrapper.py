@@ -66,6 +66,9 @@ class AntiDistillWrapper(nn.Module):
         teacher_logits = teacher_outputs.logits[..., :self.vocab_size]
         proxy_logits = proxy_outputs.logits[..., :self.vocab_size]
 
+        teacher_logits = teacher_logits.to(torch.float32)
+        proxy_logits = proxy_logits.to(torch.float32)
+
         kd_criteria = nn.KLDivLoss(reduction="batchmean")
         kd_loss = kd_criteria(
             F.log_softmax(proxy_logits / self.kd_temperature, dim=-1),
