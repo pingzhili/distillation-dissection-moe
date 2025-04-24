@@ -12,7 +12,7 @@ accelerate launch --config_file configs/zero3-4gpu-ga32.yaml \
     --num_machines=1 \
     --machine_rank=0 \
     --main_process_port=23333 \
-    --mixed_precision=fp16 \
+    --mixed_precision=bf16 \
     scripts/finetune-antidistill.py \
     --anti_kd_coef=$KD_COEF \
     --kd_temperature=$KD_TEMP \
