@@ -13,11 +13,12 @@ def dump_valid_data(
 ):
     tokenizer = "allenai/OLMoE-1B-7B-0125-Instruct" if "olmoe" in model_name else "moonshotai/Moonlight-16B-A3B-Instruct"
     sampling_params = SamplingParams(
-        max_tokens=1024
+        max_tokens=2048,
     )
     llm = LLM(
         model=model_name,
         tokenizer=tokenizer,
+        trust_remote_code=True,
         max_model_len=4096,
     )
     

@@ -70,7 +70,7 @@ def train_antidistill(
         batch_size_per_device: int = 4,
         gradient_accumulation_steps: int = 4,
         num_train_epochs: int = 2,
-        learning_rate: float = 5e-4,
+        learning_rate: float = 5e-5,
         weight_decay: float = 0.01,
         warmup_ratio: float = 0.1,
         num_workers: int = 4,
