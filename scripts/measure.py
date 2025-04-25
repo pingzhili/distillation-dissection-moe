@@ -5,14 +5,15 @@ from fire import Fire
 import torch
 from tqdm import tqdm
 import pickle
-REFERENCE_MODEL_HIDDEN_STATES = "outputs/profiling/moonlight-instruct-sft-r1-distill-1000/router_tokens.pt"
+# REFERENCE_MODEL_HIDDEN_STATES = "outputs/profiling/moonlight-instruct-sft-r1-distill-1000/router_tokens.pt"
+REFERENCE_MODEL_HIDDEN_STATES = "outputs/moonlight-instruct-sft-r1-distill/checkpoint-1000/router_tokens.pt"
 TARGET_MODEL_HIDDEN_STATES_DICT = {}
 
 
 def measure(metrics: str, model_source: str="sft"):
-    for file in os.listdir("outputs/profiling"):
+    for file in os.listdir(f"outputs/olmoe-{model_source}"):
         if f"olmoe-{model_source}-" in file:
-            TARGET_MODEL_HIDDEN_STATES_DICT[file] = os.path.join("outputs/profiling", file, "router_tokens.pt")
+            TARGET_MODEL_HIDDEN_STATES_DICT[file] = os.path.join(f"outputs/olmoe-{model_source}", file, "router_tokens.pt")
 
     logger.info(f"Loading target models: {TARGET_MODEL_HIDDEN_STATES_DICT.keys()}")
     logger.info(f"Loading reference model: {REFERENCE_MODEL_HIDDEN_STATES}")
