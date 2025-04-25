@@ -1,5 +1,5 @@
 import os
-import random
+from loguru import logger
 from functools import partial
 
 import torch
@@ -18,8 +18,10 @@ from ddmoe.models.deepseek import DeepseekV3ForCausalLM, DeepseekV3MoE
 set_seed(233)
 
 
-def dump_router_token_hidden_states(checkpoint_path: str, save_dir: str):
-    if "Moonlight-16B-A3B-Instruct" in checkpoint_path:
+def dump_router_token_hidden_states(
+    checkpoint_path: str, save_dir: str, valid_dataset: str,
+):
+    if "moonlight" in checkpoint_path.lower():
         model = DeepseekV3ForCausalLM.from_pretrained(checkpoint_path, trust_remote_code=True, device_map="auto")
     else:
         model = AutoModelForCausalLM.from_pretrained(checkpoint_path, trust_remote_code=True).cuda()
@@ -27,19 +29,24 @@ def dump_router_token_hidden_states(checkpoint_path: str, save_dir: str):
         tokenizer = AutoTokenizer.from_pretrained(
             "allenai/OLMoE-1B-7B-0125-Instruct", trust_remote_code=True
         )
-    elif "Moonlight-16B-A3B-Instruct" in checkpoint_path:
+    elif "moonlight" in checkpoint_path.lower():
         tokenizer = AutoTokenizer.from_pretrained(
             "moonshotai/Moonlight-16B-A3B-Instruct", trust_remote_code=True
         )
     else:
         raise NotImplementedError(f"Tokenizer for {checkpoint_path} not implemented.")
 
-    dataset = load_dataset("Phando/sft-dataset-valid", split="train", trust_remote_code=True)
+    if valid_dataset is not None:
+        logger.info(f"Loading valid dataset from {valid_dataset}")
+        dataset = load_dataset("csv", data_files=valid_dataset)["train"]
+    else:  
+        logger.info(f"Loading default valid dataset from Phando/sft-dataset-valid")
+        dataset = load_dataset("Phando/sft-dataset-valid", split="train", trust_remote_code=True)
     preprocess_fn = partial(batch_preprocess_fn, task="chat-profile", tokenizer=tokenizer)
     columns = dataset.column_names
-    print(columns)
+    logger.info(f"Columns: {columns}")
     dataset = dataset.map(preprocess_fn, batched=True, num_proc=8, remove_columns=["question", "response"])
-    print(dataset[0])
+    logger.info(f"Dataset[0]: {dataset[0]}")
     data_loader = DataLoader(
         dataset,
         batch_size=1,
@@ -107,7 +114,7 @@ def dump_router_token_hidden_states(checkpoint_path: str, save_dir: str):
             routing_hidden_states_per_module[module_name]["input"].append(hidden_states.squeeze().detach().cpu())
             identity = hidden_states
             orig_shape = hidden_states.shape
-            topk_idx, topk_weight, logits = self.gate(hidden_states)
+            topk_idx, topk_weight, aux_loss, logits = self.gate(hidden_states)
             routing_hidden_states_per_module[module_name]["selected_experts"].append(
                 topk_idx.squeeze().detach().cpu())
             hidden_states = hidden_states.view(-1, hidden_states.shape[-1])
@@ -146,9 +153,10 @@ def dump_router_token_hidden_states(checkpoint_path: str, save_dir: str):
     torch.save(routing_hidden_states_per_module, os.path.join(save_dir, "router_tokens.pt"))
 
 
-def main(content: str, checkpoint_path: str, save_dir: str):
+def main(content: str, checkpoint_path: str, save_dir: str, valid_dataset: str = None):
+    logger.info(f"Dumping {content} from {checkpoint_path} to {save_dir}")
     if content == "router_tokens":
-        dump_router_token_hidden_states(checkpoint_path, save_dir=save_dir)
+        dump_router_token_hidden_states(checkpoint_path, save_dir=save_dir, valid_dataset=valid_dataset)
     else:
         raise ValueError(f"Invalid content: {content}")
 

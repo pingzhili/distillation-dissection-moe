@@ -1,3 +1,4 @@
+from loguru import logger
 from functools import partial
 from typing import Any, Dict, List, Optional
 
@@ -75,13 +76,24 @@ def gsm8k_chat_eval_batch_preprocess_fn(
 def chat_profile_batch_preprocess_fn(
         examples: Dict[str, List[Any]], tokenizer: Optional[PreTrainedTokenizerBase] = None
 ) -> Dict[str, List[Any]]:
+    question_list = []
+    response_list = []
+    source_list = []
+    for q, r, s in zip(examples["question"], examples["response"], examples["source"]):
+        if q is not None and r is not None and s is not None:
+            question_list.append(q)
+            response_list.append(r)
+            source_list.append(s)
+        else:
+            logger.warning(f"Skipping example with None values: {q}, {r}, {s}")
+            
     chat_list = [
-        [{"role": "system", "content": "You are a helpful assistant provided by Moonshot-AI."},
+        [{"role": "system", "content": "You are a helpful assistant."},
          {"role": "user", "content": question},
          {"role": "assistant", "content": response}]
-        for question, response in zip(examples["question"], examples["response"])
+        for question, response in zip(question_list, response_list)
     ]
-    source_list = list(examples["source"])
+
     if tokenizer is None:
         return {"content": chat_list, "source": source_list}
     else:
