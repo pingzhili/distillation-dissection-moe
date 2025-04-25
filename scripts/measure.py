@@ -32,7 +32,7 @@ def measure(metrics: str, model_source: str="sft"):
         measure_results[target_model_name] = results
     
     # save results
-    with open(f"outputs/profiling/{model_source}_measure_results_{metrics}.pkl", "wb") as f:
+    with open(f"outputs/profiling/measure/{model_source}_{metrics}.pkl", "wb") as f:
         pickle.dump(measure_results, f)
 
     return measure_results

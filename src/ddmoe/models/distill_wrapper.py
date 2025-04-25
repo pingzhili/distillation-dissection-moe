@@ -74,6 +74,11 @@ class AntiDistillWrapper(nn.Module):
             F.log_softmax(proxy_logits / self.kd_temperature, dim=-1),
             F.softmax(teacher_logits / self.kd_temperature, dim=-1)
         )
+        # if is nan, set to 0
+        if torch.isnan(kd_loss):
+            kd_loss = 0
+            logger.warning("KD loss is nan, set to 0")
+            
         anti_kd_loss = - self.anti_kd_coef * kd_loss
 
         loss = lm_loss + anti_kd_loss

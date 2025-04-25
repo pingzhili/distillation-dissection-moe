@@ -3,7 +3,7 @@ export CUDA_VISIBLE_DEVICES=0,1,2,3
 export NCCL_P2P_DISABLE=1
 
 KD_COEF=${1:-0.001}
-KD_TEMP=0.6
+KD_TEMP=2
 EPOCH=2
 LR=5e-5
 OUTPUT_DIR="outputs/qwen7b-antidistill-coef$KD_COEF-temp$KD_TEMP-epoch$EPOCH-lr$LR"
