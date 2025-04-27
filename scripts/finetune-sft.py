@@ -27,8 +27,6 @@ def train_sft(
         base_model_name: str = "allenai/OLMoE-1B-7B-0125",
         dataset_name: str = "Phando/sft-dataset-original-filtered",
         dataset_filter_condition: str = None,
-        num_samples: int = None,
-        sampling_seed: int = 233,
         max_length: int = 1024,
         batch_size_per_device: int = 4,
         gradient_accumulation_steps: int = 4,
@@ -85,6 +83,8 @@ def train_sft(
         tokenizer = AutoTokenizer.from_pretrained("deepseek-ai/DeepSeek-V2-Lite", trust_remote_code=True)
     elif "moonlight" in base_model_name.lower():
         tokenizer = AutoTokenizer.from_pretrained("moonshotai/Moonlight-16B-A3B-Instruct", trust_remote_code=True)
+    elif "llama-3.2" in base_model_name.lower():
+        tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B-Instruct", trust_remote_code=True)
     else:
         raise NotImplementedError(f"Tokenizer for {base_model_name} not implemented.")
     tokenizer.model_max_length = max_length
@@ -114,6 +114,8 @@ def train_sft(
             proc_name = "sft-deepseek-v2-train"
         elif "moonlight" in base_model_name.lower():
             proc_name = "sft-moonlight-train"
+        elif "llama-3.2" in base_model_name.lower():
+            proc_name = "reasoning-llama-3.2-train"
         else:
             raise NotImplementedError(f"Preprocess for {base_model_name} not implemented.")
         sft_dataset = raw_datasets.map(

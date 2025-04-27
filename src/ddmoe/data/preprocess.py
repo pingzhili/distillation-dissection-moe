@@ -17,7 +17,8 @@ def batch_preprocess_fn(
         "sft-olmoe-train": partial(sft_train_batch_preprocess_fn, tokenizer=tokenizer, boa_token="<|assistant|>"),
         "sft-deepseek-v2-train": partial(sft_train_batch_preprocess_fn, tokenizer=tokenizer, boa_token="Assistant:"),
         "sft-moonlight-train": partial(sft_train_batch_preprocess_fn, tokenizer=tokenizer,
-                                       boa_token="<|im_assistant|>assistant<|im_middle|>")
+                                       boa_token="<|im_assistant|>assistant<|im_middle|>"),
+        "reasoning-llama-3.2-train": partial(reasoning_train_batch_preprocess_fn, tokenizer=tokenizer)
     }
     return task_to_fn[task](examples)
 
@@ -176,3 +177,10 @@ def sft_train_batch_preprocess_fn(
         "attention_mask": all_attention_masks,
         "labels": all_labels
     }
+
+def reasoning_train_batch_preprocess_fn(
+        examples: Dict[str, List[Any]],
+        tokenizer: PreTrainedTokenizerBase,
+):
+    # TODO
+    pass

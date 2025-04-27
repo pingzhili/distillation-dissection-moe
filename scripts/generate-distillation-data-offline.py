@@ -1,9 +1,9 @@
 import json
 import os
-import time
 from functools import partial
 
-import openai
+from vllm import LLM
+from vllm.sampling_params import SamplingParams
 from datasets import load_dataset
 from fire import Fire
 from loguru import logger
@@ -25,50 +25,56 @@ def append_generation(response, prompt, output_file):
 
 
 def api_generate_distillation_data_eager(
-        dataset_name: str = "ServiceNow-AI/R1-Distill-SFT",
-        base_url: str = "http://localhost:8008/v1",
-        save_dir: str = "data/phimoe/",
-        model_name: str = "microsoft/Phi-3.5-MoE-instruct",
+        dataset_name: str = "openai/gsm8k",
+        save_dir: str = "data/r1-qwen-7b-gsm8k/",
+        model_name: str = "deepseek-ai/DeepSeek-R1-Distill-Qwen-7B",
         num_workers: int = 4,
+        num_samples: int = None,
 ):
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
         logger.info(f"Created directory {save_dir}")
 
-    client = openai.Client(base_url=base_url, api_key="EMPTY")
+    if "qwen" in model_name.lower():
+        tokenizer = "deepseek-ai/DeepSeek-R1-Distill-Qwen-7B"
+    else:
+        raise NotImplementedError(f"Model {model_name} is not supported")
+    
     is_gsm_8k = "gsm8k" in dataset_name.lower()
-    is_reasoning = "r1" in dataset_name.lower()
+    sampling_params = SamplingParams(max_tokens=4096)
+    llm = LLM(
+        model=model_name,
+        tokenizer=tokenizer,
+        trust_remote_code=True,
+        max_model_len=5120,
+    )
 
     if is_gsm_8k:
-        dataset = load_dataset(
-            dataset_name, "main", trust_remote_code=True
-        )
+        dataset = load_dataset(dataset_name, "main", trust_remote_code=True)
     else:
-        dataset = load_dataset(
-            dataset_name, "v1", trust_remote_code=True
-        )
+        raise NotImplementedError(f"Dataset {dataset_name} is not supported")
     dataset = dataset["train"]
+    
+    if num_samples is not None:
+        logger.info(f"Sampling {num_samples} samples from the dataset")
+        dataset = dataset.select(range(num_samples))
+        save_file = f"distillation_data-{num_samples}.jsonl"
+    else:
+        save_file = "distillation_data.jsonl"
 
-    # remove those samples with "source" is "ai2-adapt-dev/tulu_hard_coded_repeated_10"
-    if not is_gsm_8k:
-        dataset = dataset.filter(lambda example: example["source"] != "ai2-adapt-dev/tulu_hard_coded_repeated_10")
     if is_gsm_8k:
         preprocess_fn = partial(batch_preprocess_fn, task="chat-gen-gsm8k")
     else:
-        preprocess_fn = partial(batch_preprocess_fn, task="chat-gen")
+        raise NotImplementedError(f"Dataset {dataset_name} is not supported")
     dataset = dataset.map(preprocess_fn, batched=True, num_proc=num_workers, remove_columns=dataset.column_names)
 
-    with open(os.path.join(save_dir, "distillation_data.jsonl"), 'a') as file:
+    with open(os.path.join(save_dir, save_file), 'a') as file:
         for j, messages in enumerate(tqdm(dataset["content"], desc="Generating distillation data via API")):
-            completion = client.chat.completions.create(
-                model=model_name,
-                messages=messages,
-            )
-            reasoning_response = completion.choices[0].message.reasoning_content
-            response = completion.choices[0].message.content
+            outputs = llm.chat(messages, sampling_params=sampling_params)
+            
+            response = outputs[0].outputs[0].text
             prompt = messages[-1]["content"]
             result_content = json.dumps({
-                "reasoning_response": reasoning_response,
                 "response": response,
                 "prompt": prompt,
             }, ensure_ascii=False) + "\n"
