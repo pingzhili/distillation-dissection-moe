@@ -8,7 +8,7 @@ accelerate launch --config_file configs/zero3-8gpu-ga16.yaml \
     --num_machines=1 \
     --machine_rank=0 \
     --main_process_port=23333 \
-    --mixed_precision=fp16 \
+    --mixed_precision=bf16 \
     scripts/finetune-sft.py \
     --base_model_name="meta-llama/Llama-3.2-1B" \
     --output_dir="outputs/llama-3.2-1b-distill--$SOURCE_MODEL" \
