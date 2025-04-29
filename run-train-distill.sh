@@ -1,0 +1,1 @@
+bash train-distill.sh "qwen-antidistill-coef0.00001-temp2-epoch2-lr5e-5-checkpoint-60"

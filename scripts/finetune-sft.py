@@ -22,6 +22,8 @@ from ddmoe.models.deepseek import DeepseekV3ForCausalLM
 set_seed(233)
 logger = get_logger(__name__)
 
+os.environ["HF_TOKEN"] = "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"
+
 
 def train_sft(
         base_model_name: str = "allenai/OLMoE-1B-7B-0125",
@@ -64,7 +66,10 @@ def train_sft(
 
     accelerator.wait_for_everyone()
 
-    raw_datasets = load_dataset(dataset_name, split="train", trust_remote_code=True)
+    if "jsonl" in dataset_name:
+        raw_datasets = load_dataset("json", data_files=dataset_name)["train"]
+    else:
+        raw_datasets = load_dataset(dataset_name, split="train", trust_remote_code=True)
     if dataset_filter_condition is not None:
         # e.g. "example['source'] == 'riddle_sense'"
         before_filter = len(raw_datasets)
@@ -85,6 +90,7 @@ def train_sft(
         tokenizer = AutoTokenizer.from_pretrained("moonshotai/Moonlight-16B-A3B-Instruct", trust_remote_code=True)
     elif "llama-3.2" in base_model_name.lower():
         tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B-Instruct", trust_remote_code=True)
+        tokenizer.pad_token = tokenizer.eos_token
     else:
         raise NotImplementedError(f"Tokenizer for {base_model_name} not implemented.")
     tokenizer.model_max_length = max_length
