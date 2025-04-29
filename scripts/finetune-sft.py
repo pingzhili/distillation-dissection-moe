@@ -36,7 +36,7 @@ def train_sft(
         warmup_ratio: float = 0.1,
         output_dir: str = "./outputs/",
         num_workers: int = 4,
-        checkpointing_steps: int = 1000,
+        checkpointing_steps: int = -1,
         logging_steps: int = 1,
         debugging: bool = False,
         enable_lora: bool = False,
@@ -145,6 +145,8 @@ def train_sft(
     optimizer = torch.optim.AdamW(optimizer_grouped_parameters, lr=learning_rate)
     num_update_steps_per_epoch = math.ceil(len(dataloader) / gradient_accumulation_steps)
     num_training_steps = num_update_steps_per_epoch * num_train_epochs
+    if checkpointing_steps == -1:
+        checkpointing_steps = num_update_steps_per_epoch
     warmup_steps = int(warmup_ratio * num_training_steps)
     lr_scheduler = get_scheduler(
         "cosine",
