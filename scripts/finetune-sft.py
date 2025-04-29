@@ -29,7 +29,7 @@ def train_sft(
         base_model_name: str = "allenai/OLMoE-1B-7B-0125",
         dataset_name: str = "Phando/sft-dataset-original-filtered",
         dataset_filter_condition: str = None,
-        max_length: int = 4096,
+        max_length: int = 8192,
         batch_size_per_device: int = 4,
         gradient_accumulation_steps: int = 4,
         num_train_epochs: int = 2,
