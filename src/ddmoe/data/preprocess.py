@@ -182,5 +182,36 @@ def reasoning_train_batch_preprocess_fn(
         examples: Dict[str, List[Any]],
         tokenizer: PreTrainedTokenizerBase,
 ):
-    # TODO
-    pass
+    """
+    Examples
+    --------
+    >>> from transformers import AutoTokenizer
+    >>> tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B-Instruct", trust_remote_code=True)
+    >>> raw_examples = {"prompt": ["Hello, how are you?", "What is the capital of France?"], "response": ["I am good, how can I help you?", "The capital of France is Paris."]}
+    >>> preprocessed_examples = reasoning_train_batch_preprocess_fn(raw_examples, tokenizer)
+    >>> preprocessed_examples.keys()
+    dict_keys(['input_ids', 'labels'])
+    """
+    response_list = [f"{response}<|eot_id|>" for response in examples["response"]]   
+    chat_list = [
+        [{"role": "system", "content": "Please reason step by step, and put your final answer within \\boxed{{}}."},
+         {"role": "user", "content": message}] for message in examples["prompt"]
+    ]
+    input_str_list = tokenizer.apply_chat_template(chat_list, add_generation_prompt=True, tokenize=False)
+    input_str_list = [f"{input_str}<think>\n" for input_str in input_str_list]
+    input_id_list = tokenizer(input_str_list, add_special_tokens=False)["input_ids"]
+    response_id_list = tokenizer(response_list, add_special_tokens=False)["input_ids"]
+    
+    input_ids = [
+        input_id + response_id
+        for input_id, response_id in zip(input_id_list, response_id_list)
+    ]
+    labels = [
+        [-100] * len(input_id) + response_id
+        for input_id, response_id in zip(input_id_list, response_id_list)
+    ]
+    
+    return {
+        "input_ids": input_ids,
+        "labels": labels
+    }
