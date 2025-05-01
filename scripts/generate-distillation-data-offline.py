@@ -28,6 +28,7 @@ def api_generate_distillation_data_eager(
         dataset_name: str = "openai/gsm8k",
         save_dir: str = "data/r1-qwen-7b-gsm8k/",
         model_name: str = "deepseek-ai/DeepSeek-R1-Distill-Qwen-7B",
+        is_eval: bool = False,
         num_workers: int = 4,
         num_samples: int = None,
 ):
@@ -37,6 +38,9 @@ def api_generate_distillation_data_eager(
 
     if "qwen" in model_name.lower():
         tokenizer = "deepseek-ai/DeepSeek-R1-Distill-Qwen-7B"
+    elif "llama-3.2" in model_name.lower():
+        tokenizer = "meta-llama/Llama-3.2-1B-Instruct"
+        tokenizer.pad_token = tokenizer.eos_token
     else:
         raise NotImplementedError(f"Model {model_name} is not supported")
     
@@ -53,14 +57,17 @@ def api_generate_distillation_data_eager(
         dataset = load_dataset(dataset_name, "main", trust_remote_code=True)
     else:
         raise NotImplementedError(f"Dataset {dataset_name} is not supported")
-    dataset = dataset["train"]
+    if is_eval:
+        dataset = dataset["test"]
+    else:
+        dataset = dataset["train"]
     
     if num_samples is not None:
         logger.info(f"Sampling {num_samples} samples from the dataset")
         dataset = dataset.select(range(num_samples))
-        save_file = f"distillation_data-{num_samples}.jsonl"
+        save_file = f"distillation_data-{num_samples}.jsonl" if not is_eval else f"eval-{num_samples}.jsonl"
     else:
-        save_file = "distillation_data.jsonl"
+        save_file = "distillation_data.jsonl" if not is_eval else "eval.jsonl"
 
     if is_gsm_8k:
         preprocess_fn = partial(batch_preprocess_fn, task="chat-gen-gsm8k")

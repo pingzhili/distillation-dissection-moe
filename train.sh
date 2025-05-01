@@ -29,7 +29,7 @@ export NCCL_P2P_DISABLE=1
 #    --num_machines=1 \
 #    --machine_rank=0 \
 #    --main_process_port=23333 \
-#    --mixed_precision=fp16 \
+#    --mixed_precision=bf16 \
 #    scripts/finetune-sft.py \
 #    --output_dir=$OUTPUT_DIR \
 #    --base_model_name="allenai/OLMoE-1B-7B-0125" \
@@ -47,7 +47,7 @@ for SUB_TASK in "taco" "code_contests" "codeforces" "apps" "numina_math"; do
     --num_machines=1 \
     --machine_rank=0 \
     --main_process_port=23333 \
-    --mixed_precision=fp16 \
+    --mixed_precision=bf16 \
     scripts/finetune-sft.py \
     --output_dir=$OUTPUT_DIR \
     --base_model_name="allenai/OLMoE-1B-7B-0125" \
