@@ -18,7 +18,8 @@ def batch_preprocess_fn(
         "sft-deepseek-v2-train": partial(sft_train_batch_preprocess_fn, tokenizer=tokenizer, boa_token="Assistant:"),
         "sft-moonlight-train": partial(sft_train_batch_preprocess_fn, tokenizer=tokenizer,
                                        boa_token="<|im_assistant|>assistant<|im_middle|>"),
-        "reasoning-llama-3.2-train": partial(reasoning_train_batch_preprocess_fn, tokenizer=tokenizer)
+        "reasoning-llama-3.2-train": partial(reasoning_train_batch_preprocess_fn, tokenizer=tokenizer),
+        "reasoning-llama-3.2-eval": partial(reasoning_train_batch_preprocess_fn, tokenizer=tokenizer, is_eval=True)
     }
     return task_to_fn[task](examples)
 
@@ -182,6 +183,7 @@ def sft_train_batch_preprocess_fn(
 def reasoning_train_batch_preprocess_fn(
         examples: Dict[str, List[Any]],
         tokenizer: PreTrainedTokenizerBase,
+        is_eval: bool = False,
 ):
     """
     Examples
@@ -193,6 +195,14 @@ def reasoning_train_batch_preprocess_fn(
     >>> preprocessed_examples.keys()
     dict_keys(['input_ids', 'labels'])
     """
+    if "question" in examples:
+        examples["prompt"] = examples["question"]
+        del examples["question"]
+    
+    if "answer" in examples:
+        examples["response"] = examples["answer"]
+        del examples["answer"]
+        
     response_list = [f"{response}<|eot_id|>" for response in examples["response"]]
     chat_list = [
         [{"role": "system", "content": "Please reason step by step, and put your final answer within \\boxed{{}}."},
@@ -200,6 +210,10 @@ def reasoning_train_batch_preprocess_fn(
     ]
     input_str_list = tokenizer.apply_chat_template(chat_list, add_generation_prompt=True, tokenize=False)
     input_str_list = [f"{input_str}<think>\n" for input_str in input_str_list]
+    if is_eval:
+        input_ids = tokenizer(input_str_list)["input_ids"]
+        return {"input_ids": input_ids, "response": examples["response"]}
+    
     input_id_list = tokenizer(input_str_list, add_special_tokens=False)["input_ids"]
     response_id_list = tokenizer(response_list, add_special_tokens=False)["input_ids"]
 
