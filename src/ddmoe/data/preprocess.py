@@ -197,11 +197,9 @@ def reasoning_train_batch_preprocess_fn(
     """
     if "question" in examples:
         examples["prompt"] = examples["question"]
-        del examples["question"]
     
     if "answer" in examples:
         examples["response"] = examples["answer"]
-        del examples["answer"]
         
     response_list = [f"{response}<|eot_id|>" for response in examples["response"]]
     chat_list = [
@@ -212,7 +210,7 @@ def reasoning_train_batch_preprocess_fn(
     input_str_list = [f"{input_str}<think>\n" for input_str in input_str_list]
     if is_eval:
         input_ids = tokenizer(input_str_list)["input_ids"]
-        return {"input_ids": input_ids, "response": examples["response"]}
+        return {"input_ids": input_ids, "response": examples["response"], "prompt": input_str_list}
     
     input_id_list = tokenizer(input_str_list, add_special_tokens=False)["input_ids"]
     response_id_list = tokenizer(response_list, add_special_tokens=False)["input_ids"]
