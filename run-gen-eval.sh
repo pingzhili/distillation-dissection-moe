@@ -1,5 +1,5 @@
 export PYTHONPATH=$PYTHONPATH:src
-export CUDA_VISIBLE_DEVICES=0
+export CUDA_VISIBLE_DEVICES=8,9
 export CUDA_LAUNCH_BLOCKING=1
 
 # MODEL_PATH="outputs/qwen7b-antidistill-coef0.00003-temp2-epoch2-lr5e-5/checkpoint-60"
@@ -23,7 +23,11 @@ export CUDA_LAUNCH_BLOCKING=1
 #     --model_path="$MODEL_PATH" 
 
 
-MODEL_PATH="outputs/qwen7b-antidistill-coef0.00001-temp2-epoch2-lr5e-5/checkpoint-60"
+MODEL_PATH="outputs/llama-3.2-1b-distill--qwen-antidistill-coef0.00001-temp2-epoch2-lr5e-5-checkpoint-60/checkpoint-177"
 python scripts/generate-eval.py \
-    --model_path="$MODEL_PATH" 
+    --model_path="$MODEL_PATH" --num_gpus=2
+
+# MODEL_PATH="outputs/qwen7b-antidistill-coef0.00001-temp2-epoch2-lr5e-5/checkpoint-60"
+# python scripts/generate-eval.py \
+#     --model_path="$MODEL_PATH" 
 

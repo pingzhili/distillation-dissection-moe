@@ -18,6 +18,7 @@ def main(
     task_name: str="gsm8k",
     batch_size: int=4,
     num_workers: int=4,
+    num_gpus: int=1,
 ):
     if task_name == "gsm8k":
         dataset_name = "openai/gsm8k"
@@ -52,6 +53,7 @@ def main(
         tokenizer=tokenizer_name,
         trust_remote_code=True,
         max_model_len=8192,
+        tensor_parallel_size=num_gpus,
     )
     # model = AutoModelForCausalLM.from_pretrained(model_path, trust_remote_code=True, device_map="cuda:0")
     # model.eval()
