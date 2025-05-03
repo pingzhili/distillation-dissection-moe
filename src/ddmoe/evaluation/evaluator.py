@@ -14,7 +14,7 @@ from sympy import Basic, MatrixBase
 from .math_utils import parse_sympy_expression, sympy_expr_eq
 
 # Regex patterns for extracting answers
-BOXED_ANSWER_PATTERN = r'\\boxed{([^{}]*)}'
+BOXED_ANSWER_PATTERN = r'\boxed{([^{}]*)}'
 FINAL_ANSWER_PATTERN = r'(?:final answer|answer)[^:]*:[ \t]*(\S.*?(?=\.|$))'
 NUMBER_PATTERN = r'(?:^|\s|is[ \t]+)(-?\d+(?:\.\d+)?)(?:$|\s|\.)'
 COMPLEX_EXPRESSION_PATTERN = r'(\d+\s*[\*\/]\s*\(\s*[\d\+\-]+\s*\)[\s\d\+\-\*\/\^]*)'
@@ -143,24 +143,10 @@ class AnswerExtractor:
         Returns:
             The extracted answer if found, None otherwise
         """
-        # Special handling for test cases
-        if "The expression is 2*(5-1)/2" in text:
-            return "2*(5-1)/2"
-
-        # Special test cases
-        test_cases = {
-            "Therefore, the final answer is: $\\boxed{42}$. I hope it is correct.": "42",
-            "The value is 42.": "42"
-        }
-
-        if text in test_cases:
-            return test_cases[text]
-
-        # Try extraction methods in order of preference
         extractors = [
             cls.extract_from_boxed,
-            cls.extract_final_answer,
-            cls.extract_expression,
+            # cls.extract_final_answer,
+            # cls.extract_expression,
             cls.extract_numeric
         ]
 
@@ -268,7 +254,7 @@ class AnswerComparator:
 
 
 def evaluate_predictions(
-        predictions: List[str], references: List[str], use_last_number: bool = False,
+        predictions: List[str], references: List[str], use_last_number: bool = True,
         is_math_task: bool = False, precision: int = 6
         ) -> Dict[str, float]:
     """Evaluate a list of predictions against references.
@@ -292,11 +278,12 @@ def evaluate_predictions(
 
     for pred, ref in zip(predictions, references):
         # Extract answer from prediction
-        extracted = AnswerExtractor.extract_answer(pred, use_last_number=use_last_number)
+        extracted_pred = AnswerExtractor.extract_answer(pred, use_last_number=use_last_number)
+        extracted_ref = AnswerExtractor.extract_answer(ref, use_last_number=use_last_number)
 
-        if extracted:
+        if extracted_pred:
             extracted_count += 1
-            if AnswerComparator.compare_answers(extracted, ref, is_math_task=is_math_task, precision=precision):
+            if AnswerComparator.compare_answers(extracted_pred, extracted_ref, is_math_task=is_math_task, precision=precision):
                 correct += 1
 
     results = {

@@ -29,6 +29,10 @@ def main(
         tokenizer = AutoTokenizer.from_pretrained(tokenizer_name, trust_remote_code=True)
         tokenizer.pad_token = tokenizer.eos_token
         preprocess_fn = partial(batch_preprocess_fn, task="reasoning-llama-3.2-eval", tokenizer=tokenizer)
+    elif "r1-distill-qwen-7b" in model_path.lower() or "qwen7b-antidistill" in model_path.lower():
+        tokenizer_name = "deepseek-ai/DeepSeek-R1-Distill-Qwen-7B"
+        tokenizer = AutoTokenizer.from_pretrained(tokenizer_name, trust_remote_code=True)
+        preprocess_fn = partial(batch_preprocess_fn, task="reasoning-llama-3.2-eval", tokenizer=tokenizer) # this is not typo
     else:
         raise ValueError(f"Model {model_path} not supported")
     
@@ -54,6 +58,7 @@ def main(
     
     predictions = []
     ground_truths = []
+    prompt_list = []
     
     logger.info(f"Generating predictions for {len(datasets)} examples with batch size {batch_size}!")
     for batch_id in tqdm(range(len(datasets) // batch_size)):
@@ -62,12 +67,13 @@ def main(
         batch_answer = batch_datasets['response']
         
         outputs = llm.generate(batch_prompt, sampling_params=sampling_params)
-        prediction = [output.outputs[0].text for output in outputs]
+        batch_prediction = [output.outputs[0].text for output in outputs]
         
-        predictions.extend(prediction)
+        predictions.extend(batch_prediction)
         ground_truths.extend(batch_answer)
+        prompt_list.extend(batch_prompt)
         
-        for pred, gt in zip(prediction, batch_answer):
+        for pred, gt in zip(batch_prediction, batch_answer):
             logger.debug(f"Input: {batch_prompt}")
             logger.debug(f"Prediction: {pred}")
             logger.debug(f"Ground truth: {gt}")
@@ -90,10 +96,23 @@ def main(
     results = evaluate_predictions(predictions, ground_truths)
     logger.info(f"Results: {results}")
     
-    if not os.path.isdir(model_path):
-        os.makedirs(model_path)
+    results["model_name"] = model_path
+    results["task_name"] = task_name
+    results["content"] = []
+    for sample_id in range(len(predictions)):
+        results["content"].append({
+            "id": sample_id,
+            "prompt": prompt_list[sample_id],
+            "prediction": predictions[sample_id],
+            "ground_truth": ground_truths[sample_id]
+        })
     
-    with open(os.path.join(model_path, f"{task_name}-results.json"), "w") as f:
+    save_dir = model_path if "outputs/" in model_path else os.path.join("outputs", model_path)
+    
+    if not os.path.isdir(save_dir):
+        os.makedirs(save_dir)
+    
+    with open(os.path.join(save_dir, f"{task_name}-results.json"), "w") as f:
         json.dump(results, f, indent=4)
         
 if __name__ == "__main__":
