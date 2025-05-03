@@ -23,7 +23,7 @@ export CUDA_LAUNCH_BLOCKING=1
 #     --model_path="$MODEL_PATH" 
 
 
-MODEL_PATH="outputs/llama-3.2-1b-distill--qwen-antidistill-coef0.00001-temp2-epoch2-lr5e-5-checkpoint-60/checkpoint-177"
+MODEL_PATH="../ddmoe/outputs/llama-3.2-1b-distill--qwen-antidistill-coef0.00001-temp2-epoch2-lr5e-5-checkpoint-60/checkpoint-177"
 python scripts/generate-eval.py \
     --model_path="$MODEL_PATH" --num_gpus=2
 
