@@ -26,7 +26,7 @@ def append_generation(response, prompt, output_file):
 
 def api_generate_distillation_data_eager(
         dataset_name: str = "ServiceNow-AI/R1-Distill-SFT",
-        base_url: str = "http://localhost:8008/v1",
+        base_url: str = "http://localhost:2334/v1",
         save_dir: str = "data/phimoe/",
         model_name: str = "microsoft/Phi-3.5-MoE-instruct",
         num_workers: int = 4,
@@ -52,6 +52,8 @@ def api_generate_distillation_data_eager(
     # remove those samples with "source" is "ai2-adapt-dev/tulu_hard_coded_repeated_10"
     if not is_gsm_8k:
         dataset = dataset.filter(lambda example: example["source"] != "ai2-adapt-dev/tulu_hard_coded_repeated_10")
+        # shuffle the dataset
+        dataset = dataset.shuffle(seed=42)
     if is_gsm_8k:
         preprocess_fn = partial(batch_preprocess_fn, task="chat-gen-gsm8k")
     else:
