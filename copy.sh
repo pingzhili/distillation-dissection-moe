@@ -1,0 +1,1 @@
+scp -r /home/pingzhi/distillation-dissection-moe/data/ pingzhi@unites4.cs.unc.edu:/home/pingzhi/distillation-dissection-moe
