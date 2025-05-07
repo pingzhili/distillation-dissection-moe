@@ -19,33 +19,43 @@ def main(
     batch_size: int=4,
     num_workers: int=4,
     num_gpus: int=1,
-):
-    if task_name == "gsm8k":
-        dataset_name = "openai/gsm8k"
-    else:
-        raise ValueError(f"Task name {task_name} not supported")
-    
+    debugging: bool=False,
+):    
     if "llama-3.2" in model_path.lower():
         tokenizer_name = "meta-llama/Llama-3.2-1B-Instruct"
         tokenizer = AutoTokenizer.from_pretrained(tokenizer_name, trust_remote_code=True)
         tokenizer.pad_token = tokenizer.eos_token
-        preprocess_fn = partial(batch_preprocess_fn, task="reasoning-llama-3.2-eval", tokenizer=tokenizer)
     elif "r1-distill-qwen-7b" in model_path.lower() or "qwen7b-antidistill" in model_path.lower():
         tokenizer_name = "deepseek-ai/DeepSeek-R1-Distill-Qwen-7B"
         tokenizer = AutoTokenizer.from_pretrained(tokenizer_name, trust_remote_code=True)
-        preprocess_fn = partial(batch_preprocess_fn, task="reasoning-llama-3.2-eval", tokenizer=tokenizer) # this is not typo
     else:
         raise ValueError(f"Model {model_path} not supported")
     
+    if task_name == "gsm8k":
+        datasets = load_dataset("openai/gsm8k", "main", trust_remote_code=True)["test"]
+        task_type = "math"
+    elif task_name == "math":
+        datasets = load_dataset("pingzhili/math", trust_remote_code=True)["test"]
+        task_type = "math"
+    elif task_name == "tabmwp": 
+        datasets = load_dataset("pingzhili/tabmwp", trust_remote_code=True)["test"]
+        task_type = "table"
+    else:
+        raise ValueError(f"Task name {task_name} not supported")
+    
+    preprocess_fn = partial(
+        batch_preprocess_fn, task="math-reasoning-llama-3.2-eval", tokenizer=tokenizer, task_type=task_type
+    )
+    
     # no cache
-    datasets = load_dataset(dataset_name, "main", trust_remote_code=True)["test"]
     datasets = datasets.map(
         preprocess_fn, 
         num_proc=num_workers, 
         batched=True
     )
-    # debugging
-    # datasets = datasets.select(range(4))
+
+    if debugging:
+        datasets = datasets.select(range(4))
     
     sampling_params = SamplingParams(max_tokens=8192, stop=[tokenizer.pad_token])
     llm = LLM(
@@ -55,8 +65,6 @@ def main(
         max_model_len=8192,
         tensor_parallel_size=num_gpus,
     )
-    # model = AutoModelForCausalLM.from_pretrained(model_path, trust_remote_code=True, device_map="cuda:0")
-    # model.eval()
     
     predictions = []
     ground_truths = []
@@ -81,20 +89,6 @@ def main(
             logger.debug(f"Ground truth: {gt}")
             logger.debug("-"*100)
     
-    # for i in tqdm(range(len(datasets))):
-    #     prompt = datasets[i]["prompt"]
-    #     # remove bos token from prompt
-    #     prompt = prompt.split(tokenizer.bos_token)[-1]
-    #     answer = datasets[i]["response"]
-        
-    #     outputs = llm.generate(prompt, sampling_params=sampling_params)
-    #     prediction = outputs[0].outputs[0].text
-        
-    #     predictions.append(prediction)
-    #     ground_truths.append(answer)
-    #     logger.debug(f"Input: {prompt}")
-    #     logger.debug(f"Prediction: {prediction}")
-    
     results = evaluate_predictions(predictions, ground_truths)
     logger.info(f"Results: {results}")
     
@@ -113,9 +107,16 @@ def main(
     
     if not os.path.isdir(save_dir):
         os.makedirs(save_dir)
-    
-    with open(os.path.join(save_dir, f"{task_name}-results.json"), "w") as f:
+        
+    if debugging:
+        save_path = os.path.join(save_dir, f"{task_name}-results-debug.json")
+    else:
+        save_path = os.path.join(save_dir, f"{task_name}-results.json")
+        
+    with open(save_path, "w") as f:
         json.dump(results, f, indent=4)
+    
+    logger.info(f"Results saved to {save_path}")
         
 if __name__ == "__main__":
     Fire(main)

@@ -8,7 +8,7 @@ __all__ = ["batch_preprocess_fn"]
 
 
 def batch_preprocess_fn(
-        examples: Dict[str, List[Any]], task: str, tokenizer: PreTrainedTokenizerBase = None
+        examples: Dict[str, List[Any]], task: str, tokenizer: PreTrainedTokenizerBase = None, task_type: str=None,
 ) -> Dict[str, List[Any]]:
     task_to_fn = {
         "chat-gen": partial(chat_eval_batch_preprocess_fn, tokenizer=tokenizer),
@@ -18,8 +18,8 @@ def batch_preprocess_fn(
         "sft-deepseek-v2-train": partial(sft_train_batch_preprocess_fn, tokenizer=tokenizer, boa_token="Assistant:"),
         "sft-moonlight-train": partial(sft_train_batch_preprocess_fn, tokenizer=tokenizer,
                                        boa_token="<|im_assistant|>assistant<|im_middle|>"),
-        "reasoning-llama-3.2-train": partial(reasoning_train_batch_preprocess_fn, tokenizer=tokenizer),
-        "reasoning-llama-3.2-eval": partial(reasoning_train_batch_preprocess_fn, tokenizer=tokenizer, is_eval=True)
+        "math-reasoning-llama-3.2-train": partial(reasoning_batch_preprocess_fn, tokenizer=tokenizer, task_type=task_type),
+        "math-reasoning-llama-3.2-eval": partial(reasoning_batch_preprocess_fn, tokenizer=tokenizer, is_eval=True, task_type=task_type),
     }
     return task_to_fn[task](examples)
 
@@ -180,10 +180,11 @@ def sft_train_batch_preprocess_fn(
     }
 
 
-def reasoning_train_batch_preprocess_fn(
+def reasoning_batch_preprocess_fn(
         examples: Dict[str, List[Any]],
         tokenizer: PreTrainedTokenizerBase,
         is_eval: bool = False,
+        task_type: str = "math",
 ):
     """
     Examples
@@ -191,19 +192,29 @@ def reasoning_train_batch_preprocess_fn(
     >>> from transformers import AutoTokenizer
     >>> tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B-Instruct", trust_remote_code=True)
     >>> raw_examples = {"prompt": ["Hello, how are you?", "What is the capital of France?"], "response": ["I am good, how can I help you?", "The capital of France is Paris."]}
-    >>> preprocessed_examples = reasoning_train_batch_preprocess_fn(raw_examples, tokenizer)
+    >>> preprocessed_examples = reasoning_batch_preprocess_fn(raw_examples, tokenizer)
     >>> preprocessed_examples.keys()
     dict_keys(['input_ids', 'labels'])
     """
-    if "question" in examples:
+    if task_type == "table":
+        examples["prompt"] = [f"###Table: {table}\n###Question: {question}" for table, question in zip(examples["table"], examples["question"])]
+        
+    elif "question" in examples and "prompt" not in examples:
         examples["prompt"] = examples["question"]
     
-    if "answer" in examples:
+    if "answer" in examples and "response" not in examples:
         examples["response"] = examples["answer"]
         
+    TASK_TO_INSTRUCTION = {
+        "math": "Please reason step by step, and put your final answer within \\boxed{{}}.",
+        "table": "Please reason step by step, and put your final answer anfter 'Answer:'.",
+        "selective-4": "Please reason step by step, select your final answer from A, B, C, D and put your final answer anfter 'Answer:'.",
+        "selective-5": "Please reason step by step, select your final answer from A, B, C, D, E and put your final answer anfter 'Answer:'.",
+    }
+
     response_list = [f"{response}<|eot_id|>" for response in examples["response"]]
     chat_list = [
-        [{"role": "system", "content": "Please reason step by step, and put your final answer within \\boxed{{}}."},
+        [{"role": "system", "content": TASK_TO_INSTRUCTION[task_type]},
          {"role": "user", "content": message}] for message in examples["prompt"]
     ]
     input_str_list = tokenizer.apply_chat_template(chat_list, add_generation_prompt=True, tokenize=False)

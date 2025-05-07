@@ -121,7 +121,7 @@ def train_sft(
         elif "moonlight" in base_model_name.lower():
             proc_name = "sft-moonlight-train"
         elif "llama-3.2" in base_model_name.lower():
-            proc_name = "reasoning-llama-3.2-train"
+            proc_name = "math-reasoning-llama-3.2-train"
         else:
             raise NotImplementedError(f"Preprocess for {base_model_name} not implemented.")
         sft_dataset = raw_datasets.map(
