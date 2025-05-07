@@ -7,8 +7,8 @@ CUDA_VISIBLE_DEVICES=0,1 python scripts/generate-eval.py \
 CUDA_VISIBLE_DEVICES=2,3 python scripts/generate-eval.py \
     --model_path="$MODEL_PATH" --task_name="math" --num_gpus=2 &
 
-# CUDA_VISIBLE_DEVICES=4,5 python scripts/generate-eval.py \
-#     --model_path="$MODEL_PATH" --task_name="arcc" --num_gpus=2 &
+CUDA_VISIBLE_DEVICES=4,5 python scripts/generate-eval.py \
+    --model_path="$MODEL_PATH" --task_name="arcc" --num_gpus=2 &
 
-# CUDA_VISIBLE_DEVICES=6,7 python scripts/generate-eval.py \
-#     --model_path="$MODEL_PATH" --task_name="csqa" --num_gpus=2 &
+CUDA_VISIBLE_DEVICES=6,7 python scripts/generate-eval.py \
+    --model_path="$MODEL_PATH" --task_name="csqa" --num_gpus=2 &

@@ -17,8 +17,9 @@ def main(
     model_path: str,
     task_name: str="gsm8k",
     batch_size: int=4,
-    num_workers: int=4,
+    num_workers: int=1,
     num_gpus: int=1,
+    max_tokens: int=8192,
     debugging: bool=False,
 ):    
     if "llama-3.2" in model_path.lower():
@@ -40,6 +41,12 @@ def main(
     elif task_name == "tabmwp": 
         datasets = load_dataset("pingzhili/tabmwp", trust_remote_code=True)["test"]
         task_type = "table"
+    elif task_name == "csqa":
+        datasets = load_dataset("tau/commonsense_qa", trust_remote_code=True)["validation"]
+        task_type = "csqa"
+    elif task_name == "arcc":
+        datasets = load_dataset("allenai/ai2_arc", "ARC-Challenge", trust_remote_code=True)["test"]
+        task_type = "arcc"
     else:
         raise ValueError(f"Task name {task_name} not supported")
     
@@ -57,12 +64,12 @@ def main(
     if debugging:
         datasets = datasets.select(range(4))
     
-    sampling_params = SamplingParams(max_tokens=8192, stop=[tokenizer.pad_token])
+    sampling_params = SamplingParams(max_tokens=max_tokens, stop=[tokenizer.pad_token])
     llm = LLM(
         model=model_path,
         tokenizer=tokenizer_name,
         trust_remote_code=True,
-        max_model_len=8192,
+        max_model_len=max_tokens,
         tensor_parallel_size=num_gpus,
     )
     

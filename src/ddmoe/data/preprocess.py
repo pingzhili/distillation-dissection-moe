@@ -198,18 +198,43 @@ def reasoning_batch_preprocess_fn(
     """
     if task_type == "table":
         examples["prompt"] = [f"###Table: {table}\n###Question: {question}" for table, question in zip(examples["table"], examples["question"])]
-        
+    elif task_type == "csqa":
+        for choices in examples["choices"]:
+            assert len(choices["text"]) == 5, f"CSQA choices must have 5 options, but got {len(choices['text'])}"
+        examples["prompt"] = [
+            f"""Question: {question} (A) {choices["text"][0]} (B) {choices["text"][1]} (C) {choices["text"][2]} (D) {choices["text"][3]} (E) {choices["text"][4]}""" 
+            for question, choices in zip(examples["question"], examples["choices"])
+        ]
+    elif task_type == "arcc":
+        # examples["prompt"] = [
+        #     f"""Question: {question} (A) {choices["text"][0]} (B) {choices["text"][1]} (C) {choices["text"][2]} (D) {choices["text"][3]}""" 
+        #     for question, choices in zip(examples["question"], examples["choices"])
+        # ]
+        examples["prompt"] = []
+        for question, choices in zip(examples["question"], examples["choices"]):
+            if len(choices["text"]) == 4:
+                examples["prompt"].append(f"""Question: {question} (A) {choices["text"][0]} (B) {choices["text"][1]} (C) {choices["text"][2]} (D) {choices["text"][3]}""")
+            elif len(choices["text"]) == 3:
+                examples["prompt"].append(f"""Question: {question} (A) {choices["text"][0]} (B) {choices["text"][1]} (C) {choices["text"][2]}""")
+            elif len(choices["text"]) == 5:
+                examples["prompt"].append(f"""Question: {question} (A) {choices["text"][0]} (B) {choices["text"][1]} (C) {choices["text"][2]} (D) {choices["text"][3]} (E) {choices["text"][4]}""")
+            else:
+                raise ValueError(f"ARCC choices got {len(choices['text'])}")
     elif "question" in examples and "prompt" not in examples:
         examples["prompt"] = examples["question"]
     
-    if "answer" in examples and "response" not in examples:
+    if task_type == "csqa":
+        examples["response"] = [f"Answer: {answer}" for answer in examples["answerKey"]]
+    elif task_type == "arcc":
+        examples["response"] = [f"Answer: {answer}" for answer in examples["answerKey"]]
+    elif "answer" in examples and "response" not in examples:
         examples["response"] = examples["answer"]
         
     TASK_TO_INSTRUCTION = {
         "math": "Please reason step by step, and put your final answer within \\boxed{{}}.",
         "table": "Please reason step by step, and put your final answer anfter 'Answer:'.",
-        "selective-4": "Please reason step by step, select your final answer from A, B, C, D and put your final answer anfter 'Answer:'.",
-        "selective-5": "Please reason step by step, select your final answer from A, B, C, D, E and put your final answer anfter 'Answer:'.",
+        "arcc": "Please reason step by step, select your final answer from A, B, C, or D and put your final answer anfter 'Answer:'.",
+        "csqa": "Please reason step by step, select your final answer from A, B, C, D, or E and put your final answer anfter 'Answer:'.",
     }
 
     response_list = [f"{response}<|eot_id|>" for response in examples["response"]]
