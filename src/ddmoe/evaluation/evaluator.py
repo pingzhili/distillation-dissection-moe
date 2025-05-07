@@ -232,6 +232,9 @@ class AnswerComparator:
         Returns:
             True if answers match, False otherwise
         """
+        if predicted is None or reference is None:
+            return False
+
         # Simple string match
         if predicted.strip() == reference.strip():
             return True
