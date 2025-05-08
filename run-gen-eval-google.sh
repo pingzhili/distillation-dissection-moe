@@ -44,7 +44,7 @@ sleep 600
 for i in {0..7}; do
     PORT=$((23333 + i))
     python scripts/generate-distillation-data.py \
-        --dataset_name="ServiceNow-AI/R1-Distill-SFT" --save_dir="data/r1-qwen-7b-mixed-split-${i}-of-8/" \
+        --dataset_name="ServiceNow-AI/R1-Distill-SFT" --save_dir="data/r1-qwen-7b-mixed/" \
         --model_name="deepseek-ai/DeepSeek-R1-Distill-Qwen-7B" --max_tokens=8192 \
         --shuffle=False --split_id=${i} --num_splits=8 --base_url="http://localhost:${PORT}/v1" &
 done
