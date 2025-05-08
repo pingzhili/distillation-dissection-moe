@@ -30,6 +30,7 @@ def api_generate_distillation_data_eager(
         save_dir: str = "data/phimoe/",
         model_name: str = "microsoft/Phi-3.5-MoE-instruct",
         num_workers: int = 4,
+        max_tokens: int = 8192,
 ):
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
@@ -59,12 +60,25 @@ def api_generate_distillation_data_eager(
     else:
         preprocess_fn = partial(batch_preprocess_fn, task="chat-gen")
     dataset = dataset.map(preprocess_fn, batched=True, num_proc=num_workers, remove_columns=dataset.column_names)
+    
+    if "qwen3" in model_name.lower():
+        kwargs = {
+            "temperature": 0.6,
+            "top_p": 0.95,
+            "extra_body": {
+                "top_k": 20,
+            },
+        }
+    else:
+        kwargs = {}
 
     with open(os.path.join(save_dir, "distillation_data.jsonl"), 'a') as file:
         for j, messages in enumerate(tqdm(dataset["content"], desc="Generating distillation data via API")):
             completion = client.chat.completions.create(
                 model=model_name,
                 messages=messages,
+                max_tokens=max_tokens,
+                **kwargs
             )
             reasoning_response = completion.choices[0].message.reasoning_content
             response = completion.choices[0].message.content
