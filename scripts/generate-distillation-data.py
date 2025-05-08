@@ -31,6 +31,9 @@ def api_generate_distillation_data_eager(
         model_name: str = "microsoft/Phi-3.5-MoE-instruct",
         num_workers: int = 4,
         max_tokens: int = 8192,
+        shuffle: bool = True,
+        split_id: int = 0,
+        num_splits: int = None,
 ):
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)
@@ -53,13 +56,20 @@ def api_generate_distillation_data_eager(
     # remove those samples with "source" is "ai2-adapt-dev/tulu_hard_coded_repeated_10"
     if not is_gsm_8k:
         dataset = dataset.filter(lambda example: example["source"] != "ai2-adapt-dev/tulu_hard_coded_repeated_10")
-        # shuffle the dataset
+    if shuffle:
         dataset = dataset.shuffle(seed=42)
+    
     if is_gsm_8k:
         preprocess_fn = partial(batch_preprocess_fn, task="chat-gen-gsm8k")
     else:
         preprocess_fn = partial(batch_preprocess_fn, task="chat-gen")
     dataset = dataset.map(preprocess_fn, batched=True, num_proc=num_workers, remove_columns=dataset.column_names)
+    
+    if num_splits is not None:
+        # selecte the no. split_id of the dataset
+        num_samples_per_split = len(dataset) // num_splits
+        logger.info(f"Selecting {num_samples_per_split} samples for split {split_id} of {num_splits}")
+        dataset = dataset.select(range(split_id * num_samples_per_split, (split_id + 1) * num_samples_per_split))
     
     if "qwen3" in model_name.lower():
         kwargs = {
@@ -71,8 +81,13 @@ def api_generate_distillation_data_eager(
         }
     else:
         kwargs = {}
+    
+    if num_samples_per_split is not None:
+        save_file_name = f"distillation_data_split-{split_id}-of-{num_splits}.jsonl"
+    else:
+        save_file_name = "distillation_data.jsonl"
 
-    with open(os.path.join(save_dir, "distillation_data.jsonl"), 'a') as file:
+    with open(os.path.join(save_dir, save_file_name), 'a') as file:
         for j, messages in enumerate(tqdm(dataset["content"], desc="Generating distillation data via API")):
             completion = client.chat.completions.create(
                 model=model_name,
