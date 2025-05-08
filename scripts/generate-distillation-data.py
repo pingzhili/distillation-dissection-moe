@@ -58,6 +58,8 @@ def api_generate_distillation_data_eager(
         dataset = dataset.filter(lambda example: example["source"] != "ai2-adapt-dev/tulu_hard_coded_repeated_10")
     if shuffle:
         dataset = dataset.shuffle(seed=42)
+        if num_splits is not None:
+            raise ValueError("Shuffle and split cannot be applied at the same time")
     
     if is_gsm_8k:
         preprocess_fn = partial(batch_preprocess_fn, task="chat-gen-gsm8k")
