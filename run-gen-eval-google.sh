@@ -37,8 +37,8 @@ CUDA_VISIBLE_DEVICES=12,13 vllm serve Qwen/Qwen3-8B \
 CUDA_VISIBLE_DEVICES=14,15 vllm serve Qwen/Qwen3-8B \
     --port 23340 --tensor-parallel-size 2 --enable-reasoning --reasoning-parser deepseek_r1 &
 
-# wait for 5 mins until all the servers are started
-sleep 300
+# wait for 10 mins until all the servers are started
+sleep 600
 
 # distributed generate by 8 splits
 for i in {0..7}; do
