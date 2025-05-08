@@ -38,7 +38,7 @@ export PYTHONPATH=$PYTHONPATH:src
 #     --port 23340 --tensor-parallel-size 2 --enable-reasoning --reasoning-parser deepseek_r1 &
 
 # # wait for 10 mins until all the servers are started
-sleep 600
+# sleep 600
 
 # distributed generate by 8 splits
 for i in {0..7}; do
