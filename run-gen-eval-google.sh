@@ -13,31 +13,31 @@ export PYTHONPATH=$PYTHONPATH:src
 # CUDA_VISIBLE_DEVICES=6,7 python scripts/generate-eval.py \
 #     --model_path="$MODEL_PATH" --task_name="csqa" --num_gpus=2 &
 
-CUDA_VISIBLE_DEVICES=0,1 vllm serve Qwen/Qwen3-8B \
-    --port 23333 --tensor-parallel-size 2 --enable-reasoning --reasoning-parser deepseek_r1 &
+# CUDA_VISIBLE_DEVICES=0,1 vllm serve Qwen/Qwen3-8B \
+#     --port 23333 --tensor-parallel-size 2 --enable-reasoning --reasoning-parser deepseek_r1 &
 
-CUDA_VISIBLE_DEVICES=2,3 vllm serve Qwen/Qwen3-8B \
-    --port 23334 --tensor-parallel-size 2 --enable-reasoning --reasoning-parser deepseek_r1 &
+# CUDA_VISIBLE_DEVICES=2,3 vllm serve Qwen/Qwen3-8B \
+#     --port 23334 --tensor-parallel-size 2 --enable-reasoning --reasoning-parser deepseek_r1 &
 
-CUDA_VISIBLE_DEVICES=4,5 vllm serve Qwen/Qwen3-8B \
-    --port 23335 --tensor-parallel-size 2 --enable-reasoning --reasoning-parser deepseek_r1 &
+# CUDA_VISIBLE_DEVICES=4,5 vllm serve Qwen/Qwen3-8B \
+#     --port 23335 --tensor-parallel-size 2 --enable-reasoning --reasoning-parser deepseek_r1 &
 
-CUDA_VISIBLE_DEVICES=6,7 vllm serve Qwen/Qwen3-8B \
-    --port 23336 --tensor-parallel-size 2 --enable-reasoning --reasoning-parser deepseek_r1 &
+# CUDA_VISIBLE_DEVICES=6,7 vllm serve Qwen/Qwen3-8B \
+#     --port 23336 --tensor-parallel-size 2 --enable-reasoning --reasoning-parser deepseek_r1 &
 
-CUDA_VISIBLE_DEVICES=8,9 vllm serve Qwen/Qwen3-8B \
-    --port 23337 --tensor-parallel-size 2 --enable-reasoning --reasoning-parser deepseek_r1 &
+# CUDA_VISIBLE_DEVICES=8,9 vllm serve Qwen/Qwen3-8B \
+#     --port 23337 --tensor-parallel-size 2 --enable-reasoning --reasoning-parser deepseek_r1 &
 
-CUDA_VISIBLE_DEVICES=10,11 vllm serve Qwen/Qwen3-8B \
-    --port 23338 --tensor-parallel-size 2 --enable-reasoning --reasoning-parser deepseek_r1 &
+# CUDA_VISIBLE_DEVICES=10,11 vllm serve Qwen/Qwen3-8B \
+#     --port 23338 --tensor-parallel-size 2 --enable-reasoning --reasoning-parser deepseek_r1 &
 
-CUDA_VISIBLE_DEVICES=12,13 vllm serve Qwen/Qwen3-8B \
-    --port 23339 --tensor-parallel-size 2 --enable-reasoning --reasoning-parser deepseek_r1 &
+# CUDA_VISIBLE_DEVICES=12,13 vllm serve Qwen/Qwen3-8B \
+#     --port 23339 --tensor-parallel-size 2 --enable-reasoning --reasoning-parser deepseek_r1 &
 
-CUDA_VISIBLE_DEVICES=14,15 vllm serve Qwen/Qwen3-8B \
-    --port 23340 --tensor-parallel-size 2 --enable-reasoning --reasoning-parser deepseek_r1 &
+# CUDA_VISIBLE_DEVICES=14,15 vllm serve Qwen/Qwen3-8B \
+#     --port 23340 --tensor-parallel-size 2 --enable-reasoning --reasoning-parser deepseek_r1 &
 
-# wait for 10 mins until all the servers are started
+# # wait for 10 mins until all the servers are started
 sleep 600
 
 # distributed generate by 8 splits
