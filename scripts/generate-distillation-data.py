@@ -82,7 +82,7 @@ def api_generate_distillation_data_eager(
     else:
         kwargs = {}
     
-    if num_samples_per_split is not None:
+    if num_splits is not None:
         save_file_name = f"distillation_data_split-{split_id}-of-{num_splits}.jsonl"
     else:
         save_file_name = "distillation_data.jsonl"
