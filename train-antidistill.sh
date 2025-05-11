@@ -21,7 +21,7 @@ accelerate launch --config_file configs/zero3-8gpu-ga32.yaml --main_process_port
     --num_train_epochs=$EPOCH \
     --batch_size_per_device=1 \
     --gradient_accumulation_steps=8 \
-    --checkpointing_steps=70 \
+    --checkpointing_steps=60 \
     --learning_rate=$LR \
     --lm_head_projector_dim=$HEAD_PROJ_DIM \
     --max_length=4096
