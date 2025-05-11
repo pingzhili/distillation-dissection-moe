@@ -13,6 +13,8 @@ export PYTHONPATH=$PYTHONPATH:src
 # CUDA_VISIBLE_DEVICES=6,7 python scripts/generate-eval.py \
 #     --model_path="$MODEL_PATH" --task_name="csqa" --num_gpus=2 &
 
+#########################
+
 # CUDA_VISIBLE_DEVICES=0,1 vllm serve Qwen/Qwen3-8B \
 #     --port 23333 --tensor-parallel-size 2 --enable-reasoning --reasoning-parser deepseek_r1 &
 
@@ -40,13 +42,19 @@ export PYTHONPATH=$PYTHONPATH:src
 # # wait for 10 mins until all the servers are started
 # sleep 600
 
-# distributed generate by 8 splits
-for i in {0..7}; do
-    PORT=$((23333 + i))
-    python scripts/generate-distillation-data.py \
-        --dataset_name="ServiceNow-AI/R1-Distill-SFT" --save_dir="data/r1-qwen-7b-mixed/" \
-        --model_name="Qwen/Qwen3-8B" --max_tokens=8192 \
-        --shuffle=False --split_id=${i} --num_splits=8 --base_url="http://localhost:${PORT}/v1" &
+# # distributed generate by 8 splits
+# for i in {0..7}; do
+#     PORT=$((23333 + i))
+#     python scripts/generate-distillation-data.py \
+#         --dataset_name="ServiceNow-AI/R1-Distill-SFT" --save_dir="data/r1-qwen-7b-mixed/" \
+#         --model_name="Qwen/Qwen3-8B" --max_tokens=8192 \
+#         --shuffle=False --split_id=${i} --num_splits=8 --base_url="http://localhost:${PORT}/v1" &
+# done
+
+
+#########################
+
+
+for KDCOEF in 0.00003 0.00001;do
+  bash train-antidistill.sh $KDCOEF
 done
-
-

@@ -24,7 +24,7 @@ logger = get_logger(__name__)
 
 
 def process_r1_thinking_data(
-        examples: Dict[str, List[Any]], tokenizer: PreTrainedTokenizerBase
+        examples: Dict[str, List[Any]], tokenizer: PreTrainedTokenizerBase, is_gsm8k: bool = False
 ) -> Dict[str, List[Any]]:
     input_ids_list = []
     labels_list = []
@@ -34,10 +34,16 @@ def process_r1_thinking_data(
         question = examples["prompt"][i]
         response = examples["response"][i]
         reasoning = examples["reasoning_response"][i]
-        messages = [
-            {"role": "system", "content": "Please reason step by step, and put your final answer within \\boxed{{}}."},
-            {"role": "user", "content": question}
-        ]
+        if is_gsm8k:
+            messages = [
+                {"role": "system", "content": "Please reason step by step, and put your final answer within \\boxed{{}}."},
+                {"role": "user", "content": question}
+            ]
+        else:
+            messages = [
+                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "user", "content": question}
+            ]
         input_ids = tokenizer.apply_chat_template(messages, add_generation_prompt=True)  # end with "<think>\n"
         response_with_thinking = f"{reasoning}\n</think>{response}{tokenizer.eos_token}"
         labels = tokenizer.encode(response_with_thinking, add_special_tokens=False)
@@ -69,7 +75,7 @@ def train_antidistill(
         max_length: int = 2048,
         batch_size_per_device: int = 4,
         gradient_accumulation_steps: int = 4,
-        num_train_epochs: int = 2,
+        num_train_epochs: float = 2,
         learning_rate: float = 5e-5,
         weight_decay: float = 0.01,
         warmup_ratio: float = 0.1,
@@ -105,7 +111,8 @@ def train_antidistill(
         logger.info(f"Loading dataset from {dataset_path} at local.")
         raw_datasets = load_dataset("json", data_files=dataset_path)["train"]
     else:
-        raise NotImplementedError(f"Dataset {dataset_path} not implemented.")
+        logger.info(f"Loading dataset from {dataset_path} at remote.")
+        raw_datasets = load_dataset(dataset_path)["train"]
 
     # debugging
     if debugging:
@@ -129,10 +136,12 @@ def train_antidistill(
         if p.requires_grad:
             logger.info(f"{n} requires grad.")
 
+    is_gsm8k = "gsm8k" in dataset_path.lower()
+    
     with accelerator.main_process_first():
         columns_names = raw_datasets.column_names
         sft_dataset = raw_datasets.map(
-            lambda x: process_r1_thinking_data(x, tokenizer=tokenizer),
+            lambda x: process_r1_thinking_data(x, tokenizer=tokenizer, is_gsm8k=is_gsm8k),
             batched=True,
             remove_columns=columns_names,
             num_proc=num_workers,
