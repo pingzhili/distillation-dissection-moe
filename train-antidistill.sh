@@ -15,6 +15,7 @@ accelerate launch --config_file configs/zero3-8gpu-ga32.yaml --main_process_port
     scripts/finetune-antidistill.py \
     --teacher_model_name="Qwen/Qwen3-8B" \
     --proxy_model_name="Qwen/Qwen3-4B" \
+    --dataset_path="pingzhili/qwen3-8b-mixed" \
     --anti_kd_coef=$KD_COEF \
     --kd_temperature=$KD_TEMP \
     --output_dir=$OUTPUT_DIR \
