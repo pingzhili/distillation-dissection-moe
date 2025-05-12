@@ -233,7 +233,7 @@ def train_antidistill(
             if completed_steps % checkpointing_steps == 0 and accelerator.sync_gradients:
                 checkpointing_dir = os.path.join(output_dir, f"checkpoint-{completed_steps}")
                 unwrapped_model = accelerator.unwrap_model(model).teacher_model
-                state_dict = accelerator.get_state_dict(unwrapped_model)
+                state_dict = accelerator.get_state_dict(model)
                 unwrapped_model.save_pretrained(
                     checkpointing_dir,
                     is_main_process=accelerator.is_main_process,
@@ -241,6 +241,7 @@ def train_antidistill(
                 )
                 if accelerator.is_main_process:
                     logger.info(f"Saving model lm_head only")
+                    state_dict = {k: v for k, v in state_dict.items() if "lm_head" in k}
                     torch.save(state_dict, os.path.join(checkpointing_dir, "lm_head.pt"))
 
             if completed_steps > num_training_steps:
@@ -256,7 +257,7 @@ def train_antidistill(
     accelerator.wait_for_everyone()
     unwrapped_model = accelerator.unwrap_model(model).teacher_model
     checkpointing_dir = os.path.join(output_dir, f"checkpoint-{completed_steps}")
-    state_dict = accelerator.get_state_dict(unwrapped_model)
+    state_dict = accelerator.get_state_dict(model)
     unwrapped_model.save_pretrained(
         checkpointing_dir,
         is_main_process=accelerator.is_main_process,
@@ -264,6 +265,7 @@ def train_antidistill(
     )
     if accelerator.is_main_process:
         logger.info(f"Saving model lm_head only")
+        state_dict = {k: v for k, v in state_dict.items() if "lm_head" in k}
         torch.save(state_dict, os.path.join(checkpointing_dir, "lm_head.pt"))
     logger.info(f"Saving model checkpoint to {checkpointing_dir}")
     accelerator.wait_for_everyone()
