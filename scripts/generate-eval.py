@@ -29,6 +29,9 @@ def main(
     elif "r1-distill-qwen-7b" in model_path.lower() or "qwen7b-antidistill" in model_path.lower():
         tokenizer_name = "deepseek-ai/DeepSeek-R1-Distill-Qwen-7B"
         tokenizer = AutoTokenizer.from_pretrained(tokenizer_name, trust_remote_code=True)
+    elif "qwen3" in model_path.lower():
+        tokenizer_name = "Qwen/Qwen3-8B"
+        tokenizer = AutoTokenizer.from_pretrained(tokenizer_name, trust_remote_code=True)
     else:
         raise ValueError(f"Model {model_path} not supported")
     
