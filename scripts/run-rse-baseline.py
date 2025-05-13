@@ -69,21 +69,22 @@ Please output the results in following format:
 ```"""
 
 def run_rse_baseline(
-    model_path: str,
+    model_csv_path: str,
     base_url: str = "http://localhost:2333/v1",
     model_name: str = "Qwen/Qwen3-4B",
     r1_distill_dataset_name: str = "pingzhili/sft-r1-distill",
 ):
-    logger.info(f"Running RSE Baseline for {model_path}")
+    response_model_name = model_csv_path.split("/")[-1].split(".csv")[0]
+    logger.info(f"Running RSE Baseline for {response_model_name}")
     
     client = openai.Client(base_url=base_url, api_key="EMPTY")
     
     r1_distill_dataset = load_dataset(r1_distill_dataset_name, split="train")
-    model_valid_dataset = Dataset.from_csv(os.path.join(model_path, "gen-valid.csv"))
+    model_valid_dataset = Dataset.from_csv(model_csv_path)
     question_to_r1_distill_answer = {}
 
     for sample in tqdm(r1_distill_dataset, desc="Building map"):
-        question_to_r1_distill_answer[sample["problem"]] = sample["reannotated_assistant_content"]
+        question_to_r1_distill_answer[sample["question"]] = sample["response"]
     
     similarity_scores = []
     for id, sample in tqdm(enumerate(model_valid_dataset), desc="Running RSE Baseline"):
@@ -91,16 +92,15 @@ def run_rse_baseline(
         model_response = sample["response"]
         r1_response = question_to_r1_distill_answer[question]
         
-        # use Temperature=0.6, TopP=0.95, TopK=20, and MinP=0
+        # using Temperature=0.7, TopP=0.8, TopK=20, and MinP=0.
         completion = client.chat.completions.create(
             model=model_name,
             messages=[
                 {"role": "system", "content": prompt},
                 {"role": "user", "content": f"Question: {question}\nReference Answer: {r1_response}\nModel Response: {model_response}"}
             ],
-            temperature=0.6,
-            top_p=0.95,
-            top_k=20,
+            temperature=0.7,
+            top_p=0.8,
         )
         response = completion.choices[0].message.content
         
@@ -110,7 +110,7 @@ def run_rse_baseline(
         similarity_scores.append(scores)
     
     # save the similarity scores
-    with open(os.path.join(model_path, "rse_similarity_scores.json"), "w") as f:
+    with open(os.path.join(os.path.dirname(model_csv_path), f"{response_model_name}-rse.json"), "w") as f:
         json.dump(similarity_scores, f)
     
     # calculate the average scores
