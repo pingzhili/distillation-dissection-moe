@@ -206,10 +206,6 @@ def reasoning_batch_preprocess_fn(
             for question, choices in zip(examples["question"], examples["choices"])
         ]
     elif task_type == "arcc":
-        # examples["prompt"] = [
-        #     f"""Question: {question} (A) {choices["text"][0]} (B) {choices["text"][1]} (C) {choices["text"][2]} (D) {choices["text"][3]}""" 
-        #     for question, choices in zip(examples["question"], examples["choices"])
-        # ]
         examples["prompt"] = []
         for question, choices in zip(examples["question"], examples["choices"]):
             if len(choices["text"]) == 4:
