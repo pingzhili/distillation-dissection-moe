@@ -36,6 +36,7 @@ class AntiDistillWrapper(nn.Module):
         self.teacher_model = teacher_model
         self.teacher_model.train()
         self.proxy_model_list = proxy_model if isinstance(proxy_model, list) else [proxy_model]
+        self.proxy_model_list = nn.ModuleList(self.proxy_model_list)
         self.vocab_size = teacher_model.config.vocab_size
         self.anti_kd_coef = anti_kd_coef
         self.kd_temperature = kd_temperature
