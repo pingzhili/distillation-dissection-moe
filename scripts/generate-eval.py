@@ -93,7 +93,7 @@ def main(
     logger.info(f"Generating predictions for {len(datasets)} examples with batch size {batch_size}!")
     for batch_id in tqdm(range(len(datasets) // batch_size)):
         batch_datasets = datasets[batch_id * batch_size:(batch_id + 1) * batch_size]
-        batch_prompt = [prompt.split(tokenizer.bos_token)[-1] for prompt in batch_datasets['prompt']]
+        batch_prompt = [prompt for prompt in batch_datasets['prompt']]
         batch_answer = batch_datasets['response']
         
         outputs = llm.generate(batch_prompt, sampling_params=sampling_params)
