@@ -123,7 +123,11 @@ def train_antidistill(
 
     tokenizer.model_max_length = max_length
     teacher_model = AutoModelForCausalLM.from_pretrained(teacher_model_name, trust_remote_code=True)
-    proxy_model = AutoModelForCausalLM.from_pretrained(proxy_model_name, trust_remote_code=True)
+    if "," in proxy_model_name:
+        proxy_model_name = proxy_model_name.split(",") # List of model names
+        proxy_model = [AutoModelForCausalLM.from_pretrained(name, trust_remote_code=True) for name in proxy_model_name]
+    else:
+        proxy_model = AutoModelForCausalLM.from_pretrained(proxy_model_name, trust_remote_code=True)
     model = AntiDistillWrapper(
         teacher_model=teacher_model,
         proxy_model=proxy_model,
