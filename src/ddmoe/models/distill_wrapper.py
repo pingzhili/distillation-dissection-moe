@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Union, List
 
 import torch
 from loguru import logger
@@ -26,7 +26,7 @@ class AntiDistillWrapper(nn.Module):
     def __init__(
             self,
             teacher_model: PreTrainedModel,
-            proxy_model: PreTrainedModel,
+            proxy_model: Union[PreTrainedModel, List[PreTrainedModel]],
             anti_kd_coef: float,
             kd_temperature: float,
             lm_head_projector: bool = False,
@@ -35,8 +35,8 @@ class AntiDistillWrapper(nn.Module):
         super().__init__()
         self.teacher_model = teacher_model
         self.teacher_model.train()
-        self.proxy_model = proxy_model
-        self.vocab_size = min(teacher_model.config.vocab_size, proxy_model.config.vocab_size)
+        self.proxy_model_list = proxy_model if isinstance(proxy_model, list) else [proxy_model]
+        self.vocab_size = teacher_model.config.vocab_size
         self.anti_kd_coef = anti_kd_coef
         self.kd_temperature = kd_temperature
 
@@ -46,8 +46,9 @@ class AntiDistillWrapper(nn.Module):
         logger.info(f"KD temperature: {kd_temperature}")
 
         logger.info("Only train TEACHER model's LM head, freeze all others")
-        for param in self.proxy_model.parameters():
-            param.requires_grad = False
+        for model in self.proxy_model_list:
+            for param in model.parameters():
+                param.requires_grad = False
 
         for param in self.teacher_model.parameters():
             param.requires_grad = False
@@ -81,24 +82,27 @@ class AntiDistillWrapper(nn.Module):
 
         teacher_outputs = self.teacher_model(*args, **kwargs)
         with torch.no_grad():
-            proxy_outputs = self.proxy_model(*args, **kwargs)
+            proxy_outputs_list = []
+            for proxy_model in self.proxy_model_list:
+                proxy_outputs_list.append(proxy_model(*args, **kwargs))
 
         lm_loss = teacher_outputs.loss
         teacher_logits = teacher_outputs.logits[..., :self.vocab_size]
-        proxy_logits = proxy_outputs.logits[..., :self.vocab_size]
+        proxy_logits_list = [proxy_outputs.logits[..., :self.vocab_size] for proxy_outputs in proxy_outputs_list]
 
         teacher_logits = teacher_logits.to(torch.float32)
-        proxy_logits = proxy_logits.to(torch.float32)
+        proxy_logits_list = [proxy_logits.to(torch.float32) for proxy_logits in proxy_logits_list]
 
         kd_criteria = nn.KLDivLoss(reduction="batchmean")
-        kd_loss = kd_criteria(
-            F.log_softmax(proxy_logits / self.kd_temperature, dim=-1),
-            F.softmax(teacher_logits / self.kd_temperature, dim=-1)
-        )
-        # if is nan, set to 0
-        if torch.isnan(kd_loss):
-            kd_loss = 0
-            logger.warning("KD loss is nan, set to 0")
+        kd_loss_list = [
+            kd_criteria(
+                F.log_softmax(proxy_logits / self.kd_temperature, dim=-1),
+                F.softmax(teacher_logits / self.kd_temperature, dim=-1)
+            )
+            for proxy_logits in proxy_logits_list
+        ]
+        kd_loss_list = [kd_loss if not torch.isnan(kd_loss) else 0 for kd_loss in kd_loss_list]
+        kd_loss = sum(kd_loss_list) / len(kd_loss_list)
             
         anti_kd_loss = - self.anti_kd_coef * kd_loss
 
