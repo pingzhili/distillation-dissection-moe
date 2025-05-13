@@ -29,24 +29,37 @@ def main(
     elif "r1-distill-qwen-7b" in model_path.lower() or "qwen7b-antidistill" in model_path.lower():
         tokenizer_name = "deepseek-ai/DeepSeek-R1-Distill-Qwen-7B"
         tokenizer = AutoTokenizer.from_pretrained(tokenizer_name, trust_remote_code=True)
+    elif "qwen3" in model_path.lower():
+        tokenizer_name = "Qwen/Qwen3-8B"
+        tokenizer = AutoTokenizer.from_pretrained(tokenizer_name, trust_remote_code=True)
+    elif "gemma-3" in model_path.lower():
+        tokenizer_name = "google/gemma-3-1b-it"
+        tokenizer = AutoTokenizer.from_pretrained(tokenizer_name, trust_remote_code=True)
     else:
         raise ValueError(f"Model {model_path} not supported")
     
+    is_math_task = False
+    is_choice_task = False
     if task_name == "gsm8k":
         datasets = load_dataset("openai/gsm8k", "main", trust_remote_code=True)["test"]
         task_type = "math"
+        is_math_task = True
     elif task_name == "math":
         datasets = load_dataset("pingzhili/math", trust_remote_code=True)["test"]
         task_type = "math"
+        is_math_task = True
     elif task_name == "tabmwp": 
         datasets = load_dataset("pingzhili/tabmwp", trust_remote_code=True)["test"]
         task_type = "table"
+        is_math_task = True
     elif task_name == "csqa":
         datasets = load_dataset("tau/commonsense_qa", trust_remote_code=True)["validation"]
         task_type = "csqa"
+        is_choice_task = True
     elif task_name == "arcc":
         datasets = load_dataset("allenai/ai2_arc", "ARC-Challenge", trust_remote_code=True)["test"]
         task_type = "arcc"
+        is_choice_task = True
     else:
         raise ValueError(f"Task name {task_name} not supported")
     
@@ -96,7 +109,7 @@ def main(
             logger.debug(f"Ground truth: {gt}")
             logger.debug("-"*100)
     
-    results = evaluate_predictions(predictions, ground_truths)
+    results = evaluate_predictions(predictions, ground_truths, is_math_task=is_math_task, is_choice_task=is_choice_task)
     logger.info(f"Results: {results}")
     
     results["model_name"] = model_path
