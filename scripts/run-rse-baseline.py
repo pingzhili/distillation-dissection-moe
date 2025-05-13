@@ -91,12 +91,16 @@ def run_rse_baseline(
         model_response = sample["response"]
         r1_response = question_to_r1_distill_answer[question]
         
+        # use Temperature=0.6, TopP=0.95, TopK=20, and MinP=0
         completion = client.chat.completions.create(
             model=model_name,
             messages=[
                 {"role": "system", "content": prompt},
                 {"role": "user", "content": f"Question: {question}\nReference Answer: {r1_response}\nModel Response: {model_response}"}
-            ]
+            ],
+            temperature=0.6,
+            top_p=0.95,
+            top_k=20,
         )
         response = completion.choices[0].message.content
         
