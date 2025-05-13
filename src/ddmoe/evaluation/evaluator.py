@@ -19,6 +19,7 @@ FINAL_ANSWER_PATTERN = r'(?:final answer|answer)[^:]*:[ \t]*(\S.*?(?=\.|$))'
 NUMBER_PATTERN = r'(?:^|\s|is[ \t]+)(-?\d+(?:\.\d+)?)(?:$|\s|\.)'
 COMPLEX_EXPRESSION_PATTERN = r'(\d+\s*[\*\/]\s*\(\s*[\d\+\-]+\s*\)[\s\d\+\-\*\/\^]*)'
 SIMPLE_EXPRESSION_PATTERN = r'(?:^|\s|value[ \t]+is[ \t]+|expression[ \t]+is[ \t]+)([\d\+\-\*\/\^\(\)]+)(?:$|\s|\.)'
+ALL_MULTI_CHOICES = ["A", "B", "C", "D", "E", "F"]
 
 
 class AnswerExtractor:
@@ -132,7 +133,7 @@ class AnswerExtractor:
         return None
 
     @classmethod
-    def extract_answer(cls, text: str, use_last_number: bool = False) -> Optional[str]:
+    def extract_math_answer(cls, text: str, use_last_number: bool = False) -> Optional[str]:
         """Extract an answer using multiple strategies.
         
         Args:
@@ -164,7 +165,29 @@ class AnswerExtractor:
 
         return None
 
+    @classmethod
+    def extract_choice_answer(cls, text: str) -> Optional[str]:
+        """Extract a choice answer from text."""
+        stop_signs = ["**", "=", "\n", "#", "\\boxed", "\\text", "\\"]
+        # 1. remove **
+        for sign in stop_signs:
+            text = text.replace(sign, "")
+        
+        # 2. remove pairs of {}, [], (), <>, etc.
+        text = re.sub(r"[\[\]\(\)\{\}<>]", "", text)
 
+        # 3. remove all =
+        text = re.sub(r"=", "", text)
+    
+        # match the last "Answer: A/B/..." or "answer: A/B/..."
+        pattern = r"answer[ \t]*:[ \t]*([A-F]+)"
+        matches = re.findall(pattern, text, re.IGNORECASE)
+        if matches:
+            return matches[-1].strip()
+
+        return None
+        
+        
 class AnswerComparator:
     """Compares extracted answers with reference answers."""
 
@@ -226,7 +249,7 @@ class AnswerComparator:
         Args:
             predicted: The predicted answer string
             reference: The reference answer string
-            is_math_task: Flag indicating if this is a math task (AIME 24/25)
+            is_math_task: Flag indicating if this is a math task (AIME 24/25 / MATH / GSM8K)
             precision: Number of decimal places to compare for sympy_expr_eq
             
         Returns:
@@ -258,7 +281,7 @@ class AnswerComparator:
 
 def evaluate_predictions(
         predictions: List[str], references: List[str], use_last_number: bool = True,
-        is_math_task: bool = False, precision: int = 6
+        is_math_task: bool = False, precision: int = 6, is_choice_task: bool = False,
         ) -> Dict[str, float]:
     """Evaluate a list of predictions against references.
     
@@ -268,6 +291,7 @@ def evaluate_predictions(
         use_last_number: If True, fall back to extracting the last number from text
                         when other extraction methods fail
         is_math_task: Flag indicating if this is a math task (AIME 24/25)
+        is_choice_task: Flag indicating if this is a multi-choice task
         precision: Number of decimal places to compare for sympy_expr_eq
         
     Returns:
@@ -275,20 +299,29 @@ def evaluate_predictions(
     """
     if len(predictions) != len(references):
         raise ValueError(f"Mismatched lengths: {len(predictions)} predictions vs {len(references)} references")
+    
+    if is_choice_task and is_math_task:
+        raise ValueError("Cannot be both a math task and a multi-choice task")
 
     correct = 0
     extracted_count = 0
 
     for pred, ref in zip(predictions, references):
         # Extract answer from prediction
-        extracted_pred = AnswerExtractor.extract_answer(pred, use_last_number=use_last_number)
-        extracted_ref = AnswerExtractor.extract_answer(ref, use_last_number=use_last_number)
-
-        if extracted_pred:
+        if is_math_task:
+            extracted_pred = AnswerExtractor.extract_math_answer(pred, use_last_number=use_last_number)
+            extracted_ref = AnswerExtractor.extract_math_answer(ref, use_last_number=use_last_number)
+        elif is_choice_task:
+            extracted_pred = AnswerExtractor.extract_choice_answer(pred)
+            extracted_ref = AnswerExtractor.extract_choice_answer(ref)
+        else:
+            raise NotImplementedError("Only math and choice tasks are supported")
+        
+        if extracted_pred and extracted_ref:
             extracted_count += 1
             if AnswerComparator.compare_answers(extracted_pred, extracted_ref, is_math_task=is_math_task, precision=precision):
                 correct += 1
-
+        
     results = {
         "accuracy": correct / len(references) if len(references) > 0 else 0.0,
         "extraction_rate": extracted_count / len(predictions) if len(predictions) > 0 else 0.0,
