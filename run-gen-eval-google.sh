@@ -55,6 +55,16 @@ export PYTHONPATH=$PYTHONPATH:src
 #########################
 
 
-for KDCOEF in 0.00003 0.00001;do
-  bash train-antidistill.sh $KDCOEF
+# for KDCOEF in 0.00003 0.00001;do
+#   bash train-antidistill.sh $KDCOEF
+# done
+
+for i in {0..7}; do
+    # devices are i*2, i*2+1
+    CUDA_VISIBLE_DEVICES=$((i*2)),$((i*2+1)) python scripts/generate-distillation-data-offline.py \
+      --model_name="outputs/qwen3-8b-antidistill-coef0.00001-temp2-head_proj0-epoch1-lr5e-5/checkpoint-408/lm_head.pt" \
+      --dataset_name="openai/gsm8k" \
+      --save_dir="outputs/qwen3-8b-antidistill-coef0.00001-temp2-head_proj0-epoch1-lr5e-5/checkpoint-408/gen-gsm8k" \
+      --num_gpus=2 --num_splits=8 --split_id=${i} &
+    sleep 600
 done

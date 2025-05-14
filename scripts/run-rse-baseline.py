@@ -90,6 +90,8 @@ def run_rse_baseline(
     for id, sample in tqdm(enumerate(model_valid_dataset), desc="Running RSE Baseline"):
         question = sample["question"]
         model_response = sample["response"]
+        if question is None or model_response is None:
+            continue
         r1_response = question_to_r1_distill_answer[question]
         
         # using Temperature=0.7, TopP=0.8, TopK=20, and MinP=0.

@@ -5,11 +5,13 @@ from tqdm import tqdm
 from fire import Fire
 import os
 
+import shutil
+import torch
 from vllm import LLM
 from vllm.sampling_params import SamplingParams
 from ddmoe.evaluation import evaluate_predictions
 from ddmoe.data import batch_preprocess_fn
-from transformers import AutoTokenizer
+from transformers import AutoTokenizer, AutoModelForCausalLM
 from datasets import load_dataset
 
 
@@ -37,6 +39,21 @@ def main(
         tokenizer = AutoTokenizer.from_pretrained(tokenizer_name, trust_remote_code=True)
     else:
         raise ValueError(f"Model {model_path} not supported")
+
+    if "lm_head.pt" in model_path:
+        model_dir = os.path.dirname(model_path)
+        if "qwen3-8b" in model_path.lower():
+            tmp_model = AutoModelForCausalLM.from_pretrained(tokenizer, torch_dtype=torch.bfloat16)
+            # copy the lm_head_weight to the tmp_model
+            lm_head_weight = torch.load(model_path)["teacher_model.lm_head.weight"]
+            # save weight to tmp_model
+            tmp_model.lm_head.weight.data.copy_(lm_head_weight)
+            logger.info(f"Copied lm_head_weight and saving full model to {os.path.join(model_dir, 'tmp_model')}")
+            tmp_model.save_pretrained(os.path.join(model_dir, "tmp_model"))
+            model_path = os.path.join(model_dir, "tmp_model")
+            logger.info(f"Using tmp_model {model_path} for generation")
+        else:
+            raise NotImplementedError(f"Model {model_path} is confusing")
     
     is_math_task = False
     is_choice_task = False
@@ -76,7 +93,7 @@ def main(
 
     if debugging:
         datasets = datasets.select(range(4))
-    
+
     sampling_params = SamplingParams(max_tokens=max_tokens, stop=[tokenizer.pad_token])
     llm = LLM(
         model=model_path,
@@ -85,6 +102,11 @@ def main(
         max_model_len=max_tokens,
         tensor_parallel_size=num_gpus,
     )
+    
+    if "tmp_model" in model_path:
+        # remove the tmp_model dir
+        shutil.rmtree(model_path)
+        logger.info(f"Removed tmp_model dir {model_path}")
     
     predictions = []
     ground_truths = []
