@@ -107,7 +107,12 @@ def run_rse_baseline(
         response = completion.choices[0].message.content
         
         # capture the scores json dict
-        scores = json.loads(response.split("```json")[1].split("```")[0].strip())
+        try:
+            scores = json.loads(response.split("```json")[1].split("```")[0].strip())
+        except IndexError:
+            logger.info(f"[{id}] Skipping due to IndexError: {response}")
+            continue
+        
         logger.info(f"[{id}] {scores}")
         similarity_scores.append(scores)
     
