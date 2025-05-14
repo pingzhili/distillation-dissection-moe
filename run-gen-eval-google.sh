@@ -65,6 +65,6 @@ for i in {0..7}; do
       --model_name="outputs/qwen3-8b-antidistill-coef0.00001-temp2-head_proj0-epoch1-lr5e-5/checkpoint-408/lm_head.pt" \
       --dataset_name="openai/gsm8k" \
       --save_dir="outputs/qwen3-8b-antidistill-coef0.00001-temp2-head_proj0-epoch1-lr5e-5/checkpoint-408/gen-gsm8k" \
-      --num_gpus=2 --num_splits=8 --split_id=${i} &
+      --num_gpus=2 --num_splits=8 --split_id=${i} &> "logs/qwen3-8b-antidistill-coef0.00001-temp2-head_proj0-epoch1-lr5e-5--checkpoint-408-gen-gsm8k-${i}.log"
     sleep 600
 done
