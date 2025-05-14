@@ -63,9 +63,9 @@ export NCCL_P2P_DISABLE=1
 for i in {0..7}; do
     # devices are i*2, i*2+1
     CUDA_VISIBLE_DEVICES=$((i*2)),$((i*2+1)) python scripts/generate-distillation-data-offline.py \
-      --model_name="outputs/qwen3-8b-antidistill-coef0.00003-temp2-head_proj0-epoch1-lr5e-5/checkpoint-60/lm_head.pt" \
+      --model_name="outputs/qwen3-8b-antidistill-coef0.00003-temp2-head_proj0-epoch1-lr5e-5/checkpoint-120/lm_head.pt" \
       --dataset_name="openai/gsm8k" \
-      --save_dir="outputs/qwen3-8b-antidistill-coef0.00003-temp2-head_proj0-epoch1-lr5e-5/checkpoint-60/gen-gsm8k" \
-      --num_gpus=2 --num_splits=8 --split_id=${i} &> "logs/qwen3-8b-antidistill-coef0.00003-temp2-head_proj0-epoch1-lr5e-5--checkpoint-60-gen-gsm8k-${i}.log" &
+      --save_dir="outputs/qwen3-8b-antidistill-coef0.00003-temp2-head_proj0-epoch1-lr5e-5/checkpoint-120/gen-gsm8k" \
+      --num_gpus=2 --num_splits=8 --split_id=${i} &> "logs/qwen3-8b-antidistill-coef0.00003-temp2-head_proj0-epoch1-lr5e-5--checkpoint-120-gen-gsm8k-${i}.log" &
     sleep 600
 done
