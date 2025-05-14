@@ -18,7 +18,7 @@ from datasets import load_dataset
 def main(
     model_path: str,
     task_name: str="gsm8k",
-    batch_size: int=4,
+    batch_size: int=1,
     num_workers: int=1,
     num_gpus: int=1,
     max_tokens: int=8192,
@@ -43,14 +43,18 @@ def main(
     if "lm_head.pt" in model_path:
         model_dir = os.path.dirname(model_path)
         if "qwen3-8b" in model_path.lower():
-            tmp_model = AutoModelForCausalLM.from_pretrained(tokenizer, torch_dtype=torch.bfloat16)
+            tmp_model = AutoModelForCausalLM.from_pretrained(tokenizer_name, torch_dtype=torch.bfloat16, device_map="cpu")
             # copy the lm_head_weight to the tmp_model
             lm_head_weight = torch.load(model_path)["teacher_model.lm_head.weight"]
+            
             # save weight to tmp_model
             tmp_model.lm_head.weight.data.copy_(lm_head_weight)
+            
             logger.info(f"Copied lm_head_weight and saving full model to {os.path.join(model_dir, 'tmp_model')}")
-            tmp_model.save_pretrained(os.path.join(model_dir, "tmp_model"))
             model_path = os.path.join(model_dir, "tmp_model")
+            
+            tmp_model.save_pretrained(model_path)
+            
             logger.info(f"Using tmp_model {model_path} for generation")
         else:
             raise NotImplementedError(f"Model {model_path} is confusing")
