@@ -1,4 +1,5 @@
 export PYTHONPATH=$PYTHONPATH:src
+export NCCL_P2P_DISABLE=1
 # export MODEL_PATH="../ddmoe/outputs/llama-3.2-1b-distill--qwen-antidistill-coef0.00001-temp2-epoch2-lr5e-5-checkpoint-60/checkpoint-177"
 
 # CUDA_VISIBLE_DEVICES=0,1 python scripts/generate-eval.py \
