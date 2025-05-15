@@ -8,7 +8,7 @@ __all__ = ["batch_preprocess_fn"]
 
 
 def batch_preprocess_fn(
-        examples: Dict[str, List[Any]], task: str, tokenizer: PreTrainedTokenizerBase = None, task_type: str=None,
+        examples: Dict[str, List[Any]], task: str, tokenizer: PreTrainedTokenizerBase = None, task_type: str = None,
 ) -> Dict[str, List[Any]]:
     task_to_fn = {
         "chat-gen": partial(chat_eval_batch_preprocess_fn, tokenizer=tokenizer),

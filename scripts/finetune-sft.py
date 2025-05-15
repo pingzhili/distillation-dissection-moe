@@ -118,16 +118,23 @@ def train_sft(
         columns_names = raw_datasets.column_names
         if "olmoe" in base_model_name.lower():
             proc_name = "sft-olmoe-train"
+            task_type = None
         elif "deepseek-v2" in base_model_name.lower():
             proc_name = "sft-deepseek-v2-train"
+            task_type = None
         elif "moonlight" in base_model_name.lower():
             proc_name = "sft-moonlight-train"
+            task_type = None
         elif "llama-3.2" in base_model_name.lower() or "gemma-3" in base_model_name.lower():
             proc_name = "math-reasoning-llama-3.2-train"
+            if "gsm8k" in dataset_name.lower():
+                task_type = "math"
+            else:
+                raise NotImplementedError(f"Preprocess for {base_model_name} not implemented.")
         else:
             raise NotImplementedError(f"Preprocess for {base_model_name} not implemented.")
         sft_dataset = raw_datasets.map(
-            lambda x: batch_preprocess_fn(x, task=proc_name, tokenizer=tokenizer),
+            lambda x: batch_preprocess_fn(x, task=proc_name, tokenizer=tokenizer, task_type=task_type),
             batched=True,
             remove_columns=columns_names,
             num_proc=num_workers,
