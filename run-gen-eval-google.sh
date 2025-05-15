@@ -110,22 +110,22 @@ mkdir -p logs
 export MODEL_PATH="outputs/llama-3.2-1b-distill--qwen3-8b-antidistill-coef0.00003-temp2-head_proj0-epoch1-lr5e-5-checkpoint-120/checkpoint-171"
 
 TASK="gsm8k" CUDA_VISIBLE_DEVICES=0,1 python scripts/generate-eval.py \
-    --model_path="$MODEL_PATH" --task_name="$TASK" --num_gpus=2 &> "logs/llama-3.2-distill-qwen3-8b-antidistill-coef0.00003-temp2-head_proj0-epoch1-lr5e-5-checkpoint-120--checkpoint-171-gen-${TASK}.log" &
+    --model_path="$MODEL_PATH" --task_name="$TASK" --num_gpus=2 &> "logs/llama-3.2-distill-qwen3-8b-antidistill-coef0.00003-temp2-head_proj0-epoch1-lr5e-5-checkpoint-120--checkpoint-171-gen-$TASK.log" &
 
 TASK="arcc" CUDA_VISIBLE_DEVICES=2,3 python scripts/generate-eval.py \
-    --model_path="$MODEL_PATH" --task_name="$TASK" --num_gpus=2 &> "logs/llama-3.2-distill-qwen3-8b-antidistill-coef0.00003-temp2-head_proj0-epoch1-lr5e-5-checkpoint-120--checkpoint-171-gen-${TASK}.log" &
+    --model_path="$MODEL_PATH" --task_name="$TASK" --num_gpus=2 &> "logs/llama-3.2-distill-qwen3-8b-antidistill-coef0.00003-temp2-head_proj0-epoch1-lr5e-5-checkpoint-120--checkpoint-171-gen-$TASK.log" &
 
 TASK="csqa" CUDA_VISIBLE_DEVIzhegCES=4,5 python scripts/generate-eval.py \
-    --model_path="$MODEL_PATH" --task_name="$TASK" --num_gpus=2 &> "logs/llama-3.2-distill-qwen3-8b-antidistill-coef0.00003-temp2-head_proj0-epoch1-lr5e-5-checkpoint-120--checkpoint-171-gen-${TASK}.log" &
+    --model_path="$MODEL_PATH" --task_name="$TASK" --num_gpus=2 &> "logs/llama-3.2-distill-qwen3-8b-antidistill-coef0.00003-temp2-head_proj0-epoch1-lr5e-5-checkpoint-120--checkpoint-171-gen-$TASK.log" &
 
 
 export MODEL_PATH="outputs/gemma-3-1b-it-distill--qwen3-8b-antidistill-coef0.00003-temp2-head_proj0-epoch1-lr5e-5-checkpoint-120/checkpoint-171"
 
 TASK="gsm8k" CUDA_VISIBLE_DEVICES=6,7 python scripts/generate-eval.py \
-    --model_path="$MODEL_PATH" --task_name="$TASK" --num_gpus=2 &> "logs/gemma-3-1b-it-distill-qwen3-8b-antidistill-coef0.00003-temp2-head_proj0-epoch1-lr5e-5-checkpoint-120--checkpoint-171-gen-${TASK}.log" &
+    --model_path="$MODEL_PATH" --task_name="$TASK" --num_gpus=2 &> "logs/gemma-3-1b-it-distill-qwen3-8b-antidistill-coef0.00003-temp2-head_proj0-epoch1-lr5e-5-checkpoint-120--checkpoint-171-gen-$TASK.log" &
 
 TASK="arcc" CUDA_VISIBLE_DEVICES=8,9 python scripts/generate-eval.py \
-    --model_path="$MODEL_PATH" --task_name="$TASK" --num_gpus=2 &> "logs/gemma-3-1b-it-distill-qwen3-8b-antidistill-coef0.00003-temp2-head_proj0-epoch1-lr5e-5-checkpoint-120--checkpoint-171-gen-${TASK}.log" &
+    --model_path="$MODEL_PATH" --task_name="$TASK" --num_gpus=2 &> "logs/gemma-3-1b-it-distill-qwen3-8b-antidistill-coef0.00003-temp2-head_proj0-epoch1-lr5e-5-checkpoint-120--checkpoint-171-gen-$TASK.log" &
 
 TASK="csqa" CUDA_VISIBLE_DEVICES=10,11 python scripts/generate-eval.py \
-    --model_path="$MODEL_PATH" --task_name="$TASK" --num_gpus=2 &> "logs/gemma-3-1b-it-distill-qwen3-8b-antidistill-coef0.00003-temp2-head_proj0-epoch1-lr5e-5-checkpoint-120--checkpoint-171-gen-${TASK}.log" &
+    --model_path="$MODEL_PATH" --task_name="$TASK" --num_gpus=2 &> "logs/gemma-3-1b-it-distill-qwen3-8b-antidistill-coef0.00003-temp2-head_proj0-epoch1-lr5e-5-checkpoint-120--checkpoint-171-gen-$TASK.log" &
