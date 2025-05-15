@@ -115,7 +115,7 @@ TASK="gsm8k" CUDA_VISIBLE_DEVICES=0,1 python scripts/generate-eval.py \
 TASK="arcc" CUDA_VISIBLE_DEVICES=2,3 python scripts/generate-eval.py \
     --model_path="$MODEL_PATH" --task_name="$TASK" --num_gpus=2 &> "logs/llama-3.2-distill-qwen3-8b-antidistill-coef0.00003-temp2-head_proj0-epoch1-lr5e-5-checkpoint-120--checkpoint-171-gen-${TASK}.log" &
 
-TASK="csqa" CUDA_VISIBLE_DEVICES=4,5 python scripts/generate-eval.py \
+TASK="csqa" CUDA_VISIBLE_DEVIzhegCES=4,5 python scripts/generate-eval.py \
     --model_path="$MODEL_PATH" --task_name="$TASK" --num_gpus=2 &> "logs/llama-3.2-distill-qwen3-8b-antidistill-coef0.00003-temp2-head_proj0-epoch1-lr5e-5-checkpoint-120--checkpoint-171-gen-${TASK}.log" &
 
 
