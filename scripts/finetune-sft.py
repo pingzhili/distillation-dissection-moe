@@ -91,6 +91,8 @@ def train_sft(
     elif "llama-3.2" in base_model_name.lower():
         tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.2-1B-Instruct", trust_remote_code=True)
         tokenizer.pad_token = tokenizer.eos_token
+    elif "gemma-3" in base_model_name.lower():
+        tokenizer = AutoTokenizer.from_pretrained("google/gemma-3-1b-it", trust_remote_code=True)
     else:
         raise NotImplementedError(f"Tokenizer for {base_model_name} not implemented.")
     tokenizer.model_max_length = max_length
@@ -120,7 +122,7 @@ def train_sft(
             proc_name = "sft-deepseek-v2-train"
         elif "moonlight" in base_model_name.lower():
             proc_name = "sft-moonlight-train"
-        elif "llama-3.2" in base_model_name.lower():
+        elif "llama-3.2" in base_model_name.lower() or "gemma-3" in base_model_name.lower():
             proc_name = "math-reasoning-llama-3.2-train"
         else:
             raise NotImplementedError(f"Preprocess for {base_model_name} not implemented.")
