@@ -86,7 +86,7 @@ CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 accelerate launch --config_file configs/zer
     --base_model_name="meta-llama/Llama-3.2-1B" \
     --output_dir="outputs/llama-3.2-1b-distill--$SOURCE_MODEL" \
     --dataset_name="data/antidistill-exps/gsm8k/$SOURCE_MODEL.jsonl" \
-    --num_train_epochs=3 \
+    --num_train_epochs=3 --max_length=4096 \
     --batch_size_per_device=1 \
     --gradient_accumulation_steps=16 &
   
@@ -101,6 +101,6 @@ CUDA_VISIBLE_DEVICES=8,9,10,11,12,13,14,15 accelerate launch --config_file confi
     --base_model_name="google/gemma-3-1b-it" \
     --output_dir="outputs/gemma-3-1b-it-distill--$SOURCE_MODEL" \
     --dataset_name="data/antidistill-exps/gsm8k/$SOURCE_MODEL.jsonl" \
-    --num_train_epochs=3 \
+    --num_train_epochs=3 --max_length=4096 \
     --batch_size_per_device=1 \
     --gradient_accumulation_steps=16 &
