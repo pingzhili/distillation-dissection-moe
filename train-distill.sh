@@ -3,7 +3,7 @@ export CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7
 export NCCL_P2P_DISABLE=1
 
 
-SOURCE_MODEL=${1:-"qwen-antidistill-coef0.00001-temp2-epoch2-lr5e-5-checkpoint-60"}
+SOURCE_MODEL=${1:-"qwen3-8b-antidistill-coef0.00003-temp2-head_proj0-epoch1-lr5e-5-checkpoint-120"}
 accelerate launch --config_file configs/zero3-8gpu-ga16.yaml \
     --num_processes=8 \
     --num_machines=1 \

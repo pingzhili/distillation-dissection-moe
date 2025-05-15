@@ -60,12 +60,46 @@ export NCCL_P2P_DISABLE=1
 #   bash train-antidistill.sh $KDCOEF
 # done
 
-for i in {0..7}; do
-    # devices are i*2, i*2+1
-    CUDA_VISIBLE_DEVICES=$((i*2)),$((i*2+1)) python scripts/generate-distillation-data-offline.py \
-      --model_name="outputs/qwen3-8b-antidistill-coef0.00003-temp2-head_proj0-epoch1-lr5e-5/checkpoint-120/lm_head.pt" \
-      --dataset_name="openai/gsm8k" \
-      --save_dir="outputs/qwen3-8b-antidistill-coef0.00003-temp2-head_proj0-epoch1-lr5e-5/checkpoint-120/gen-gsm8k" \
-      --num_gpus=2 --num_splits=8 --split_id=${i} &> "logs/qwen3-8b-antidistill-coef0.00003-temp2-head_proj0-epoch1-lr5e-5--checkpoint-120-gen-gsm8k-${i}.log" &
-    sleep 600
-done
+# for i in {0..7}; do
+#     # devices are i*2, i*2+1
+#     CUDA_VISIBLE_DEVICES=$((i*2)),$((i*2+1)) python scripts/generate-distillation-data-offline.py \
+#       --model_name="outputs/qwen3-8b-antidistill-coef0.00003-temp2-head_proj0-epoch1-lr5e-5/checkpoint-120/lm_head.pt" \
+#       --dataset_name="openai/gsm8k" \
+#       --save_dir="outputs/qwen3-8b-antidistill-coef0.00003-temp2-head_proj0-epoch1-lr5e-5/checkpoint-120/gen-gsm8k" \
+#       --num_gpus=2 --num_splits=8 --split_id=${i} &> "logs/qwen3-8b-antidistill-coef0.00003-temp2-head_proj0-epoch1-lr5e-5--checkpoint-120-gen-gsm8k-${i}.log" &
+#     sleep 600
+# done
+
+# CUDA_VISIBLE_DEVICES=$((i*2)),$((i*2+1)) python scripts/generate-eval.py \
+#       --model_path="outputs/qwen3-8b-antidistill-coef0.00003-temp2-head_proj0-epoch1-lr5e-5/checkpoint-120/lm_head.pt" \
+#       --task_name="gsm8k"&> "logs/qwen3-8b-antidistill-coef0.00003-temp2-head_proj0-epoch1-lr5e-5--checkpoint-120-gen-gsm8k-${i}.log" &
+# sleep 600
+
+SOURCE_MODEL=${1:-"qwen3-8b-antidistill-coef0.00003-temp2-head_proj0-epoch1-lr5e-5-checkpoint-120"}
+CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 accelerate launch --config_file configs/zero3-8gpu-ga16.yaml \
+    --num_processes=8 \
+    --num_machines=1 \
+    --machine_rank=0 \
+    --main_process_port=23333 \
+    --mixed_precision=bf16 \
+    scripts/finetune-sft.py \
+    --base_model_name="meta-llama/Llama-3.2-1B" \
+    --output_dir="outputs/llama-3.2-1b-distill--$SOURCE_MODEL" \
+    --dataset_name="data/antidistill-exps/gsm8k/$SOURCE_MODEL.jsonl" \
+    --num_train_epochs=3 \
+    --batch_size_per_device=1 \
+    --gradient_accumulation_steps=16 &
+  
+CUDA_VISIBLE_DEVICES=8,9,10,11,12,13,14,15 accelerate launch --config_file configs/zero3-8gpu-ga16.yaml \
+    --num_processes=8 \
+    --num_machines=1 \
+    --machine_rank=0 \
+    --main_process_port=23333 \
+    --mixed_precision=bf16 \
+    scripts/finetune-sft.py \
+    --base_model_name="google/gemma-3-1b-it" \
+    --output_dir="outputs/gemma-3-1b-it-distill--$SOURCE_MODEL" \
+    --dataset_name="data/antidistill-exps/gsm8k/$SOURCE_MODEL.jsonl" \
+    --num_train_epochs=3 \
+    --batch_size_per_device=1 \
+    --gradient_accumulation_steps=16 &
