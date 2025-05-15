@@ -75,32 +75,57 @@ export NCCL_P2P_DISABLE=1
 #       --task_name="gsm8k"&> "logs/qwen3-8b-antidistill-coef0.00003-temp2-head_proj0-epoch1-lr5e-5--checkpoint-120-gen-gsm8k-${i}.log" &
 # sleep 600
 
-SOURCE_MODEL="qwen3-8b-antidistill-coef0.00003-temp2-head_proj0-epoch1-lr5e-5-checkpoint-120"
-CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 accelerate launch --config_file configs/zero3-8gpu-ga16.yaml \
-    --num_processes=8 \
-    --num_machines=1 \
-    --machine_rank=0 \
-    --main_process_port=23333 \
-    --mixed_precision=bf16 \
-    scripts/finetune-sft.py \
-    --base_model_name="meta-llama/Llama-3.2-1B" \
-    --output_dir="outputs/llama-3.2-1b-distill--$SOURCE_MODEL" \
-    --dataset_name="data/antidistill-exps/gsm8k/$SOURCE_MODEL.jsonl" \
-    --num_train_epochs=3 --max_length=4096 \
-    --batch_size_per_device=1 \
-    --gradient_accumulation_steps=16 &
+# SOURCE_MODEL="qwen3-8b-antidistill-coef0.00003-temp2-head_proj0-epoch1-lr5e-5-checkpoint-120"
+# CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 accelerate launch --config_file configs/zero3-8gpu-ga16.yaml \
+#     --num_processes=8 \
+#     --num_machines=1 \
+#     --machine_rank=0 \
+#     --main_process_port=23333 \
+#     --mixed_precision=bf16 \
+#     scripts/finetune-sft.py \
+#     --base_model_name="meta-llama/Llama-3.2-1B" \
+#     --output_dir="outputs/llama-3.2-1b-distill--$SOURCE_MODEL" \
+#     --dataset_name="data/antidistill-exps/gsm8k/$SOURCE_MODEL.jsonl" \
+#     --num_train_epochs=3 --max_length=4096 \
+#     --batch_size_per_device=1 \
+#     --gradient_accumulation_steps=16 &
   
-SOURCE_MODEL="qwen3-8b-antidistill-coef0.00003-temp2-head_proj0-epoch1-lr5e-5-checkpoint-120"
-CUDA_VISIBLE_DEVICES=8,9,10,11,12,13,14,15 accelerate launch --config_file configs/zero3-8gpu-ga16.yaml \
-    --num_processes=8 \
-    --num_machines=1 \
-    --machine_rank=0 \
-    --main_process_port=23334 \
-    --mixed_precision=bf16 \
-    scripts/finetune-sft.py \
-    --base_model_name="google/gemma-3-1b-it" \
-    --output_dir="outputs/gemma-3-1b-it-distill--$SOURCE_MODEL" \
-    --dataset_name="data/antidistill-exps/gsm8k/$SOURCE_MODEL.jsonl" \
-    --num_train_epochs=3 --max_length=4096 \
-    --batch_size_per_device=1 \
-    --gradient_accumulation_steps=16 &
+# SOURCE_MODEL="qwen3-8b-antidistill-coef0.00003-temp2-head_proj0-epoch1-lr5e-5-checkpoint-120"
+# CUDA_VISIBLE_DEVICES=8,9,10,11,12,13,14,15 accelerate launch --config_file configs/zero3-8gpu-ga16.yaml \
+#     --num_processes=8 \
+#     --num_machines=1 \
+#     --machine_rank=0 \
+#     --main_process_port=23334 \
+#     --mixed_precision=bf16 \
+#     scripts/finetune-sft.py \
+#     --base_model_name="google/gemma-3-1b-it" \
+#     --output_dir="outputs/gemma-3-1b-it-distill--$SOURCE_MODEL" \
+#     --dataset_name="data/antidistill-exps/gsm8k/$SOURCE_MODEL.jsonl" \
+#     --num_train_epochs=3 --max_length=4096 \
+#     --batch_size_per_device=1 \
+#     --gradient_accumulation_steps=16 &
+
+mkdir -p logs
+
+export MODEL_PATH="outputs/llama-3.2-1b-distill--qwen3-8b-antidistill-coef0.00003-temp2-head_proj0-epoch1-lr5e-5-checkpoint-120/checkpoint-171"
+
+TASK="gsm8k" CUDA_VISIBLE_DEVICES=0,1 python scripts/generate-eval.py \
+    --model_path="$MODEL_PATH" --task_name="$TASK" --num_gpus=2 &> "logs/llama-3.2-distill-qwen3-8b-antidistill-coef0.00003-temp2-head_proj0-epoch1-lr5e-5-checkpoint-120--checkpoint-171-gen-${TASK}.log" &
+
+TASK="arcc" CUDA_VISIBLE_DEVICES=2,3 python scripts/generate-eval.py \
+    --model_path="$MODEL_PATH" --task_name="$TASK" --num_gpus=2 &> "logs/llama-3.2-distill-qwen3-8b-antidistill-coef0.00003-temp2-head_proj0-epoch1-lr5e-5-checkpoint-120--checkpoint-171-gen-${TASK}.log" &
+
+TASK="csqa" CUDA_VISIBLE_DEVICES=4,5 python scripts/generate-eval.py \
+    --model_path="$MODEL_PATH" --task_name="$TASK" --num_gpus=2 &> "logs/llama-3.2-distill-qwen3-8b-antidistill-coef0.00003-temp2-head_proj0-epoch1-lr5e-5-checkpoint-120--checkpoint-171-gen-${TASK}.log" &
+
+
+export MODEL_PATH="outputs/gemma-3-1b-it-distill--qwen3-8b-antidistill-coef0.00003-temp2-head_proj0-epoch1-lr5e-5-checkpoint-120/checkpoint-171"
+
+TASK="gsm8k" CUDA_VISIBLE_DEVICES=6,7 python scripts/generate-eval.py \
+    --model_path="$MODEL_PATH" --task_name="$TASK" --num_gpus=2 &> "logs/gemma-3-1b-it-distill-qwen3-8b-antidistill-coef0.00003-temp2-head_proj0-epoch1-lr5e-5-checkpoint-120--checkpoint-171-gen-${TASK}.log" &
+
+TASK="arcc" CUDA_VISIBLE_DEVICES=8,9 python scripts/generate-eval.py \
+    --model_path="$MODEL_PATH" --task_name="$TASK" --num_gpus=2 &> "logs/gemma-3-1b-it-distill-qwen3-8b-antidistill-coef0.00003-temp2-head_proj0-epoch1-lr5e-5-checkpoint-120--checkpoint-171-gen-${TASK}.log" &
+
+TASK="csqa" CUDA_VISIBLE_DEVICES=10,11 python scripts/generate-eval.py \
+    --model_path="$MODEL_PATH" --task_name="$TASK" --num_gpus=2 &> "logs/gemma-3-1b-it-distill-qwen3-8b-antidistill-coef0.00003-temp2-head_proj0-epoch1-lr5e-5-checkpoint-120--checkpoint-171-gen-${TASK}.log" &
