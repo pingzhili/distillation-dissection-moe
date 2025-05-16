@@ -78,7 +78,7 @@ class AntiDistillWrapper(nn.Module):
                     param.requires_grad = True
                 logger.info(f"Setting trainable on {name} (set to trainable? {param.requires_grad})")
 
-    def forward(self, *args, **kwargs) -> AntiDistillCausalLMOutputWithPast:
+    def forward(self, kd_mask: torch.Tensor = None, *args, **kwargs) -> AntiDistillCausalLMOutputWithPast:
         assert self.training, "AntiDistillWrapper should only be used in training mode"
 
         teacher_outputs = self.teacher_model(*args, **kwargs)
@@ -93,6 +93,11 @@ class AntiDistillWrapper(nn.Module):
 
         teacher_logits = teacher_logits.to(torch.float32)
         proxy_logits_list = [proxy_logits.to(torch.float32) for proxy_logits in proxy_logits_list]
+        
+        if kd_mask is not None:
+            kd_mask = kd_mask.to(torch.float32)
+            teacher_logits = teacher_logits * kd_mask
+            proxy_logits_list = [proxy_logits * kd_mask for proxy_logits in proxy_logits_list]
 
         kd_criteria = nn.KLDivLoss(reduction="batchmean")
         kd_loss_list = [
